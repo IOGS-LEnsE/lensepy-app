@@ -1,14 +1,10 @@
 import sys, os
 import lensepy
 from pathlib import Path
-from lensepy.appli._app.app_utils import XMLFileConfig, XMLFileModule
-from lensepy.appli._app.main_view import MainWindow
+from lensepy_app.appli._app.app_utils import XMLFileConfig, XMLFileModule
+from lensepy_app.appli._app.main_view import MainWindow
 import importlib
-from lensepy.modules.default.default_controller import DefaultController
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from lensepy.appli.VI_gui.machine_vision_gui import My_Application
+from lensepy_app.modules.default.default_controller import DefaultController
 
 
 class MainManager:
@@ -16,7 +12,7 @@ class MainManager:
     Main widget/application manager.
     """
     def __init__(self, parent=None):
-        self.parent: My_Application = parent    # Parent application
+        self.parent = parent    # Parent application / MainApplication
         self.main_window: MainWindow = MainWindow(self)     # Main window management
         self.main_window.menu_changed.connect(self.handle_menu_changed)
         self.controller = None

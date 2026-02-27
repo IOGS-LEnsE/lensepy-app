@@ -7,10 +7,9 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt, pyqtSignal
+from lensepy_app.appli._app.app_utils import XMLFileModule
 
 from typing import TYPE_CHECKING
-
-from lensepy.appli._app.app_utils import XMLFileModule
 
 if TYPE_CHECKING:
     from _app.main_manager import MainManager

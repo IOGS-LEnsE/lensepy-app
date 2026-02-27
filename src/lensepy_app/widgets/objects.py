@@ -1,8 +1,23 @@
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QComboBox, QVBoxLayout, QLineEdit, QSlider, QProgressBar, \
-    QSizePolicy
+from PyQt6.QtWidgets import (
+    QWidget, QHBoxLayout, QLabel, QComboBox,
+    QVBoxLayout, QLineEdit, QSlider, QProgressBar,
+    QSizePolicy, QFrame)
 from lensepy.css import *
+
+
+def make_hline():
+    line = QFrame()
+    line.setFrameShape(QFrame.Shape.HLine)
+    line.setFrameShadow(QFrame.Shadow.Sunken)
+    return line
+
+def make_vline():
+    line = QFrame()
+    line.setFrameShape(QFrame.Shape.VLine)
+    line.setFrameShadow(QFrame.Shadow.Sunken)
+    return line
 
 
 class SelectWidget(QWidget):
@@ -70,6 +85,10 @@ class SelectWidget(QWidget):
         :param index: Index of the selection.
         """
         self.combo_box.setCurrentIndex(index)
+
+    def set_enabled(self, value=True):
+        """Set enabled state."""
+        self.combo_box.setEnabled(value)
 
 
 class LabelWidget(QWidget):

@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout
 from lensepy.css import *
-from lensepy.utils import make_hline
+from lensepy_app.widgets import make_hline
 
 
 class DefaultTopLeftWidget(QWidget):

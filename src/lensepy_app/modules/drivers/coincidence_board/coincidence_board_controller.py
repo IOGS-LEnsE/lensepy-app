@@ -5,7 +5,7 @@ import numpy as np
 from PyQt6.QtCore import QThread, QObject, pyqtSignal
 from PyQt6.QtWidgets import QWidget
 
-from lensepy_app.modules.drivers.coincidence_board.coincidence_board_model import NucleoWrapper
+from lensepy.drivers.coincidence_board.coincidence_board_model import NucleoWrapper
 from lensepy_app.modules.drivers.coincidence_board.coincidence_board_views import (
     CoincidenceDisplayWidget, NucleoParamsWidget, TimeChartCoincidenceWidget)
 from lensepy_app.appli._app.template_controller import TemplateController
@@ -83,18 +83,24 @@ class CoincidenceBoardController(TemplateController):
             self.stop_acq()
             self.data_time_a = np.zeros(30)
             self.data_time_b = np.zeros(30)
+            self.data_time_c = np.zeros(30)
+            self.data_time_ab = np.zeros(30)
+            self.data_time_ac = np.zeros(30)
+            self.data_time_abc = np.zeros(30)
             self.nucleo_wrapper.stop_acq()
             self.acquiring = False
             self.bot_right.set_acquisition(False)
+            self.top_left.set_acquisition(False)
         else:
             self.acquiring = True
             self.bot_right.set_acquisition()
+            self.top_left.set_acquisition()
             self.start_acq()
 
     def handle_max_value_changed(self, value):
         """Action performed when max value is changed."""
         self.top_left.set_max_values(value)
-        self.bot_left.set_y_range(0, value)
+        self.bot_left.set_range(0, value)
 
     def handle_time_changed(self, value):
         """Action performed when integration time value is changed."""

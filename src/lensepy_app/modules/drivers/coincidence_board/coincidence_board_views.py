@@ -1,4 +1,5 @@
 import sys, time
+from lensepy import translate
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QBrush, QColor, QGuiApplication
 from PyQt6.QtWidgets import (
@@ -6,11 +7,9 @@ from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem,
     QHeaderView, QLineEdit, QHBoxLayout, QLabel, QFormLayout, QGroupBox, QProgressBar
 )
-from lensepy.pyqt6.widget_xy_chart import XYChartWidget
-
-from lensepy import translate
+from lensepy_app.pyqt6.widget_xy_chart import XYChartWidget
 from lensepy.utils import *
-from lensepy.widgets import *
+from lensepy_app.widgets import *
 
 class NucleoParamsWidget(QWidget):
 
@@ -225,6 +224,11 @@ class CoincidenceDisplayWidget(QWidget):
         """Action performed when log checkbox is changed."""
         log = self.log_display.isChecked()
         self.log_selected.emit(log)
+
+    def set_acquisition(self, value=True):
+        """Set acquisition mode."""
+        self.time_value_label.setEnabled(value)
+
 
 
 class TimeChartCoincidenceWidget(QWidget):

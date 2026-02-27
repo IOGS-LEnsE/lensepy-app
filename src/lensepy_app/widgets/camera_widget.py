@@ -4,12 +4,8 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
 
 from lensepy import translate
 from lensepy.css import *
-from lensepy.utils import make_hline
-from lensepy.widgets import LabelWidget, SliderBloc
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from lensepy.modules.basler import BaslerCamera
+from lensepy_app.widgets.objects import make_hline
+from lensepy_app.widgets import LabelWidget, SliderBloc
 
 
 class CameraParamsWidget(QWidget):
