@@ -22,7 +22,7 @@
     </contributors>
 	<module>
 		<name>coincidence_board</name>
-		<location>lensepy.modules.drivers</location>
+		<location>lensepy_app.modules.drivers</location>
 	</module>
     <variable name="nucleo_wrapper"/>
 </appli>

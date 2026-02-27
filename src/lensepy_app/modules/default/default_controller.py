@@ -1,10 +1,10 @@
 import cv2
 from PyQt6.QtWidgets import QWidget
 from PyQt6.QtGui import QGuiApplication
-from lensepy.appli._app.template_controller import TemplateController
-from lensepy.modules.default.default_views import *
-from lensepy.widgets import ImageDisplayWidget
-from lensepy.widgets.html_view import HTMLView
+from lensepy_app.appli._app.template_controller import TemplateController
+from lensepy_app.modules.default.default_views import *
+from lensepy_app.widgets import ImageDisplayWidget
+from lensepy_app.widgets.html_view import HTMLView
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
