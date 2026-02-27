@@ -25,7 +25,7 @@ How to use
 
 .. code-block:: python
 
-    import lensepy
+    import lensepy-app
 
 For specific use, a documentation is available at this website:
 `<https://iogs-lense.github.io/lensepy-app/>`_.
