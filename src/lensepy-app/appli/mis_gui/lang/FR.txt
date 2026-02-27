@@ -1,0 +1,40 @@
+# value;translation
+# MAIN MENU
+basler_menu;Camera Basler
+piezo_dmd_menu;DMD et Piezo
+###################
+# Camera BASLER
+###################
+histo_xlabel;Intensité des pixels
+histo_ylabel;Nombre de pixels
+basler_infos_title;Caméra Basler / Informations
+basler_infos_name;Type de caméra
+basler_infos_serial;Numéro de série
+basler_infos_size;Taille du capteur
+basler_infos_color_mode;Profondeur/Couleur
+camera_roi_title;Choix de la zone d'intérêt
+roi_x0;x0
+roi_y0;y0
+roi_x1;x1
+roi_y1;y1
+roi_w;Largeur
+roi_h;Hauteur
+roi_center_button;Centrer la ROI
+roi_reset_button;Remise à zéro de la ROI
+activate_roi_button;Activer la ROI
+basler_params_title;Paramètres de la caméra
+basler_params_fps;Taux rafraîchissement (images/seconde)
+basler_params_slider_expo;Temps d'intégration
+basler_params_slider_black;Black Level
+###################
+# Piezo et DMD
+###################
+dmd_params_title;Images pour le DMD
+piezo_params_title;Contrôle du piézo
+piezo_connect;Se connecter...
+mire_title;Mire
+image_path;Image non chargée
+dmd_open_button;Charger une image...
+dmd_view_button;Visualiser la mire
+dmd_send_button;Envoyer sur le DMD
+dmd_camera_view_button;Visualiser la caméra

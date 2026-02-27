@@ -1,0 +1,16 @@
+
+Fichier XML / Main appli
+
+-> Name of the application
+-> List of all the modules and requirements
+
+
+		
+		
+<?xml version="1.0" encoding="UTF-8"?>
+<appli name="My_App">
+<module>
+	<name>images</name>
+	<location>lensepy</location>
+</module>
+</appli>

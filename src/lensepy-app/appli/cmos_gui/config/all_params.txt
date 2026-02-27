@@ -1,0 +1,137 @@
+# Default camera parameters
+# ParameterName;InitValue;Type (Integer, String, Float)
+AcquisitionBurstFrameCount;1;I
+AcquisitionFrameRate;100.0;F
+AcquisitionFrameRateEnable;False;B
+#AcquisitionMode;Continuous;S
+#AcquisitionStatus;False;B
+#AcquisitionStatusSelector;AcquisitionActive;S
+AutoExposureTimeLowerLimit;1.0;F
+AutoExposureTimeUpperLimit;100000.0;F
+AutoFunctionProfile;MinimizeGain;S
+AutoFunctionROIHeight;1200;I
+AutoFunctionROIHighlight;False;B
+AutoFunctionROIOffsetX;8;I
+AutoFunctionROIOffsetY;8;I
+AutoFunctionROISelector;ROI1;S
+AutoFunctionROIUseBrightness;False;B
+AutoFunctionROIUseWhiteBalance;False;B
+AutoFunctionROIWidth;1920;I
+AutoGainLowerLimit;0.0;F
+AutoGainUpperLimit;24.0;F
+AutoTargetBrightness;0.5;F
+BalanceRatio;1.0;F
+BalanceRatioSelector;Red;S
+BalanceWhiteAuto;Off;S
+BlackLevel;10.0;F
+BlackLevelSelector;All;S
+BslAcquisitionBurstMode;Standard;S
+BslAcquisitionStopMode;CompleteExposure;S
+BslBrightness;0.0;F
+BslChunkTimestampSelector;FrameStart;S
+BslColorAdjustmentEnable;False;B
+BslColorAdjustmentHue;0.0;F
+BslColorAdjustmentSaturation;1.0;F
+BslColorAdjustmentSelector;Red;S
+BslColorSpace;Off;S
+BslContrast;0.0;F
+BslContrastMode;Linear;S
+BslDemosaicingMode;Auto;S
+BslDeviceLinkCurrentThroughput;360000000;I
+BslErrorPresent;False;B
+BslErrorReportValue;0;I
+BslExposureTimeMode;Standard;S
+BslFlashWindowDuration;5000.0;F
+BslHue;0.0;F
+BslHueRaw;0;I
+BslInputFilterTime;0.0;F
+BslInputHoldOffTime;0.0;F
+BslLightControlMode;Off;S
+# BslLightSourcePreset;Daylight6500K;S
+# BslLightSourcePresetFeatureEnable;False;B
+# BslLightSourcePresetFeatureSelector;WhiteBalance;S
+BslLineOverloadStatusAll;0;I
+BslMultipleROIColumnOffset;0;I
+BslMultipleROIColumnSelector;Column1;S
+BslMultipleROIColumnSize;1920;I
+BslMultipleROIColumnsEnable;False;B
+BslMultipleROIRowOffset;0;I
+BslMultipleROIRowSelector;Row1;S
+BslMultipleROIRowSize;1200;I
+BslMultipleROIRowsEnable;False;B
+BslResultingFrameBurstRate;156.25;F
+BslSaturation;1.0;F
+BslSaturationRaw;256;I
+BslSensorBitDepth;Bpp12;S
+BslSensorBitDepthMode;Manual;S
+BslStaticDefectPixelCorrectionMaxDefects;4096;I
+BslStaticDefectPixelCorrectionMode;Factory;S
+# ChunkCounterSelector;Counter1;S
+# ChunkEnable;False;B
+# ChunkGainSelector;All;S
+# ChunkModeActive;False;B
+# ChunkSelector;AutoBrightnessStatus;S
+ColorTransformationEnable;False;B
+ColorTransformationSelector;RGBtoRGB;S
+ColorTransformationValue;1.0;F
+ColorTransformationValueSelector;Gain00;S
+CounterDuration;4294967295;I
+CounterEventSource;Off;S
+CounterResetSource;Off;S
+CounterSelector;Counter1;S
+CounterTriggerSource;Off;S
+CounterValue;0;I
+DigitalShift;0;I
+EventNotification;Off;S
+EventSelector;ExposureEnd;S
+ExposureAuto;Off;S
+ExposureMode;Timed;S
+ExposureTime;5000.0;F
+Gain;0.0;F
+GainAuto;Off;S
+GainSelector;All;S
+Gamma;1.0;F
+Height;1216;I
+HeightMax;1216;I
+LUTEnable;False;B
+LUTIndex;0;I
+LUTSelector;Luminance;S
+LUTValue;0;I
+LineInverter;False;B
+LineMode;Input;S
+LineSelector;Line1;S
+LineStatus;False;B
+# OffsetX;8;I
+# OffsetY;8;I
+# PayloadSize;2304000;I
+PixelDynamicRangeMin;0;I
+PixelFormat;Mono12;S
+ReverseX;False;B
+ReverseY;False;B
+# SIPayloadFinalTransfer1Size;0;I
+# SIPayloadTransferCount;0;I
+SensorHeight;1216;I
+SensorShutterMode;Global;S
+SoftwareSignalSelector;SoftwareSignal1;S
+TLParamsLocked;0;I
+TestPattern;Off;S
+TestPendingAck;0;I
+TimerDelay;0.0;F
+TimerDuration;9.99;F
+TimerSelector;Timer1;S
+TimerTriggerArmDelay;0.0;F
+TimerTriggerSource;Off;S
+TimestampLatchValue;0;I
+TriggerDelay;0.0;F
+TriggerMode;Off;S
+TriggerSelector;FrameStart;S
+TriggerSource;Software;S
+UserDefinedValue;0;I
+UserDefinedValueSelector;Value1;S
+UserOutputSelector;UserOutput1;S
+UserOutputValue;False;B
+UserOutputValueAll;0;I
+UserSetDefault;Default;S
+UserSetSelector;Default;S
+Width;1936;I
+WidthMax;1936;I

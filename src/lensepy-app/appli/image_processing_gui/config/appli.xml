@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli name="My_App">
+    <name>Image Processing GUI</name>
+    <appname>Image Processing GUI</appname>
+    <organization>LEnsE</organization>
+    <year>2025</year>
+    <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
+    <contributors>
+        <contributor>
+            <name>Julien VILLEMEJANE</name>
+            <organization>LEnsE / IOGS</organization>
+            <mail>julien.villemejane@institutoptique.fr</mail>
+        </contributor>
+    </contributors>
+	<module>
+		<name>images</name>
+		<location>lensepy.modules.images</location>
+        <imgdir>lensepy.data.images</imgdir>
+	</module>
+	<module>
+		<name>spatial_images</name>
+		<location>lensepy.modules.images</location>
+	</module>
+    <module>
+		<name>fft_images</name>
+		<location>lensepy.modules.images</location>
+	</module>
+    <module>
+		<name>sampling</name>
+		<location>lensepy.modules.images</location>
+	</module>
+    <variable name="image"/>
+    <variable name="bits_depth"/>
+    <variable name="fft_image"/>
+</appli>

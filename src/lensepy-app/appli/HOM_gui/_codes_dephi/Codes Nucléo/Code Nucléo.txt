@@ -1,0 +1,300 @@
+ /*  
+ *  Structure of a main file for embedded project @ Solec/LEnsE
+ *
+ *  This code (explain in 2 lines what is the main function of this code)
+
+
+This code will count the number of pulse there is on each input of the Nucleo card (there is a counter for each input). The goal is to have
+the number of pulse on each input during a time T_int. When this time is over, the counters resets to 0.
+With that, we give the datas of the counters to Python which will calculate the g2 fonction (which depends on every pulse
+on every input).
+
+
+
+
+ *****************************************************************
+ *  Pinout :
+ *      - signal_A /    Input for a numerical signal on PA1 port of the Nucleo
+ *      - signal_AB /   Input for a numerical signal on PA8 port of the Nucleo
+ *      - signal_AC /   Input for a numerical signal on PB5 port of the Nucleo
+ *      - signal_ABC /  Input for  numerical signal on PA9 port of the Nucleo
+ *      - signal_B /  Input for  numerical signal on PA4 port of the Nucleo
+ *      - signal_C /  Input for  numerical signal on PA6 port of the Nucleo
+ *      - T_int /       It is the time a user choose to do the measurement of g2
+ *****************************************************************
+ *  Tested with Nucleo G431KB board / Mbed OS 6
+ *****************************************************************
+ *  Authors : J.DUBOEUF and N.LE LAY / Solec Group - Creation 2025/02/05
+ *****************************************************************
+ *  Pre-compiler json file at the end of this file
+ *****************************************************************
+ *  Solec / https://solecgroup.wordpress.com/
+ *  ProTIS / https://lense.institutoptique.fr/
+ *      Based on Mbed OS 6 example : mbed-os-example-blinky-baremetal
+ */
+#include "mbed.h"
+using namespace chrono;
+
+// On our Nucleo card, the D4 port does not work
+
+
+InterruptIn signal_A(A1);        // It defines a numerical signal to the PA1 port of the Nucleo.
+InterruptIn signal_AB(D9);        // It defines a numerical signal to the PA8 port of the Nucleo.
+InterruptIn signal_AC(D11);        // It defines a numerical signal to the PB5 port of the Nucleo.
+InterruptIn signal_ABC(D1);        // It defines a numerical signal to the PA9 port of the Nucleo.
+InterruptIn signal_B(A3);        // It defines a numerical signal to the PA4 port of the Nucleo.
+InterruptIn signal_C(A5);        // It defines a numerical signal to the PA6 port of the Nucleo.
+BufferedSerial  usb_pc(USBTX, USBRX); //It connects the Nucleo to the computer in order to transmit data through python
+
+DigitalOut led1(LED1);
+
+
+int     counter_A = 0;        // It sets counter to 0, counter_A is the number of time a pulse appears on A output
+int     counter_AB = 0;       // It sets counter to 0, counter_AB is the number of time a pulse appears on AB output
+int     counter_AC = 0;       // It sets counter to 0, counter_AC is the number of time a pulse appears on AC output
+int     counter_ABC = 0;      // It sets counter to 0, counter_ABC is the number of time a pulse appears on ABC output
+int     counter_B = 0;      // It sets counter to 0, counter_B is the number of time a pulse appears on ABC output
+int     counter_C = 0;      // It sets counter to 0, counter_C is the number of time a pulse appears on ABC output
+
+
+Ticker reset_ticker;             // Ticker which resets the counters
+
+
+// Integration Time
+int T_int = 1000;
+int compteur_octet = 0; // It sets a cpt for every bit received
+int T_int_values[2] = {0, 0};  // It sets a liste of 2 elements in order to change T_int when we receive a new value
+
+
+
+
+// Variables to blind an input during x seconds (timeout)
+bool blind_A = false;
+bool blind_AB = false;
+bool blind_AC = false;
+bool blind_ABC = false;
+bool blind_B = false;
+bool blind_C = false;
+
+
+// Durée du timeout (par exemple 1 seconde)
+#define TIMEOUT 1.0  // Timeout in seconds
+
+
+void rising_A() {
+    if (!blind_A) {  // if signal_A isn't blinded
+        counter_A++;  // add +1 to counter_A
+        blind_A = true;  // Blinds signal_A during a TIMEOUT
+        //thread_sleep_for(TIMEOUT * 1e-9 * 300);  // waits timeout
+        blind_A = false;  // allows the detection on signal_A again
+    }
+}
+
+
+void rising_AB() {
+    if (!blind_AB) {  // if signal_AB isn't blinded
+        counter_AB++;  // add +1 to counter_AB
+        blind_AB = true;  // Blinds signal_AB during a TIMEOUT
+        //thread_sleep_for(TIMEOUT * 1e-9 * 300);  // waits timeout
+        blind_AB = false;  // allow the detection on signal_AB again
+    }
+}
+
+
+void rising_AC() {
+    if (!blind_AC) {  // if signal_AC isn't blinded
+        counter_AC++;  // add +1 to counter_AC
+        blind_AC = true;  // Blinds signal_AC during a TIMEOUT
+        //thread_sleep_for(TIMEOUT * 1e-9 * 300);  // waits timeout
+        blind_AC = false;  // allow the detection on signal_AC again
+    }
+}
+
+
+void rising_ABC() {
+    if (!blind_ABC) {  // if signal_ABC isn't blinded
+        counter_ABC++;  // add +1 to counter_ABC
+        blind_ABC = true;  // Blinds signal_ABC during a TIMEOUT
+        //thread_sleep_for(TIMEOUT * 1e-9 * 300);  // waits timeout
+        blind_ABC = false;  // allow the detection on signal_ABC again
+    }
+}
+
+
+void rising_B() {
+    if (!blind_B) {  // if signal_ABC isn't blinded
+        counter_B++;  // add +1 to counter_ABC
+        blind_B = true;  // Blinds signal_ABC during a TIMEOUT
+        //thread_sleep_for(TIMEOUT * 1e-9 * 300);  // waits timeout
+        blind_B = false;  // allow the detection on signal_ABC again
+    }
+}
+
+
+void rising_C() {
+    if (!blind_C) {  // if signal_ABC isn't blinded
+        counter_C++;  // add +1 to counter_ABC
+        blind_C = true;  // Blinds signal_ABC during a TIMEOUT
+        //thread_sleep_for(TIMEOUT * 1e-9 * 300);  // waits timeout
+        blind_C = false;  // allow the detection on signal_ABC again
+    }
+}
+
+
+
+
+void send_counters() {
+    uint8_t buffer[18];
+
+    // Encode counter_A into 3 bytes
+    buffer[0] = (counter_A >> 16) & 0xFF;
+    buffer[1] = (counter_A >> 8) & 0xFF;
+    buffer[2] = counter_A & 0xFF;
+
+
+    // Encode counter_AB into 3 bytes
+    buffer[3] = (counter_AB >> 16) & 0xFF;
+    buffer[4] = (counter_AB >> 8) & 0xFF;
+    buffer[5] = counter_AB & 0xFF;
+
+
+    // Encode counter_AC into 3 bytes
+    buffer[6] = (counter_AC >> 16) & 0xFF;
+    buffer[7] = (counter_AC >> 8) & 0xFF;
+    buffer[8] = counter_AC & 0xFF;
+
+
+    // Encode counter_ABC into 3 bytes
+    buffer[9] = (counter_ABC >> 16) & 0xFF;
+    buffer[10] = (counter_ABC >> 8) & 0xFF;
+    buffer[11] = counter_ABC & 0xFF;
+
+
+    // Encode counter_B into 3 bytes
+    buffer[12] = (counter_B >> 16) & 0xFF;
+    buffer[13] = (counter_B >> 8) & 0xFF;
+    buffer[14] = counter_B & 0xFF;
+
+
+    // Encode counter_C into 3 bytes
+    buffer[15] = (counter_C >> 16) & 0xFF;
+    buffer[16] = (counter_C >> 8) & 0xFF;
+    buffer[17] = counter_C & 0xFF;
+
+    // Send the 12-byte buffer through the serial port
+    usb_pc.write(buffer, 18);
+}
+
+
+
+
+void reset_counters() {
+    // Arrêter et réinitialiser le Ticker
+    reset_ticker.detach();  // Arrêter le Ticker existant
+    // It prints the values of counters after T_int has passed
+    // printf("Test 002\n");
+    // printf("Counter A: %d\n", counter_A);
+    // printf("Counter B: %d\n", counter_B);
+    // printf("Counter C: %d\n", counter_C);
+    // printf("Counter AB: %d\n", counter_AB);
+    // printf("Counter AC: %d\n", counter_AC);
+    // printf("Counter ABC: %d\n", counter_ABC);
+    // printf("T_int : %d\n", T_int);
+
+
+    send_counters();
+    // It resets the counters
+    counter_A = 0;
+    counter_AB = 0;
+    counter_AC = 0;
+    counter_ABC = 0;
+    counter_B = 0;
+    counter_C = 0;
+   
+    // Réattacher le Ticker avec la nouvelle valeur de T_int
+    reset_ticker.attach(&reset_counters, milliseconds(T_int));
+}
+
+
+void usb_pc_ISR(void) {
+    uint8_t rec_data_pc[2]; // Array to store the 2 bytes received from USB serial
+    int rec_length = 0;
+    int m = 0;
+   
+    // Check if data is available on the serial port
+    if (usb_pc.readable()) {
+        // Read 2 bytes from the USB serial port into the array
+        rec_length = usb_pc.read(rec_data_pc, 2);  // Read 2 bytes into the array
+        m = rec_data_pc[0];  // Get the first byte (most significant byte)
+        compteur_octet++;  // Increment the byte counter
+       
+        // If the first byte has been received (compteur_octet == 1)
+        if (compteur_octet == 1) {
+            led1 = !led1;
+            // Combine the two bytes into an integer value (Big Endian)
+            T_int = m * 256; // The first byte is the most significant byte
+        }
+
+
+        // If the second byte has been received (compteur_octet == 2)
+        if (compteur_octet == 2) {
+            // Combine the second byte to complete the integer value (Big Endian)
+            T_int = (T_int + m); // Add the second byte and apply scaling (e.g., convert to seconds)
+            compteur_octet = 0;  // Reset the byte counter after both bytes have been received
+           
+            // Update the list of the last two values of T_int
+            T_int_values[0] = T_int_values[1];  // The oldest value becomes the previous element
+            T_int_values[1] = T_int;            // The new value becomes the latest element
+
+
+            // Detach the old Ticker and attach a new one with the updated T_int value
+            reset_ticker.detach();  // Detach the old Ticker
+            reset_ticker.attach(&reset_counters, milliseconds(T_int_values[1]));  // Attach a new Ticker with the latest T_int value
+        }
+    }
+}
+
+
+
+
+int main() {
+    // We detect the rising on each input signal
+    signal_A.rise(&rising_A);  // Detect a rising on signal_A
+    signal_AB.rise(&rising_AB);  // Detect a rising on signal_AB
+    signal_AC.rise(&rising_AC);  // Detect a rising on signal_AC
+    signal_ABC.rise(&rising_ABC);  // Detect a rising on signal_ABC
+    signal_B.rise(&rising_B);  // Detect a rising on signal_B
+    signal_C.rise(&rising_C);  // Detect a rising on signal_C
+
+    usb_pc.set_baud(9600);
+    usb_pc.sigio(callback(usb_pc_ISR));
+
+
+
+    // We stop the detection after T_int has passed and we reset the counters
+    reset_ticker.attach(&reset_counters, milliseconds(T_int));  // It runs the reset_counters function every T_int
+   
+    while (true) {
+        wait_us(1000);  
+    }
+}
+
+
+
+
+/* mbed_app.json - Precompiler option for Mbed Studio and Keil Studio.
+{
+    "requires": ["bare-metal"],
+    "target_overrides": {
+      "*": {
+        "target.c_lib": "small",
+        "target.printf_lib": "minimal-printf",
+        "platform.minimal-printf-enable-floating-point": true,        
+        "platform.stdio-baud-rate": 9600,
+        "platform.stdio-minimal-console-only": true
+      }
+    }
+}
+*/
+
+

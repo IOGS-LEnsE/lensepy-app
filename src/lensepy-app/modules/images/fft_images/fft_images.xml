@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>fft_images</name>
+    <requirements>images</requirements>
+    <req_var>image</req_var>
+    <display>MODE1</display>
+    <controller>FFTImagesController</controller>
+    <location>fft_images_controller</location>
+</appli>

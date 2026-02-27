@@ -1,0 +1,114 @@
+<deployment-project plugin="plugin.ezdeploy" plugin-version="1.0">
+  <configuration build-checksum="3940633491" file="J:\__temlp\PIMS_Pointage_vBeta_1.0\alignement.prj" location="J:\__temlp\PIMS_Pointage_vBeta_1.0" name="alignement" preferred-package-location="J:\__temlp\PIMS_Pointage_vBeta_1.0\alignement\for_redistribution" preferred-package-type="package.type.exe" target="target.ezdeploy.standalone" target-name="Application Compiler">
+    <param.appname>alignement</param.appname>
+    <param.icon />
+    <param.icons />
+    <param.version>1.0</param.version>
+    <param.authnamewatermark>Julien VILLEMEJANE</param.authnamewatermark>
+    <param.email>julien.villemejane@institutoptique.fr</param.email>
+    <param.company>LEnsE - Institut d'Optique Graduate School</param.company>
+    <param.summary>Interface for Embedded Digital PID Controller in L476RG Nucleo Board
+Tracking of a laser beam in two directions</param.summary>
+    <param.description>Interface for Embedded Digital PID Controller in L476RG Nucleo Board
+Tracking of a laser beam in two directions</param.description>
+    <param.screenshot>C:\Users\Villou\ownCloud\LEnsE-Commun\LogoLEnsE\IOGS-LEnsE-logo.jpg</param.screenshot>
+    <param.guid />
+    <param.installpath.string>\LEnsE\LaserTracking_vBeta\</param.installpath.string>
+    <param.installpath.combo>option.installpath.programfiles</param.installpath.combo>
+    <param.logo>C:\Users\Villou\ownCloud\LEnsE-Commun\LogoLEnsE\IOGS-LEnsE-logo.jpg</param.logo>
+    <param.install.notes />
+    <param.target.install.notes />
+    <param.intermediate>${PROJECT_ROOT}\alignement\for_testing</param.intermediate>
+    <param.files.only>${PROJECT_ROOT}\alignement\for_redistribution_files_only</param.files.only>
+    <param.output>${PROJECT_ROOT}\alignement\for_redistribution</param.output>
+    <param.logdir>${PROJECT_ROOT}\alignement</param.logdir>
+    <param.enable.clean.build>false</param.enable.clean.build>
+    <param.user.defined.mcr.options />
+    <param.target.type>subtarget.standalone</param.target.type>
+    <param.support.packages />
+    <param.web.mcr>false</param.web.mcr>
+    <param.package.mcr>true</param.package.mcr>
+    <param.no.mcr>false</param.no.mcr>
+    <param.web.mcr.name>LaserTracking_Beta</param.web.mcr.name>
+    <param.package.mcr.name>MyAppInstaller_mcr</param.package.mcr.name>
+    <param.no.mcr.name>MyAppInstaller_app</param.no.mcr.name>
+    <param.windows.command.prompt>true</param.windows.command.prompt>
+    <param.create.log>false</param.create.log>
+    <param.log.file />
+    <param.native.matlab>false</param.native.matlab>
+    <param.checkbox>false</param.checkbox>
+    <param.example />
+    <param.help.text>Syntax 
+	  -? 
+	 
+ Input Arguments 
+	 -?  print help on how to use the application 
+	 input arguments</param.help.text>
+    <unset>
+      <param.icon />
+      <param.icons />
+      <param.version />
+      <param.guid />
+      <param.installpath.combo />
+      <param.install.notes />
+      <param.target.install.notes />
+      <param.intermediate />
+      <param.files.only />
+      <param.output />
+      <param.logdir />
+      <param.enable.clean.build />
+      <param.user.defined.mcr.options />
+      <param.target.type />
+      <param.support.packages />
+      <param.no.mcr />
+      <param.package.mcr.name />
+      <param.no.mcr.name />
+      <param.windows.command.prompt />
+      <param.create.log />
+      <param.log.file />
+      <param.native.matlab />
+      <param.checkbox />
+      <param.example />
+    </unset>
+    <fileset.main>
+      <file>${PROJECT_ROOT}\pointage_laser_vBeta.mlapp</file>
+    </fileset.main>
+    <fileset.resources />
+    <fileset.package>
+      <file>${PROJECT_ROOT}\nucleo_prog_vBeta_1.0.cpp</file>
+      <file>${PROJECT_ROOT}\pointage_laser.mlx</file>
+    </fileset.package>
+    <fileset.depfun>
+      <file>${PROJECT_ROOT}\4q_photodiode.png</file>
+      <file>${PROJECT_ROOT}\bad.jpg</file>
+      <file>${PROJECT_ROOT}\better.jpg</file>
+      <file>${PROJECT_ROOT}\goodtoo.jpg</file>
+      <file>${PROJECT_ROOT}\systBoucle.png</file>
+    </fileset.depfun>
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}\alignement\for_testing" name="readme.txt" optional="true">J:\__temlp\PIMS_Pointage_vBeta_1.0\alignement\for_testing\readme.txt</file>
+      <file location="${PROJECT_ROOT}\alignement\for_testing" name="splash.png" optional="false">J:\__temlp\PIMS_Pointage_vBeta_1.0\alignement\for_testing\splash.png</file>
+      <file location="${PROJECT_ROOT}\alignement\for_testing" name="alignement.exe" optional="false">J:\__temlp\PIMS_Pointage_vBeta_1.0\alignement\for_testing\alignement.exe</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>C:\Program Files\MATLAB\R2020b</root>
+      <toolboxes />
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>

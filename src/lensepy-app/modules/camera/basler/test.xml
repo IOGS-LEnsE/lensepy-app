@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli name="My_App">
+    <name>CMOS Machine Vision GUI</name>
+    <appname>CMOS GUI</appname>
+    <organization>LEnsE</organization>
+    <year>2025</year>
+    <logo>./assets/LEnsE_IOGS.jpg</logo>
+    <contributors>
+        <contributor>
+            <name>Julien VILLEMEJANE</name>
+            <organization>LEnsE / IOGS</organization>
+            <mail>julien.villemejane@institutoptique.fr</mail>
+        </contributor>
+    </contributors>
+	<module>
+		<name>basler</name>
+		<location>./modules</location>
+	</module>
+	<module>
+		<name>fft_images</name>
+        <requirements>images/basler</requirements>
+		<location>./modules</location>
+	</module>
+    <variable name="image"/>
+    <variable name="bits_depth"/>
+    <variable name="fft_image"/>
+    <variable name="camera"/>
+    <camera>
+        <name>Basler</name>
+        <colormode>Mono12:12,Mono10:10,Mono8:8,BayerRG8:8</colormode>
+    </camera>
+</appli>

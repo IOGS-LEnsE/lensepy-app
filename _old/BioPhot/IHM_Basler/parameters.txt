@@ -1,0 +1,13 @@
+Z Init (um) = 2.7755575615628914e-17
+Z Final (um) = 0.3000000000000001
+Z Step (nm) = 30.0
+
+Camera settings :
+Exposure time = 41
+FPS = 6
+BlackLevel = 0
+
+Patterns loaded :
+Pattern 1 = ..\MiresDMD\mire_256\Mire256_pix_decalee_0_quarts.bmp
+Pattern 2 = ..\MiresDMD\Mire256_pix_lense.bmp
+Pattern 3 = ..\MiresDMD\FTM.bmp

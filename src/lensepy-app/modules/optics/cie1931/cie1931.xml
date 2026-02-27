@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>led_control</name>
+    <requirements></requirements>
+    <req_var>points_list</req_var>
+    <display>MODE3</display>
+    <controller>CIE1931Controller</controller>
+    <location>cie1941_controller</location>
+</appli>

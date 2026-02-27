@@ -1,0 +1,6 @@
+# Menu Test 2
+# Type; Title; Signal;
+B;Sub Test 21;sub_test_21;
+S;;;
+B;Sub Test 22;sub_test_22;
+S;;;

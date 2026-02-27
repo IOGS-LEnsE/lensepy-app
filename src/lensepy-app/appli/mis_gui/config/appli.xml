@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli name="My_App">
+    <name>Structured Illumination Microscopy GUI</name>
+    <description>For MIS/SIM labwork in biophotonics</description>
+    <img_desc>./mis_gui/html/MIS_pims_image.png</img_desc>
+    <html_page>./mis_gui/html/mis_lab.html</html_page>
+    <appname>SIM/MIS Lab</appname>
+    <organization>LEnsE</organization>
+    <year>2026</year>
+    <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
+    <img_dir>%USERPROFILE%\Documents</img_dir>
+    <contributors>
+        <contributor type="dev">
+            <name>Julien VILLEMEJANE</name>
+            <organization>LEnsE / IOGS</organization>
+            <mail>julien.villemejane@institutoptique.fr</mail>
+        </contributor>
+        <contributor type="sciexp">
+            <name>Nathalie WESTBROOK</name>
+            <organization>LCF / IOGS</organization>
+        </contributor>
+        <contributor type="sciexp">
+            <name>Julien MOREAU</name>
+            <organization>LCF / IOGS</organization>
+        </contributor>
+    </contributors>
+	<module>
+		<name>basler</name>
+		<location>lensepy.modules.camera</location>
+	</module>
+	<module>
+		<name>piezo_dmd</name>
+		<location>lensepy.modules.drivers</location>
+	</module>
+    <variable name="image"/>
+    <variable name="bits_depth"/>
+    <variable name="camera"/>
+    <variable name="roi_activated"/>
+    <variable name="roi_coords"/>
+    <variable name="dmd_wrapper"/>
+    <camera>
+        <name>Basler</name>
+        <colormode>Mono12:12,Mono10:10,Mono8:8</colormode>
+        <exposuretime>2000000</exposuretime>
+        <maxwidth>1920</maxwidth>
+        <maxheight>1200</maxheight>
+        <offset>8</offset>
+    </camera>
+</appli>

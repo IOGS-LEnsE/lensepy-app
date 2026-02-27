@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>sampling</name>
+    <requirements>images</requirements>
+    <req_var>image,bits_depth</req_var>
+    <display>MODE1</display>
+    <controller>SamplingController</controller>
+    <location>sampling_controller</location>
+</appli>

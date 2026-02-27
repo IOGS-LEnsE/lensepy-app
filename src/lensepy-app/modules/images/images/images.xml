@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>images</name>
+    <requirements></requirements>
+    <req_var>image,bits_depth</req_var>
+    <display>MODE2</display>
+    <controller>ImagesController</controller>
+    <location>images_controller</location>
+</appli>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>time_camera</name>
+    <requirements>camera</requirements>
+    <req_var>bits_depth,camera</req_var>
+    <display>MODE1</display>
+    <controller>TimeCameraController</controller>
+    <location>time_camera_controller</location>
+</appli>

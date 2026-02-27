@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>spatial_camera</name>
+    <requirements>camera</requirements>
+    <req_var>bits_depth,camera</req_var>
+    <display>MODE1</display>
+    <controller>SpatialCameraController</controller>
+    <location>spatial_camera_controller</location>
+</appli>

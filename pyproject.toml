@@ -1,0 +1,37 @@
+[project]
+name = "lensepy-app"
+version = "1.0.1"
+authors = [
+  { name="Julien VILLEMEJANE", email="julien.villemejane@institutoptique.fr" },
+]
+description = "LEnsE Package of applications. Required lensepy package."
+readme = "README.rst"
+requires-python = ">=3.11"
+
+dependencies = [
+    "pyqt6>=6.1",
+	"lensepy>=3",
+    "pypylon>=4.1.0",
+    "pyqtgraph>=0.12",
+    "colour-science",
+    "pyserial",
+    "PyQt6-WebEngine"
+]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/IOGS-LEnsE/lensepy-app"
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.setuptools.package-data]
+# File to include
+"lensepy" = ["**/*.xml", "**/*.jpg"]

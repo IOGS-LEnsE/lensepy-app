@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>coincidence_board</name>
+    <requirements></requirements>
+    <req_var></req_var>
+    <display>MODE3</display>
+    <controller>CoincidenceBoardController</controller>
+    <location>coincidence_board_controller</location>
+</appli>

@@ -1,0 +1,16 @@
+
+
+Start APP
+
+	-> 	Read "config/appli.xml"  (containing all the modules to import)
+		-> Read "modules"
+			+ test if modules exist
+			+ test if required modules exist
+			+ create variables
+			+ create menu
+		
+		-> Start the main_view with the first module 
+			(or init view ? with specific data from XML ?)
+		
+		
+			

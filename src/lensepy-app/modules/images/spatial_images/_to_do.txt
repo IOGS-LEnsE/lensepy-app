@@ -1,0 +1,7 @@
+
+-> Regroup Slices display in *top_right*
+-> Options in *bot_right*
+    + process mean and stdev for image
+    + check for histogram zoom
+    + save histogram in PNG
+    + save slices in PNG

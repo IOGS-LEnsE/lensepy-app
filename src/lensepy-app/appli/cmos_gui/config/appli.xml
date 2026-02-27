@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli name="My_App">
+    <name>CMOS Sensor GUI</name>
+    <appname>CMOS GUI</appname>
+    <organization>LEnsE</organization>
+    <year>2025</year>
+    <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
+    <img_dir>%USERPROFILE%\Documents</img_dir>
+    <contributors>
+        <contributor>
+            <name>Julien VILLEMEJANE</name>
+            <organization>LEnsE / IOGS</organization>
+            <mail>julien.villemejane@institutoptique.fr</mail>
+        </contributor>
+    </contributors>
+	<module>
+		<name>basler</name>
+		<location>lensepy.modules.camera</location>
+	</module>
+	<module>
+		<name>spatial_camera</name>
+		<location>lensepy.modules.camera</location>
+	</module>
+	<module>
+		<name>time_camera</name>
+		<location>lensepy.modules.camera</location>
+	</module>
+    <variable name="image"/>
+    <variable name="bits_depth"/>
+    <variable name="camera"/>
+    <variable name="time_points"/>
+    <variable name="roi_activated"/>
+    <variable name="roi_coords"/>
+    <camera>
+        <name>Basler</name>
+        <colormode>Mono12:12,Mono10:10,Mono8:8</colormode>
+        <exposuretime>2000000</exposuretime>
+        <maxwidth>1920</maxwidth>
+        <maxheight>1200</maxheight>
+        <offset>8</offset>
+    </camera>
+</appli>

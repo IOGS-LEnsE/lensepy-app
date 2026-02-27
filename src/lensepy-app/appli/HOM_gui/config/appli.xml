@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli name="My_App">
+    <name>Hong-Ou-Mandel GUI</name>
+    <description>Two photons interference labwork</description>
+    <img_desc>./HOM_gui/html/HOM_labwork.png</img_desc>
+    <html_page>./HOM_gui/html/hom_lab.html</html_page>
+    <appname>HOM/Bell Lab</appname>
+    <organization>LEnsE</organization>
+    <year>2026</year>
+    <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
+    <img_dir>%USERPROFILE%\Documents</img_dir>
+    <contributors>
+        <contributor type="dev">
+            <name>Julien VILLEMEJANE</name>
+            <organization>LEnsE / IOGS</organization>
+            <mail>julien.villemejane@institutoptique.fr</mail>
+        </contributor>
+        <contributor type="sciexp">
+            <name>Benjamin WEST</name>
+            <organization>LCF / IOGS</organization>
+        </contributor>
+    </contributors>
+	<module>
+		<name>coincidence_board</name>
+		<location>lensepy.modules.drivers</location>
+	</module>
+    <variable name="nucleo_wrapper"/>
+</appli>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>led_control</name>
+    <requirements></requirements>
+    <req_var>led_w1,led_w2,led_r,led_b,led_g</req_var>
+    <display>MODE3</display>
+    <controller>LedControlController</controller>
+    <location>led_control_controller</location>
+</appli>

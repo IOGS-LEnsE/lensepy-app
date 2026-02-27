@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>images</name>
+    <requirements>images</requirements>
+    <req_var>image,bits_depth</req_var>
+    <display>MODE1</display>
+    <controller>SpatialImagesController</controller>
+    <location>spatial_images_controller</location>
+</appli>

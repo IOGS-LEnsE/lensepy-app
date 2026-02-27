@@ -1,0 +1,11 @@
+# Menu MAIN
+# Type; Title; Signal;
+B;Photodiode;photodiode;
+B;Scanner;scanner;
+S;;;
+B;Central Position;central;
+B;Step Response;step;
+B;Sine Response;sine;
+S;;;
+B;PID Control;pid;
+S;;;

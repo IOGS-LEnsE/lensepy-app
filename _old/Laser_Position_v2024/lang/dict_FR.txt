@@ -1,0 +1,13 @@
+# -*- coding: utf-8 -*-
+# Dictionnaire Français
+#
+# --------------
+# MainMenuWidget
+# --------------
+window_title_main_menu_widget; Menu Principal
+label_title_main_menu; Menu
+# --------------------
+# TitleWidget
+# --------------------
+label_title; Titre principal
+label_subtitle; Sous-titre

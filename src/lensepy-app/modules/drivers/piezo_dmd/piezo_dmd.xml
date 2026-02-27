@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>piezo_dmd</name>
+    <requirements></requirements>
+    <req_var>piezo_connected,dmd_connected,piezo_wrap,dmd_wrap</req_var>
+    <display>MODE2</display>
+    <controller>PiezoDMDController</controller>
+    <location>piezo_dmd_controller</location>
+</appli>

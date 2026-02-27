@@ -1,0 +1,52 @@
+# value;translation
+# MAIN MENU
+basler_menu;Camera Basler
+spatial_camera_menu;Analyse spatiale
+time_camera_menu;Analyse temporelle
+###################
+# Camera BASLER
+###################
+histo_xlabel;Intensité des pixels
+histo_ylabel;Nombre de pixels
+basler_infos_title;Caméra Basler / Informations
+basler_infos_name;Type de caméra
+basler_infos_serial;Numéro de série
+basler_infos_size;Taille du capteur
+basler_infos_color_mode;Profondeur/Couleur
+camera_roi_title;Choix de la zone d'intérêt
+roi_x0;x0
+roi_y0;y0
+roi_x1;x1
+roi_y1;y1
+roi_w;Largeur
+roi_h;Hauteur
+roi_center_button;Centrer la ROI
+roi_reset_button;Remise à zéro de la ROI
+activate_roi_button;Activer la ROI
+basler_params_title;Paramètres de la caméra
+basler_params_fps;Taux rafraîchissement (images/seconde)
+basler_params_slider_expo;Temps d'intégration
+basler_params_slider_black;Black Level
+###################
+# Analyse spatiale
+###################
+image_slice_title;Coupes horizontale et verticale
+save_histo_button;Sauvegarder l'histogramme (PNG)
+save_histo_zoom_button;Sauvegarder le zoom de l'histogramme (PNG)
+save_slice_button;Sauvegarder les coupes
+zoom_check_box;Zoom dans l'histogramme
+contrast_button;Ajustement du contraste
+###################
+# Analyse temporelle
+###################
+image_time_xy_title;Signal moyen en fonction du temps
+camera_display_params_title;Informations sur la caméra
+exposure_time;Temps d'intégration
+black_level;Black Level
+frame_rate;Taux de rafraîchissement
+time_acquisition_title;Acquisition au cours du temps
+nb_of_points_edit;Nombre de points
+start_time_acq_button;Lancer l'acquisition
+save_time_histo_button;Sauvegarder les histogrammes
+save_time_chart_button;Sauvegarder le graphique temporel
+reset_data_button;Remise à zéro

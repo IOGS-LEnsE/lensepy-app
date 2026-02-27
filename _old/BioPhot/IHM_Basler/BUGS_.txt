@@ -1,0 +1,21 @@
+TO MODIFY !
+-----------
+MODE AUTOMATIQUE :
+- vérifier si 3 mires OK
+- vérifier si Parametres OK
+- vérifier si USB Piezo OK
+- ajouter la possibilité d'annuler (de stopper)
+- Barre progression
+
+DMD :
+- si pas d'image chargée, bug lors du LOAD
+
+Global :
+- Sauvegarde image avec Date+Heure
+- Sauvegarder fichier de paramètrage dans répertoire SNAP
+
+
+TO ADD !!
+---------
+- Blacklevel 
+- Expo Time / FPS / BlackLevel --> qeditline to add to enter a value by hand

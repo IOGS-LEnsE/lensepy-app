@@ -1,0 +1,7 @@
+
+MODE1
+
+-> top_left : initial image
+-> bot_left : final image
+-> top_right : options for quantization and sampling (2 modes)
+-> bot_right : histogram (double)
