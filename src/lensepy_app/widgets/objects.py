@@ -451,6 +451,7 @@ class LineEditWidget(QWidget):
         """
         self.line_edit.setEnabled(value)
 
+
 class VerticalGauge(QWidget):
 
     def __init__(self, parent=None, title="", min_value=0, max_value=100):
@@ -463,6 +464,8 @@ class VerticalGauge(QWidget):
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
+        self.bg_color = BLUE_IOGS
+        self.fg_color = ORANGE_IOGS
 
         # Label au-dessus
         self.label = QLabel(title)
@@ -485,14 +488,22 @@ class VerticalGauge(QWidget):
         layout.addWidget(self.progress, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         # Custom Style
-        self.progress.setStyleSheet(progressBar)
+        style_pb = progress_bar_color(self.bg_color, self.fg_color)
+        self.progress.setStyleSheet(style_pb)
 
-        self.value_label = QLabel(title)
+        self.value_label = QLabel(' ')
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.value_label.setStyleSheet(styleH3)
+        self.value_label.setStyleSheet(f"font-size:20px; padding:0px; color:{BLUE_IOGS};font-weight:bold;")
         layout.addWidget(self.value_label)
 
         self.setLayout(layout)
+
+    def set_colors(self, bg_color, fg_color):
+        """Set colors of the gauge."""
+        self.bg_color = bg_color
+        self.fg_color = fg_color
+        style_pb = progress_bar_color(self.bg_color, self.fg_color)
+        self.progress.setStyleSheet(style_pb)
 
     def set_value(self, value):
         """
@@ -518,3 +529,13 @@ class VerticalGauge(QWidget):
         """
         self.label.setText(text)
 
+if __name__ == "__main__":
+    import sys
+    from PyQt6.QtWidgets import QApplication
+    app = QApplication(sys.argv)
+    w = VerticalGauge(min_value=0, max_value=100)
+    #w = VerticalGauge(title='Test', min_value=0, max_value=100)
+    w.set_value(76)
+    w.resize(400, 400)
+    w.show()
+    sys.exit(app.exec())

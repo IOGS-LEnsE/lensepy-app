@@ -111,7 +111,6 @@ class CoincidenceBoardController(TemplateController):
     def handle_log_selected(self, value):
         """Action performed when log checkbox is selected."""
         self.log_display = value
-        print(f'Log checkbox selected to {value}')
 
     def _boards_list_display(self, boards_list):
         """
@@ -167,7 +166,7 @@ class CoincidenceBoardController(TemplateController):
         """
         if self.nucleo_wrapper is not None:
             # Read Period
-            sampling_period = 400
+            sampling_period = self.top_left.get_time_value() * 1000 # s to ms
             self.nucleo_wrapper.set_sampling_period(sampling_period)
             # Start worker
             self.thread = QThread()

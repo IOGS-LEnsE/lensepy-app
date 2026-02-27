@@ -17,6 +17,9 @@ from pyqtgraph import PlotWidget, mkPen, mkBrush
 from lensepy.css import *
 
 
+LINES = [Qt.PenStyle.DashLine, Qt.PenStyle.DashDotLine,
+         Qt.PenStyle.SolidLine,  Qt.PenStyle.DashDotDotLine]
+
 class XYChartWidget(QWidget):
     """
     Widget used to display data in a 2D chart - X and Y axis.
@@ -82,6 +85,7 @@ class XYChartWidget(QWidget):
         self.plot_y_data = np.array([])
         self.x_label = ''
         self.y_label = ''
+        self.y_name = ''
 
         # No data at initialization
         self.pen = [mkPen(color=BLUE_IOGS, style=Qt.PenStyle.SolidLine, width=2.5),
@@ -290,6 +294,13 @@ class XYChartWidget(QWidget):
         """
         self.refresh_chart(last=number)
 
+    def set_colors(self, colors):
+        """Set colors of the lines in the chart."""
+        self.pen = []
+        for i, color in enumerate(colors):
+            self.pen.append(mkPen(color=color, style=LINES[i], width=5))
+
+
 
 # -----------------------------------------------------------------------------------------------
 # Only for testing
@@ -314,8 +325,8 @@ class MyWindow(QMainWindow):
 
         self.chart_widget.set_background('white')
 
-        self.chart_widget.set_data(x, y)
         y_name = ['Test 1', 'Test 2 - very long long long']
+        self.chart_widget.set_data(x, y)
         self.chart_widget.set_legend(y_name, 100, 20)
         self.chart_widget.refresh_chart()
         #self.chart_widget.display_last(50)
