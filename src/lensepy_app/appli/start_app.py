@@ -1,7 +1,7 @@
 import sys, os
 from pathlib import Path
 
-import lensepy
+import lensepy_app
 from lensepy import translate, load_dictionary, dictionary
 
 from lensepy_app.modules.default.default_controller import DefaultController
@@ -15,14 +15,21 @@ DEFAULT_LANG = 'FR'
 
 class My_Application(QApplication):
 
-    def __init__(self, app_name=None, *args, **kwargs):
-        super().__init__(*args)
+    def __init__(self, app_name=None, standalone=False, argv=None):
+        if argv is None:
+            argv = sys.argv
+        super().__init__(argv)
         self.manager = MainManager(self)
         self.window = self.manager.main_window
-        self.package_root = os.path.dirname(lensepy.__file__)
-        self.appli_root = os.path.dirname(os.path.abspath(__file__))
-        if app_name is not None:
+        self.package_root = os.path.dirname(lensepy_app.__file__)
+        if not standalone:
+            self.appli_root = os.path.dirname(os.path.abspath(__file__))
             self.appli_root += f'/{app_name}'
+        else:
+            if app_name is not None:
+                self.appli_root = f'{app_name}'
+            else:
+                return
         self.config_name = f'{self.appli_root}/config/appli.xml'
         self.config_ok = False
         self.config = {}
@@ -120,8 +127,13 @@ class My_Application(QApplication):
         self.window.showMaximized()
 
 
-def start_app(app_path, *argv):
-    app = My_Application(app_path, *argv)
+def start_app(app_path, standalone=False, argv=None):
+    if standalone:
+        print('Standalone')
+        app = My_Application(app_path, standalone)
+    else:
+        app = My_Application(app_path, argv=argv)
+
     if app.init_config():
         if app.check_dependencies():
             app.init_app()
@@ -137,6 +149,7 @@ def start_app(app_path, *argv):
                 print(f'Missing modules: {app.missing_modules} / These modules are not installed.')
             return
     else:
+        print('Failed')
         return
 
 
@@ -145,7 +158,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         application_name = sys.argv[1]
         print(application_name)
-        start_app(application_name, sys.argv)
+        start_app(application_name, standalone=False, argv=sys.argv)
     else:
         # Display all app
         path_to_app = Path("./")

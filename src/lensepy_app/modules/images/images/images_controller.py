@@ -1,9 +1,9 @@
 __all__ = ["ImagesController"]
 
-from lensepy.modules.images.images.images_views import ImagesOpeningWidget, ImagesInfosWidget
-from lensepy.widgets.image_display_widget import ImageDisplayWidget
-from lensepy.appli._app.template_controller import TemplateController
-from lensepy.widgets.histogram_widget import HistogramWidget
+from lensepy_app.modules.images.images.images_views import ImagesOpeningWidget, ImagesInfosWidget
+from lensepy_app.widgets.image_display_widget import ImageDisplayWidget
+from lensepy_app.appli._app.template_controller import TemplateController
+from lensepy_app.widgets.histogram_widget import HistogramWidget
 from lensepy import translate
 import numpy as np
 

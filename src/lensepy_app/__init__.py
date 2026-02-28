@@ -1,7 +1,9 @@
 __all__ = [
+    'appli',
 ]
+from .appli.start_app import start_app
 
-version = '1.0.2'
+version = '1.0.3'
 print('LEnsE Applications package (v.'+version+') / lensepy-app')
 import numpy as np
 import os
