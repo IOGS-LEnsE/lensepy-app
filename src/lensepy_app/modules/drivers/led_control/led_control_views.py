@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
 
 from lensepy import translate
 from lensepy.utils import *
-from lensepy.widgets import *
+from lensepy_app.widgets import *
 
 
 class CircleWidget(QWidget):

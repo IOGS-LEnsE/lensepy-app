@@ -1,0 +1,4 @@
+# value;translation
+# MAIN MENU
+led_control_menu;LED controller
+cie1931_menu;CIE 1931 Spacecolor

@@ -1,0 +1,5 @@
+# value;translation
+# LED CONTROL - module - ENGLISH
+led_control_dialog;LED illumination control
+led_control_boards;Connected control boards (Arduino)
+no_boards;No board / Check USB and restart application

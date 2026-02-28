@@ -1,6 +1,7 @@
 import sys, os
-import lensepy
+import lensepy_app
 from pathlib import Path
+from lensepy import translate, load_dictionary
 from lensepy_app.appli._app.app_utils import XMLFileConfig, XMLFileModule
 from lensepy_app.appli._app.main_view import MainWindow
 import importlib
@@ -36,7 +37,7 @@ class MainManager:
             self.xml_app = XMLFileConfig(xml_app)
             self.app_logo = self.xml_app.get_parameter_xml('logo') or ''
             if './' not in self.app_logo:
-                root_path = os.path.dirname(lensepy.__file__)
+                root_path = os.path.dirname(lensepy_app.__file__)
                 self.app_logo = f'{root_path}/{self.app_logo}'
             self.app_title = self.xml_app.get_parameter_xml('appname') or ''
             if self.init_variables():
@@ -62,6 +63,7 @@ class MainManager:
         Initialize the main menu from the module list in the application XML file.
         :return:
         """
+        print('Update MAIN MENU')
         if self.xml_app is not None:
             self.main_window.set_menu_elements(self.list_modules_name)
             if self.actual_module == 'default':
@@ -70,10 +72,15 @@ class MainManager:
         else:
             return False
 
+    def update_menu(self):
+        """Update the main menu."""
+        self.main_window.update_menu()
+
     def init_controller(self):
-        package_root = os.path.dirname(lensepy.__file__)
+        package_root = os.path.dirname(lensepy_app.__file__)
+        print(f'ROOT = {package_root}')
         if self.actual_module == 'default':
-            lensepy_path = (os.path.dirname(lensepy.__file__))
+            lensepy_path = (os.path.dirname(lensepy_app.__file__))
             xml_path = lensepy_path +'/modules/default/default.xml'
             self.xml_module = XMLFileModule(xml_path)
             self.controller = DefaultController(self)
@@ -92,11 +99,13 @@ class MainManager:
                 module_path += '.'
             module_path += f'{self.actual_module}'
             module = importlib.import_module(module_path, package=__package__)
-            xml_path = os.path.dirname(module.__file__)
-            xml_path += f'/{self.actual_module}.xml'
+            module_real_path = os.path.dirname(module.__file__)
+            xml_path = module_real_path + f'/{self.actual_module}.xml'
             self.xml_module = XMLFileModule(xml_path)
             controller_name = self.xml_module.get_parameter_xml('controller')
             controller_class = getattr(self.list_modules[self.actual_module], controller_name)
+            def_lang = self.parent.config['default_lang']
+            load_dictionary(f'{module_real_path}/lang/{def_lang}.txt')
             self.controller = controller_class(self)
         self.controller.init_view()
 

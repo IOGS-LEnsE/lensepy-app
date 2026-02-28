@@ -84,10 +84,11 @@ class MainWindow(QMainWindow):
 
     def update_menu(self):
         """
-
-        :return:
+        Update the main menu
         """
-        for element in self.menu_button_list:
+        for k, element in enumerate(self.menu_button_list):
+            b_title = translate(f'{self.menu_button_name_list[k]}_menu')
+            element.setText(b_title)
             if element == self.actual_button:
                 element.setStyleSheet(actived_button)
                 element.setEnabled(True)

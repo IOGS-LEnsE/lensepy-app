@@ -4,10 +4,6 @@ from PyQt6 import sip
 from PyQt6.QtCore import pyqtSignal, QObject, QThread
 from PyQt6.QtWidgets import QWidget
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from lensepy.appli._app.main_manager import MainManager
-
 
 class TemplateController:
     """
@@ -20,7 +16,7 @@ class TemplateController:
         """
 
         """
-        self.parent: MainManager = parent
+        self.parent = parent   # MainManager
         self.top_left = QWidget()
         self.top_right = QWidget()
         self.bot_left = QWidget()

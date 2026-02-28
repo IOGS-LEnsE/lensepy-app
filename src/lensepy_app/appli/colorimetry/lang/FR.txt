@@ -1,3 +1,4 @@
 # value;translation
 # MAIN MENU
-basler_menu;Camera Basler
+led_control_menu;Pilotage Eclairage
+cie1931_menu;Espace CIE 1931

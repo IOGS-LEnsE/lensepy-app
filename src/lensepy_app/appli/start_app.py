@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import QApplication
 import importlib
 import importlib.util
 
-
+DEFAULT_LANG = 'FR'
 
 class My_Application(QApplication):
 
@@ -20,22 +20,26 @@ class My_Application(QApplication):
         self.manager = MainManager(self)
         self.window = self.manager.main_window
         self.package_root = os.path.dirname(lensepy.__file__)
-        appli_root = os.path.dirname(os.path.abspath(__file__))
+        self.appli_root = os.path.dirname(os.path.abspath(__file__))
         if app_name is not None:
-            appli_root += f'/{app_name}'
-        self.config_name = f'{appli_root}/config/appli.xml'
+            self.appli_root += f'/{app_name}'
+        self.config_name = f'{self.appli_root}/config/appli.xml'
         self.config_ok = False
         self.config = {}
         # Dependencies
         self.required_modules = []
         self.missing_modules = []
         self.error_modules = []
-        load_dictionary(f'{appli_root}/lang/FR.txt')
 
     def init_config(self):
         self.config_ok = self.manager.set_xml_app(self.config_name)
         xml_data: XMLFileConfig = self.manager.xml_app
         if self.config_ok:
+            self.config['default_lang'] = xml_data.get_parameter_xml('default_langage')
+            if self.config['default_lang'] is None:
+                self.config['default_lang'] = DEFAULT_LANG
+            load_dictionary(f'{self.appli_root}/lang/{self.config['default_lang']}.txt')
+            self.manager.update_menu()
             self.config['name'] = xml_data.get_app_name() or None
             self.config['description'] = xml_data.get_app_desc() or None
             self.config['img_desc'] = xml_data.get_img_desc() or None

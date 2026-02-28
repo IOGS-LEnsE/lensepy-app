@@ -4,9 +4,9 @@ import time
 
 from PyQt6.QtWidgets import QWidget
 
-from lensepy.modules.drivers.led_control.led_control_views import RGBLedControlWidget, MatrixWidget
-from lensepy.modules.drivers.led_control.led_control_model import *
-from lensepy.appli._app.template_controller import TemplateController
+from lensepy_app.modules.drivers.led_control.led_control_views import RGBLedControlWidget, MatrixWidget
+from lensepy_app.modules.drivers.led_control.led_control_model import *
+from lensepy_app.appli._app.template_controller import TemplateController
 
 
 class LedControlController(TemplateController):

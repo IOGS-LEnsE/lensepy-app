@@ -1,8 +1,8 @@
 __all__ = [
 ]
 
-version = '1.0.1'
-print('SupOptique LEnsE Package (v.'+version+') / lensepy-app')
+version = '1.0.2'
+print('LEnsE Applications package (v.'+version+') / lensepy-app')
 import numpy as np
 import os
 from PyQt6.QtGui import QImage

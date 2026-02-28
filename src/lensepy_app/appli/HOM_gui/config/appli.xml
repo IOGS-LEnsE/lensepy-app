@@ -9,6 +9,7 @@
     <year>2026</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>%USERPROFILE%\Documents</img_dir>
+    <default_langage>FR</default_langage>
     <contributors>
         <contributor type="dev">
             <name>Julien VILLEMEJANE</name>

@@ -6,6 +6,7 @@
     <year>2025</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>%USERPROFILE%\Documents</img_dir>
+    <default_langage>EN</default_langage>
     <contributors>
         <contributor>
             <name>Julien VILLEMEJANE</name>
@@ -15,11 +16,11 @@
     </contributors>
 	<module>
 		<name>led_control</name>
-		<location>lensepy.modules.drivers</location>
+		<location>lensepy_app.modules.drivers</location>
 	</module>
 	<module>
 		<name>cie1931</name>
-		<location>lensepy.modules.optics</location>
+		<location>lensepy_app.modules.optics</location>
 	</module>
     <variable name="led_w1"/>
     <variable name="led_w2"/>

@@ -1,0 +1,5 @@
+# value;translation
+# LED CONTROL - module
+led_control_dialog;Pilotage de l'éclairage à LED
+led_control_boards;Liste des cartes de pilotage (Arduino)
+no_boards;Pas de carte connectée / Vérifiez USB et relancez l'application
