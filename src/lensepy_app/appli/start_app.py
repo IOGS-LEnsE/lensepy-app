@@ -45,7 +45,7 @@ class My_Application(QApplication):
             self.config['default_lang'] = xml_data.get_parameter_xml('default_langage')
             if self.config['default_lang'] is None:
                 self.config['default_lang'] = DEFAULT_LANG
-            load_dictionary(f'{self.appli_root}/lang/{self.config['default_lang']}.txt')
+            load_dictionary(f'{self.appli_root}/lang/{self.config["default_lang"]}.txt')
             self.manager.update_menu()
             self.config['name'] = xml_data.get_app_name() or None
             self.config['description'] = xml_data.get_app_desc() or None
