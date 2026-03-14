@@ -217,6 +217,15 @@ class CIE1931MatplotlibWidget(QWidget):
 
         layout = QVBoxLayout(self)
         layout.addWidget(self.canvas)
+
+        # Save PNG button
+        self.save_cie_button = QPushButton(translate('save_cie_button'))
+        self.save_cie_button.setStyleSheet(disabled_button)
+        self.save_cie_button.setEnabled(False)
+        self.save_cie_button.setFixedHeight(BUTTON_HEIGHT)
+        self.save_cie_button.clicked.connect(self.handle_save_cie)
+        layout.addWidget(self.save_cie_button)
+
         self.setLayout(layout)
 
         self.canvas.mpl_connect("button_press_event", self.on_click)
@@ -257,6 +266,15 @@ class CIE1931MatplotlibWidget(QWidget):
         self.ax.set_xlim(-0.1, 0.8)
         self.ax.set_ylim(-0.1, 0.9)
         self.canvas.draw()
+
+    def handle_save_cie(self, event):
+        self.save_cie_button.setStyleSheet(actived_button)
+        save_dir = self._get_file_path(self.image_dir)
+        if save_dir != '':
+            print('OK OK')
+            # GET GRAPH
+            # save_slice(image, self.parent.x_cross, self.parent.y_cross, file_path=save_dir)
+        self.save_cie_button.setStyleSheet(unactived_button)
 
     def on_click(self, event):
         """Handle mouse click on the chromaticity diagram."""

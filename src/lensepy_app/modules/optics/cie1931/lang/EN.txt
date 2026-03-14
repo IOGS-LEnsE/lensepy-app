@@ -1,0 +1,6 @@
+# value;translation
+# CIE 1931 - module - ENGLISH
+name_cie_point;Name
+add_cie_point;Add a new point
+delete_all_cie_points;Remove ALL the points
+save_cie_button;Save the chart as PNG

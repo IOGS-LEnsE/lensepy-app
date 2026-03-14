@@ -67,6 +67,13 @@ Correction gamma (sRGB)
 
 <script>
 
+function gammaCorrect(c){
+    c = Math.max(0, c)
+    return c <= 0.0031308
+        ? 12.92*c
+        : 1.055*Math.pow(c,1/2.4)-0.055
+}
+
 function xyToRgb(x, y, Y=1, gamma=false){
 
     if (y === 0) return [0,0,0]
@@ -77,13 +84,6 @@ function xyToRgb(x, y, Y=1, gamma=false){
     let r =  3.2406*X - 1.5372*Y - 0.4986*Z
     let g = -0.9689*X + 1.8758*Y + 0.0415*Z
     let b =  0.0557*X - 0.2040*Y + 1.0570*Z
-
-    function gammaCorrect(c){
-        c = Math.max(0, c)
-        return c <= 0.0031308
-            ? 12.92*c
-            : 1.055*Math.pow(c,1/2.4)-0.055
-    }
 
     if (gamma){
         r = gammaCorrect(r)
@@ -128,7 +128,7 @@ function updateColor(){
     let hex = rgbToHex(r,g,b)
 
     document.getElementById("colorBox").style.background = hex
-    document.getElementById("hexValue").innerText = hex
+    document.getElementById("hexValue").innerText = hex+" "+gamma
     document.getElementById("rgbValue").innerText = "Calculated RGB = "+[r,g,b]
     document.getElementById("rgbRealValue").innerText = "Applied RGB = "+[real_r, real_g, real_b]
 }

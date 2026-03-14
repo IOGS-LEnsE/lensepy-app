@@ -63,7 +63,6 @@ class MainManager:
         Initialize the main menu from the module list in the application XML file.
         :return:
         """
-        print('Update MAIN MENU')
         if self.xml_app is not None:
             self.main_window.set_menu_elements(self.list_modules_name)
             if self.actual_module == 'default':
@@ -78,7 +77,6 @@ class MainManager:
 
     def init_controller(self):
         package_root = os.path.dirname(lensepy_app.__file__)
-        print(f'ROOT = {package_root}')
         if self.actual_module == 'default':
             lensepy_path = (os.path.dirname(lensepy_app.__file__))
             xml_path = lensepy_path +'/modules/default/default.xml'
