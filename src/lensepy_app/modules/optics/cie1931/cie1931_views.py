@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QPushButton, QScrollArea,
     QLineEdit, QDoubleSpinBox, QDialog, QFormLayout, QDialogButtonBox,
     QMessageBox, QTableWidget, QHeaderView,
-    QTableWidgetItem)
+    QTableWidgetItem, QFileDialog)
 import matplotlib
 matplotlib.use("QtAgg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -202,16 +202,43 @@ class CoordinateTableWidget(QWidget):
             data.append({"name": name, "x": x, "y": y})
         return data
 
+    def _get_file_path(self, default_dir: str = '') -> bool:
+        """
+        Open an image from a file.
+        """
+        file_dialog = QFileDialog()
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            translate('dialog_save_cie_png'),
+            default_dir,
+            "Images (*.png)"
+        )
+
+        if file_path != '':
+            print(f'Saving path {file_path}')
+            return file_path
+        else:
+            dlg = QMessageBox(self)
+            dlg.setWindowTitle("Warning - No File Loaded")
+            dlg.setText("No Image File was loaded...")
+            dlg.setStandardButtons(
+                QMessageBox.StandardButton.Ok
+            )
+            dlg.setIcon(QMessageBox.Icon.Warning)
+            button = dlg.exec()
+            return ''
+
 marker_list = ['x', '+', 'p', '8', '1']
 
 class CIE1931MatplotlibWidget(QWidget):
 
     point_clicked = pyqtSignal(float, float)
+    saved_chart = pyqtSignal()
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__()
         self.points_list = {}
-        # Initialisation du graphique une seule fois
+        # Initialization of the chart
         self.fig, self.ax = plt.subplots()
         self.canvas = FigureCanvas(self.fig)
 
@@ -220,9 +247,8 @@ class CIE1931MatplotlibWidget(QWidget):
 
         # Save PNG button
         self.save_cie_button = QPushButton(translate('save_cie_button'))
-        self.save_cie_button.setStyleSheet(disabled_button)
-        self.save_cie_button.setEnabled(False)
-        self.save_cie_button.setFixedHeight(BUTTON_HEIGHT)
+        self.save_cie_button.setStyleSheet(unactived_button)
+        self.save_cie_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
         self.save_cie_button.clicked.connect(self.handle_save_cie)
         layout.addWidget(self.save_cie_button)
 
@@ -269,12 +295,13 @@ class CIE1931MatplotlibWidget(QWidget):
 
     def handle_save_cie(self, event):
         self.save_cie_button.setStyleSheet(actived_button)
-        save_dir = self._get_file_path(self.image_dir)
-        if save_dir != '':
-            print('OK OK')
-            # GET GRAPH
-            # save_slice(image, self.parent.x_cross, self.parent.y_cross, file_path=save_dir)
-        self.save_cie_button.setStyleSheet(unactived_button)
+        self.saved_chart.emit()
+
+    def set_saving_activated(self, enabled: bool):
+        if enabled:
+            self.save_cie_button.setStyleSheet(actived_button)
+        else:
+            self.save_cie_button.setStyleSheet(unactived_button)
 
     def on_click(self, event):
         """Handle mouse click on the chromaticity diagram."""
@@ -292,6 +319,41 @@ class CIE1931MatplotlibWidget(QWidget):
             return
 
         self.point_clicked.emit(x, y)
+
+    def save_image(self, file_path):
+        """Save the image in a PNG file."""
+        fig, ax = plt.subplots()
+        fig.set_size_inches(8, 8)
+        ax.clear()
+
+        # Draw the color chart
+        colour.plotting.plot_chromaticity_diagram_CIE1931(
+            show=False, axes=ax,
+            show_diagram_colours=True,
+            show_spectral_locus=True,
+            show_colourspace_diagram=False
+        )
+
+        # Add new points
+        ax.plot(0.33, 0.33, 'kD', label="D65")
+        marker_nb = 0
+        for key in self.points_list:
+            x, y = self.points_list[key].get_coords()
+            name = self.points_list[key].get_name()
+            # To display in a complementary color
+            RGB = complementary_colour(x, y)
+            ax.plot(x, y, marker=marker_list[marker_nb%len(marker_list)],
+                         color=RGB, label=name, linestyle='None')
+            marker_nb += 1
+
+        # SetUp and repaint
+        ax.legend(loc="upper right")
+        ax.set_xlim(-0.1, 0.8)
+        ax.set_ylim(-0.1, 0.9)
+        ax.set_aspect('equal')
+
+        fig.savefig(file_path, dpi=150)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

@@ -16,6 +16,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import colour
 import numpy as np
+from lensepy_app.modules.optics.cie1931.cie1931_views import CIE1931MatplotlibWidget
 
 def complementary_colour(x, y, Y=1.0):
     # xy → XYZ
@@ -25,7 +26,7 @@ def complementary_colour(x, y, Y=1.0):
     RGB = np.clip(RGB, 0, 1)
     return 1 - RGB
 
-class AddPointDialog(QDialog):
+class AddGammutDialog(QDialog):
     """Dialog box to enter a new point (name, x, y)."""
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -76,8 +77,8 @@ class AddPointDialog(QDialog):
         return self.name_edit.text().strip(), self.x_spin.value(), self.y_spin.value()
 
 
-class CoordinateTableWidget(QWidget):
-    """Table to manage and display CIE x,y points."""
+class GammutTableWidget(QWidget):
+    """Table to manage and display screen gammut (3 CIE points)."""
 
     point_added = pyqtSignal(PointCIE)
     point_deleted = pyqtSignal(PointCIE)
@@ -130,7 +131,7 @@ class CoordinateTableWidget(QWidget):
     # --- Logique principale ---
     def open_add_dialog(self):
         """Ouvre la boîte de dialogue pour ajouter un point."""
-        dialog = AddPointDialog(self)
+        dialog = AddGammutDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             name, x, y = dialog.get_values()
             self.add_point(name, x, y)
@@ -174,7 +175,7 @@ class CoordinateTableWidget(QWidget):
         self.table.setRowCount(0)
 
     def open_add_dialog_with_coords(self, x, y):
-        dialog = AddPointDialog(self)
+        dialog = AddGammutDialog(self)
         dialog.x_spin.setValue(x)
         dialog.y_spin.setValue(y)
 
@@ -204,76 +205,13 @@ class CoordinateTableWidget(QWidget):
 
 marker_list = ['x', '+', 'p', '8', '1']
 
-class GammutCIEMatplotlibWidget(QWidget):
+class GammutCIEMatplotlibWidget(CIE1931MatplotlibWidget):
 
     point_clicked = pyqtSignal(float, float)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.points_list = {}
-        # Initialisation du graphique une seule fois
-        self.fig, self.ax = plt.subplots()
-        self.canvas = FigureCanvas(self.fig)
-
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.canvas)
-        self.setLayout(layout)
-
-        self.canvas.mpl_connect("button_press_event", self.on_click)
-
         self.update_chart()
-
-    def update_list(self, p_list: dict):
-        """Update the list of points."""
-        self.points_list = p_list
-        self.update_chart()
-
-    def update_chart(self):
-        # Efface le contenu précédent
-        self.ax.clear()
-
-        # Redessine le diagramme
-        colour.plotting.plot_chromaticity_diagram_CIE1931(
-            show=False, axes=self.ax,
-            show_diagram_colours=True,
-            show_spectral_locus=True,
-            show_colourspace_diagram=False
-        )
-
-        # Ajoute les nouveaux points
-        self.ax.plot(0.33, 0.33, 'kD', label="D65")
-        marker_nb = 0
-        for key in self.points_list:
-            x, y = self.points_list[key].get_coords()
-            name = self.points_list[key].get_name()
-            # To display in a complementary color
-            RGB = complementary_colour(x, y)
-            self.ax.plot(x, y, marker=marker_list[marker_nb%len(marker_list)],
-                         color=RGB, label=name, linestyle='None')
-            marker_nb += 1
-
-        # Réglages et redraw
-        self.ax.legend(loc="upper right")
-        self.ax.set_xlim(-0.1, 0.8)
-        self.ax.set_ylim(-0.1, 0.9)
-        self.canvas.draw()
-
-    def on_click(self, event):
-        """Handle mouse click on the chromaticity diagram."""
-        if event.inaxes != self.ax:
-            return
-
-        x = event.xdata
-        y = event.ydata
-
-        if x is None or y is None:
-            return
-
-        # limites raisonnables du diagramme
-        if x < 0 or y < 0 or x > 0.8 or y > 0.9:
-            return
-
-        self.point_clicked.emit(x, y)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

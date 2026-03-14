@@ -2,7 +2,8 @@ __all__ = ["GammutCIEController"]
 
 from PyQt6.QtWidgets import QWidget
 
-from lensepy_app.modules.optics.cie1931.cie1931_views import CIE1931MatplotlibWidget, CoordinateTableWidget
+from lensepy_app.modules.optics.gammutCIE.gammutCIE_views import GammutCIEMatplotlibWidget, GammutTableWidget
+
 from lensepy_app.appli._app.template_controller import TemplateController
 
 
@@ -18,10 +19,10 @@ class GammutCIEController(TemplateController):
         super().__init__(parent)
 
         # Graphical layout
-        self.top_left = CIE1931MatplotlibWidget()
+        self.top_left = GammutCIEMatplotlibWidget()
         self.bot_left = QWidget()
         self.bot_right = QWidget()
-        self.top_right = CoordinateTableWidget()
+        self.top_right = GammutTableWidget()
         # Update list of points if exists
         if isinstance(self.parent.variables['points_list'], dict):
             self.points_list = self.parent.variables['points_list']

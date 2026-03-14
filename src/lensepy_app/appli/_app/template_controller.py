@@ -1,4 +1,5 @@
 import time
+from pathlib import Path
 import numpy as np
 from PyQt6 import sip
 from PyQt6.QtCore import pyqtSignal, QObject, QThread
@@ -59,6 +60,44 @@ class TemplateController:
         :return:
         """
         return self.parent.variables
+
+    def _get_image_dir(self, filepath):
+        if filepath is None:
+            return ''
+        else:
+            # Detect if % in filepath
+            if '%USER' in filepath:
+                new_filepath = filepath.split('%')
+                new_filepath = f'{Path.home()}/{new_filepath[2]}'
+                return new_filepath
+            else:
+                return filepath
+
+    def _get_file_path(self, default_dir: str = '') -> bool:
+        """
+        Open an image from a file.
+        """
+        file_dialog = QFileDialog()
+        file_path, _ = QFileDialog.getSaveFileName(
+            self.bot_right,
+            translate('dialog_save_histoe'),
+            default_dir,
+            "Images (*.png)"
+        )
+
+        if file_path != '':
+            print(f'Saving path {file_path}')
+            return file_path
+        else:
+            dlg = QMessageBox(self.bot_right)
+            dlg.setWindowTitle("Warning - No File Loaded")
+            dlg.setText("No Image File was loaded...")
+            dlg.setStandardButtons(
+                QMessageBox.StandardButton.Ok
+            )
+            dlg.setIcon(QMessageBox.Icon.Warning)
+            button = dlg.exec()
+            return ''
 
 
 class ImageLive(QObject):

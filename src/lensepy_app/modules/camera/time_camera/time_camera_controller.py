@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import numpy as np
 from PyQt6.QtCore import QThread
@@ -8,11 +7,11 @@ from matplotlib import pyplot as plt
 
 from lensepy import translate
 from lensepy.css import *
-from lensepy.widgets import HistoStatsWidget
-from lensepy.appli._app.template_controller import TemplateController, ImageLive
-from lensepy.widgets import XYMultiChartWidget, ImageDisplayWithPoints
-from lensepy.modules.camera.time_camera.time_camera_views import TimeOptionsWidget, MultiHistoWidget
-from lensepy.utils import make_hline, process_hist_from_array, save_hist, rgb255_to_float
+from lensepy_app.widgets import make_hline, HistoStatsWidget
+from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
+from lensepy_app.widgets import XYMultiChartWidget, ImageDisplayWithPoints
+from lensepy_app.modules.camera.time_camera.time_camera_views import TimeOptionsWidget, MultiHistoWidget
+from lensepy.utils import process_hist_from_array, save_hist, rgb255_to_float
 
 NUMBER_OF_POINTS = 4
 DISPLAY_NB_OF_PTS = 50
@@ -269,44 +268,6 @@ class TimeCameraController(TemplateController):
             camera.camera_acquiring = False
         self.worker = None
         self.thread = None
-
-    def _get_image_dir(self, filepath):
-        if filepath is None:
-            return ''
-        else:
-            # Detect if % in filepath
-            if '%USER' in filepath:
-                new_filepath = filepath.split('%')
-                new_filepath = f'{Path.home()}/{new_filepath[2]}'
-                return new_filepath
-            else:
-                return filepath
-
-    def _get_file_path(self, default_dir: str = '') -> bool:
-        """
-        Open an image from a file.
-        """
-        file_dialog = QFileDialog()
-        file_path, _ = QFileDialog.getSaveFileName(
-            self.bot_right,
-            translate('dialog_save_histoe'),
-            default_dir,
-            "Images (*.png)"
-        )
-
-        if file_path != '':
-            print(f'Saving path {file_path}')
-            return file_path
-        else:
-            dlg = QMessageBox(self.bot_right)
-            dlg.setWindowTitle("Warning - No File Loaded")
-            dlg.setText("No Image File was loaded...")
-            dlg.setStandardButtons(
-                QMessageBox.StandardButton.Ok
-            )
-            dlg.setIcon(QMessageBox.Icon.Warning)
-            button = dlg.exec()
-            return ''
 
     def _random_points(self, x_min, x_max, y_min, y_max, n: int=4):
         # All the possible points

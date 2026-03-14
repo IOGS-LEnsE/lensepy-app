@@ -2,5 +2,7 @@
 # CIE 1931 - module - FRANCAIS
 name_cie_point;Nom
 add_cie_point;Ajouter un nouveau point
-delete_all_cie_points;Retirer TOUS les points
+delete_all_cie_points;Supprimer TOUS les points
 save_cie_button;Sauvegarder le graphique (PNG)
+delete_point;Supprimer
+dialog_save_cie_png;Répertoire de sauvegarde

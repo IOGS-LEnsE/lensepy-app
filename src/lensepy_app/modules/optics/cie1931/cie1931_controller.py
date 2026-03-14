@@ -1,6 +1,7 @@
 __all__ = ["CIE1931Controller"]
 
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QFileDialog, QMessageBox
+from lensepy import translate
 
 from lensepy_app.modules.optics.cie1931.cie1931_views import CIE1931MatplotlibWidget, CoordinateTableWidget
 from lensepy_app.appli._app.template_controller import TemplateController
@@ -16,7 +17,8 @@ class CIE1931Controller(TemplateController):
 
         """
         super().__init__(parent)
-
+        self.image_dir = self._get_image_dir(self.parent.parent.config['img_dir'])
+        print(f'img_dir: {self.image_dir}')
         # Graphical layout
         self.top_left = CIE1931MatplotlibWidget()
         self.bot_left = QWidget()
@@ -41,6 +43,7 @@ class CIE1931Controller(TemplateController):
         self.top_left.point_clicked.connect(
             self.top_right.open_add_dialog_with_coords
         )
+        self.top_left.saved_chart.connect(self.handle_save_cie)
 
     def handle_point_added(self, data):
         """Action performed when a new point is added."""
@@ -56,4 +59,39 @@ class CIE1931Controller(TemplateController):
         # Update graph ?
         self.top_left.update_list(self.points_list)
 
+    def handle_save_cie(self):
+        """Action performed when a PNG is required."""
+        save_dir = self._get_file_path(self.image_dir, 'CIE_chart.png')
+        if save_dir != '':
+            self.top_left.save_image(save_dir)
+        self.top_left.set_saving_activated(enabled=False)
 
+    def _get_file_path(self, default_dir: str = '', default_name: str = '') -> str:
+        """
+        Open an image from a file.
+        """
+        file_dialog = QFileDialog()
+        if default_name != '' and default_dir != '':
+            new_dir = default_dir+"/"+default_name
+        else:
+            new_dir = default_dir
+        file_path, _ = QFileDialog.getSaveFileName(
+            None,
+            translate('dialog_save_cie_png'),
+            new_dir,
+            "Images (*.png)"
+        )
+
+        if file_path != '':
+            print(f'Saving path {file_path}')
+            return file_path
+        else:
+            dlg = QMessageBox(self)
+            dlg.setWindowTitle("Warning - No File Loaded")
+            dlg.setText("No Image File was loaded...")
+            dlg.setStandardButtons(
+                QMessageBox.StandardButton.Ok
+            )
+            dlg.setIcon(QMessageBox.Icon.Warning)
+            button = dlg.exec()
+            return ''
