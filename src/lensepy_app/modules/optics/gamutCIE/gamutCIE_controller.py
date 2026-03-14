@@ -2,7 +2,7 @@ __all__ = ["GammutCIEController"]
 
 from PyQt6.QtWidgets import QWidget
 
-from lensepy_app.modules.optics.gammutCIE.gammutCIE_views import GammutCIEMatplotlibWidget, GammutTableWidget
+from lensepy_app.modules.optics.gamutCIE.gamutCIE_views import GammutCIEMatplotlibWidget, GammutTableWidget
 
 from lensepy_app.appli._app.template_controller import TemplateController
 

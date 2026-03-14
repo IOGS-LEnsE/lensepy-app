@@ -23,7 +23,7 @@
 		<location>lensepy_app.modules.optics</location>
 	</module>
 	<module>
-		<name>gammutCIE</name>
+		<name>gamutCIE</name>
 		<location>lensepy_app.modules.optics</location>
 	</module>
     <variable name="led_w1"/>

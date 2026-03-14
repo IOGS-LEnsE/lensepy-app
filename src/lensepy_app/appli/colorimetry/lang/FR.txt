@@ -2,4 +2,4 @@
 # MAIN MENU
 led_control_menu;Pilotage Eclairage
 cie1931_menu;Espace CIE 1931
-gammutCIE_menu;Gammut de l'écran
+gamutCIE_menu;Gamut de l'écran

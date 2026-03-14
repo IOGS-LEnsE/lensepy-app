@@ -1,6 +1,9 @@
 import sys
 from lensepy import translate
 from lensepy.css import *
+from matplotlib.lines import Line2D
+from numpy.matlib import empty
+
 from lensepy_app.modules.optics.cie1931.cie1931_model import PointCIE
 
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -11,12 +14,17 @@ from PyQt6.QtWidgets import (
     QMessageBox, QTableWidget, QHeaderView,
     QTableWidgetItem)
 import matplotlib
+
+#from lensepy_app.modules.optics.gammutCIE import GammutCIEController
+
 matplotlib.use("QtAgg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 import colour
 import numpy as np
 from lensepy_app.modules.optics.cie1931.cie1931_views import CIE1931MatplotlibWidget
+from lensepy_app.modules.optics.gamutCIE.gamutCIE_model import TriangleGammut
 
 def complementary_colour(x, y, Y=1.0):
     # xy → XYZ
@@ -204,6 +212,18 @@ class GammutTableWidget(QWidget):
         return data
 
 marker_list = ['x', '+', 'p', '8', '1']
+colors = ["red", "blue", "green", "purple"]
+styles = ["-", "--", "-.", ":"]
+
+sRGB_triangle = TriangleGammut('sRGB')
+sRGB_triangle.add_point(PointCIE(0.64, 0.33, 'R'))
+sRGB_triangle.add_point(PointCIE(0.30, 0.60, 'G'))
+sRGB_triangle.add_point(PointCIE(0.15, 0.06, 'B'))
+
+rec_2020_triangle = TriangleGammut('rec2020')
+rec_2020_triangle.add_point(PointCIE(0.708, 0.292, 'R'))
+rec_2020_triangle.add_point(PointCIE(0.170, 0.797, 'G'))
+rec_2020_triangle.add_point(PointCIE(0.131, 0.046, 'B'))
 
 class GammutCIEMatplotlibWidget(CIE1931MatplotlibWidget):
 
@@ -211,12 +231,122 @@ class GammutCIEMatplotlibWidget(CIE1931MatplotlibWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.triangles = []
+        self.legend_handles = []
         self.update_chart()
+
+    def add_triangle(self, triangle: TriangleGammut):
+        """Add a triangle to the table."""
+        if triangle.is_complete():
+            self.triangles.append(triangle)
+            return True
+        return False
+
+    def _sRGB_display(self):
+        """Display the sRGB triangle."""
+        style = '--'
+        disp_sRGB_triangle = Polygon(
+                sRGB_triangle.get_points(),
+                closed=True,
+                fill=False,
+                edgecolor='black',
+                linestyle=style,
+                linewidth=1,
+                label='sRGB'
+            )
+        self.ax.add_patch(disp_sRGB_triangle)
+
+        self.legend_handles.append(
+            Line2D(
+                [0], [0],
+                color='black',
+                linestyle=style,
+                linewidth=1,
+                label='sRGB'
+            )
+        )
+
+    def _rec2020_display(self):
+        style = ':'
+        disp_rec2020_triangle = Polygon(
+                rec_2020_triangle.get_points(),
+                closed=True,
+                fill=False,
+                edgecolor='black',
+                linestyle=style,
+                linewidth=1,
+                label='Rec.2020'
+            )
+        self.ax.add_patch(disp_rec2020_triangle)
+        self.legend_handles.append(
+            Line2D(
+                [0], [0],
+                color='black',
+                linestyle=style,
+                linewidth=1,
+                label='Rec.2020'
+            )
+        )
+
+    def update_chart(self):
+        super().update_chart()
+        self.legend_handles.clear()
+        self._sRGB_display()
+        self._rec2020_display()
+
+
+        for k, triangle in enumerate(self.triangles):
+            points = triangle.get_points()
+            name = triangle.name
+            color = colors[k % len(colors)]
+            style = styles[k % len(styles)]
+            disp_triangle = Polygon(
+                points,
+                closed=True,
+                fill=False,
+                edgecolor='red',
+                linewidth=2,
+                label=name
+            )
+
+            self.legend_handles.append(
+                Line2D(
+                    [0], [0],
+                    color=color,
+                    linestyle=style,
+                    linewidth=2,
+                    label=name
+                )
+            )
+
+            self.ax.add_patch(disp_triangle)
+
+        self.ax.legend(handles=self.legend_handles, loc="upper right")
+
+        # redraw
+        self.canvas.draw()
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    win = CIE1931MatplotlibWidget()
+    win = GammutCIEMatplotlibWidget()
+
+    triangle = TriangleGammut('Ecran 1')
+
+    print(f'Is OK ? {triangle.is_complete()}')
+    p1 = PointCIE(0.1, 0.6, 'A')
+    triangle.add_point(p1)
+    p2 = PointCIE(0.4, 0.5, 'B')
+    triangle.add_point(p2)
+    p3 = PointCIE(0.2, 0.1, 'C')
+    triangle.add_point(p3)
+    print(f'Is OK ? {triangle.is_complete()}')
+
     win.setWindowTitle("Diagramme CIE 1931")
     win.resize(800, 700)
     win.show()
+
+    win.add_triangle(triangle)
+    win.update_chart()
+
     sys.exit(app.exec())

@@ -256,8 +256,6 @@ class CIE1931MatplotlibWidget(QWidget):
 
         self.canvas.mpl_connect("button_press_event", self.on_click)
 
-        self.update_chart()
-
     def update_list(self, p_list: dict):
         """Update the list of points."""
         self.points_list = p_list
