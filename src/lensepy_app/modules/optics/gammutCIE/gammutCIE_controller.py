@@ -1,4 +1,4 @@
-__all__ = ["CIE1931Controller"]
+__all__ = ["GammutCIEController"]
 
 from PyQt6.QtWidgets import QWidget
 
@@ -6,7 +6,7 @@ from lensepy_app.modules.optics.cie1931.cie1931_views import CIE1931MatplotlibWi
 from lensepy_app.appli._app.template_controller import TemplateController
 
 
-class CIE1931Controller(TemplateController):
+class GammutCIEController(TemplateController):
     """
 
     """

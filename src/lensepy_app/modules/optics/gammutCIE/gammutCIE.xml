@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>gammutCIE</name>
+    <requirements></requirements>
+    <req_var>points_list</req_var>
+    <display>MODE3</display>
+    <controller>GammutCIEController</controller>
+    <location>gammutCIE_controller</location>
+</appli>

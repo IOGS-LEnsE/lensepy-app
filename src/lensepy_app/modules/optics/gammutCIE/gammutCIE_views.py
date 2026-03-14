@@ -204,7 +204,7 @@ class CoordinateTableWidget(QWidget):
 
 marker_list = ['x', '+', 'p', '8', '1']
 
-class CIE1931MatplotlibWidget(QWidget):
+class GammutCIEMatplotlibWidget(QWidget):
 
     point_clicked = pyqtSignal(float, float)
 

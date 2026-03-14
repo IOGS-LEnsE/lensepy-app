@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>xy → Couleur HTML</title>
+<style>
+body{
+  font-family: Arial;
+  padding:20px;
+  background-color:black;
+  color:lightgray;
+}
+
+.control{
+  margin-bottom:15px;
+}
+
+#colorBox{
+  width:300px;
+  height:300px;
+  border:1px solid black;
+  margin-top:20px;
+}
+
+input[type=range]{
+  width:300px;
+}
+</style>
+</head>
+
+<body>
+
+<h3>Colorimétrie / (x,y) to RGB/hex</h3>
+
+<div class="control">
+x :
+<input type="range" id="xSlider" min="0.01" max="0.75" step="0.001" value="0.33">
+<input type="number" id="xInput" step="0.001" value="0.33">
+</div>
+
+<div class="control">
+y :
+<input type="range" id="ySlider" min="0.01" max="0.85" step="0.001" value="0.33">
+<input type="number" id="yInput" step="0.001" value="0.33">
+</div>
+<hr>
+<div class="control">
+Y :
+<input type="range" id="lumSlider" min="0" max="1" step="0.01" value="1">
+<input type="number" id="lumInput" step="0.01" value="1">
+</div>
+<hr>
+<div class="control">
+<label>
+<input type="checkbox" id="gammaCheck" checked>
+Correction gamma (sRGB)
+</label>
+</div>
+
+<div id="colorBox"></div>
+<p id="rgbValue"></p>
+<p id="rgbRealValue"></p>
+<p id="hexValue"></p>
+
+<script>
+
+function xyToRgb(x, y, Y=1, gamma=false){
+
+    if (y === 0) return [0,0,0]
+
+    let X = (x * Y) / y
+    let Z = ((1 - x - y) * Y) / y
+
+    let r =  3.2406*X - 1.5372*Y - 0.4986*Z
+    let g = -0.9689*X + 1.8758*Y + 0.0415*Z
+    let b =  0.0557*X - 0.2040*Y + 1.0570*Z
+
+    function gammaCorrect(c){
+        c = Math.max(0, c)
+        return c <= 0.0031308
+            ? 12.92*c
+            : 1.055*Math.pow(c,1/2.4)-0.055
+    }
+
+    if (gamma){
+        r = gammaCorrect(r)
+        g = gammaCorrect(g)
+        b = gammaCorrect(b)
+    }
+
+    r = Math.min(255, Math.round(r*255))
+    g = Math.min(255, Math.round(g*255))
+    b = Math.min(255, Math.round(b*255))
+
+    return [r,g,b]
+}
+
+function rgbToHex(r,g,b){
+    return "#"+[r,g,b].map(x=>{
+        return x.toString(16).padStart(2,'0')
+    }).join("")
+}
+
+function limitRGB(r,g,b){
+    if (r < 0)  r = 0
+    if (g < 0)  g = 0
+    if (b < 0)  b = 0
+    return [r,g,b]
+}
+
+function updateColor(){
+
+    let x = parseFloat(document.getElementById("xInput").value)
+    let y = parseFloat(document.getElementById("yInput").value)
+    let YY = parseFloat(document.getElementById("lumInput").value)
+
+    let gamma = document.getElementById("gammaCheck").checked
+
+    document.getElementById("xSlider").value = x
+    document.getElementById("ySlider").value = y
+    document.getElementById("lumSlider").value = YY
+
+    let [r,g,b] = xyToRgb(x,y,Y=YY, gamma=gamma)
+    let [real_r, real_g, real_b] = limitRGB(r, g, b)
+    let hex = rgbToHex(r,g,b)
+
+    document.getElementById("colorBox").style.background = hex
+    document.getElementById("hexValue").innerText = hex
+    document.getElementById("rgbValue").innerText = "Calculated RGB = "+[r,g,b]
+    document.getElementById("rgbRealValue").innerText = "Applied RGB = "+[real_r, real_g, real_b]
+}
+
+document.getElementById("xSlider").oninput = e=>{
+    document.getElementById("xInput").value = e.target.value
+    updateColor()
+}
+
+document.getElementById("ySlider").oninput = e=>{
+    document.getElementById("yInput").value = e.target.value
+    updateColor()
+}
+
+document.getElementById("lumSlider").oninput = e=>{
+    document.getElementById("lumInput").value = e.target.value
+    updateColor()
+}
+document.getElementById("xInput").oninput = updateColor
+document.getElementById("yInput").oninput = updateColor
+document.getElementById("lumInput").oninput = updateColor
+document.getElementById("gammaCheck").onchange = updateColor
+
+updateColor()
+
+</script>
+
+</body>
+</html>
