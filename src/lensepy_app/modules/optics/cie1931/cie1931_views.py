@@ -29,11 +29,11 @@ class AddPointDialog(QDialog):
     """Dialog box to enter a new point (name, x, y)."""
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Ajouter un point")
+        self.setWindowTitle(translate('add_point_button'))
         layout = QFormLayout(self)
 
         self.name_edit = QLineEdit()
-        self.name_edit.setPlaceholderText("Nom du point")
+        self.name_edit.setPlaceholderText(translate('add_point_name'))
 
         self.x_spin = QDoubleSpinBox()
         self.x_spin.setRange(0, 1)

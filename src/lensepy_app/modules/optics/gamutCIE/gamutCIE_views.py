@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout, QPushButton, QScrollArea,
     QLineEdit, QDoubleSpinBox, QDialog, QFormLayout, QDialogButtonBox,
     QMessageBox, QTableWidget, QHeaderView,
-    QTableWidgetItem)
+    QTableWidgetItem, QCheckBox)
 import matplotlib
 
 #from lensepy_app.modules.optics.gammutCIE import GammutCIEController
@@ -38,11 +38,11 @@ class AddGamutDialog(QDialog):
     """Dialog box to enter a new point (name, x, y)."""
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Ajouter un point")
+        self.setWindowTitle(translate('add_gamut_button'))
         layout = QFormLayout(self)
 
         self.name_edit = QLineEdit()
-        self.name_edit.setPlaceholderText("Nom du point")
+        self.name_edit.setPlaceholderText(translate('add_gamut_name'))
 
         self.x_spin = QDoubleSpinBox()
         self.x_spin.setRange(0, 1)
@@ -54,7 +54,7 @@ class AddGamutDialog(QDialog):
         self.y_spin.setSingleStep(0.1)
         self.y_spin.setDecimals(2)
 
-        layout.addRow(translate("name_cie_point_add"), self.name_edit)
+        layout.addRow(translate("name_gamut_add"), self.name_edit)
         layout.addRow(translate("x_cie_point_add"), self.x_spin)
         layout.addRow(translate("y_cie_point_add"), self.y_spin)
 
@@ -97,10 +97,9 @@ class GamutTableWidget(QWidget):
 
         # Table (4 cols : name, x, y, del)
         self.table = QTableWidget(0, 4)
-        self.table.setHorizontalHeaderLabels([translate("name_cie_point"), "x", "y", ""])
+        self.table.setHorizontalHeaderLabels([translate("name_gamuts"), ""])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.table.setColumnWidth(3, 50)    # Delete button column
-        #self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        self.table.setColumnWidth(1, 50)    # Delete button column
         self.table.verticalHeader().setVisible(False)
         self.table.setAlternatingRowColors(True)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
@@ -124,13 +123,21 @@ class GamutTableWidget(QWidget):
 
         # --- Boutons globaux ---
         button_layout = QHBoxLayout()
-        self.add_button = QPushButton(translate('add_cie_point'))
-        self.clear_button = QPushButton(translate('delete_all_cie_points'))
+        self.add_button = QPushButton(translate('add_new_gamut'))
+        self.clear_button = QPushButton(translate('delete_all_gamuts'))
 
         button_layout.addWidget(self.add_button)
         button_layout.addWidget(self.clear_button)
         button_layout.addStretch()
         main_layout.addLayout(button_layout)
+
+        check_layout = QHBoxLayout()
+        self.display_sRGB = QCheckBox(translate('gamut_display_sRGB'))
+        self.display_rec2020 = QCheckBox(translate('gamut_display_rec2020'))
+        check_layout.addWidget(self.display_sRGB)
+        check_layout.addWidget(self.display_rec2020)
+        check_layout.addStretch()
+        main_layout.addLayout(check_layout)
 
         # Connexions
         self.add_button.clicked.connect(self.open_add_dialog)
@@ -140,6 +147,9 @@ class GamutTableWidget(QWidget):
     def open_add_dialog(self):
         """Ouvre la boîte de dialogue pour ajouter un point."""
         dialog = AddGamutDialog(self)
+        dialog.setFixedHeight(400)
+        dialog.setFixedWidth(600)
+
         if dialog.exec() == QDialog.DialogCode.Accepted:
             name, x, y = dialog.get_values()
             self.add_point(name, x, y)
@@ -176,10 +186,8 @@ class GamutTableWidget(QWidget):
         """Clear all the points."""
         for row in range(self.table.rowCount()):
             name = self.table.item(row, 0).text()
-            x = float(self.table.item(row, 1).text())
-            y = float(self.table.item(row, 2).text())
-            point = PointCIE(x, y, name)
-            self.point_deleted.emit(point)
+            triangle = TriangleGammut(name)
+            self.point_deleted.emit(triangle)
         self.table.setRowCount(0)
 
     def open_add_dialog_with_coords(self, x, y):

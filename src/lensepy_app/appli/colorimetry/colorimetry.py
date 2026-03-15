@@ -1,11 +1,9 @@
-
-
 import sys, os
 import lensepy
 from lensepy import translate, load_dictionary
 
-from lensepy.appli._app.app_utils import XMLFileConfig, XMLFileModule
-from lensepy.appli._app.main_manager import MainManager
+from lensepy_app.appli._app.app_utils import XMLFileConfig, XMLFileModule
+from lensepy_app.appli._app.main_manager import MainManager
 from PyQt6.QtWidgets import QApplication
 import importlib
 import importlib.util
