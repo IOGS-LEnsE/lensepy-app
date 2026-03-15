@@ -34,7 +34,7 @@ def complementary_colour(x, y, Y=1.0):
     RGB = np.clip(RGB, 0, 1)
     return 1 - RGB
 
-class AddGammutDialog(QDialog):
+class AddGamutDialog(QDialog):
     """Dialog box to enter a new point (name, x, y)."""
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -85,7 +85,7 @@ class AddGammutDialog(QDialog):
         return self.name_edit.text().strip(), self.x_spin.value(), self.y_spin.value()
 
 
-class GammutTableWidget(QWidget):
+class GamutTableWidget(QWidget):
     """Table to manage and display screen gammut (3 CIE points)."""
 
     point_added = pyqtSignal(PointCIE)
@@ -139,7 +139,7 @@ class GammutTableWidget(QWidget):
     # --- Logique principale ---
     def open_add_dialog(self):
         """Ouvre la boîte de dialogue pour ajouter un point."""
-        dialog = AddGammutDialog(self)
+        dialog = AddGamutDialog(self)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             name, x, y = dialog.get_values()
             self.add_point(name, x, y)
@@ -183,7 +183,7 @@ class GammutTableWidget(QWidget):
         self.table.setRowCount(0)
 
     def open_add_dialog_with_coords(self, x, y):
-        dialog = AddGammutDialog(self)
+        dialog = AddGamutDialog(self)
         dialog.x_spin.setValue(x)
         dialog.y_spin.setValue(y)
 
@@ -225,7 +225,7 @@ rec_2020_triangle.add_point(PointCIE(0.708, 0.292, 'R'))
 rec_2020_triangle.add_point(PointCIE(0.170, 0.797, 'G'))
 rec_2020_triangle.add_point(PointCIE(0.131, 0.046, 'B'))
 
-class GammutCIEMatplotlibWidget(CIE1931MatplotlibWidget):
+class GamutCIEMatplotlibWidget(CIE1931MatplotlibWidget):
 
     point_clicked = pyqtSignal(float, float)
 
