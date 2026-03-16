@@ -1,0 +1,4 @@
+# value;translation
+# Coincidence Board - module - FRANCAIS
+coincidence_params_title;Affichage des coïncidences par voie
+coincidence_max_value;Valeur maximale à afficher

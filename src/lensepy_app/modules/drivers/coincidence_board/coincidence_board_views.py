@@ -173,7 +173,7 @@ class CoincidenceDisplayWidget(QWidget):
         layout.addWidget(disp_widget)
 
         # Exposure time choice
-        self.time_values = ['2.0', '1.0', '0.5', '0.2', '0.1']
+        self.time_values = ['0.1', '0.2', '0.5', '1.0', '2.0']
         self.time_value_label = SelectWidget(translate('coincidence_exposure_time'), values=self.time_values)
         disp_layout.addWidget(self.time_value_label)
 
@@ -208,9 +208,9 @@ class CoincidenceDisplayWidget(QWidget):
         self.a_value.set_min_max_values(0, self.max_value)
         self.b_value.set_min_max_values(0, self.max_value)
         self.c_value.set_min_max_values(0, self.max_value)
-        self.ab_value.set_min_max_values(0, self.max_value)
-        self.ac_value.set_min_max_values(0, self.max_value)
-        self.abc_value.set_min_max_values(0, self.max_value)
+        self.ab_value.set_min_max_values(0, self.max_value//10)
+        self.ac_value.set_min_max_values(0, self.max_value//10)
+        self.abc_value.set_min_max_values(0, self.max_value//100)
 
     def init_max_value(self):
         """Return maximum value of the gauges."""

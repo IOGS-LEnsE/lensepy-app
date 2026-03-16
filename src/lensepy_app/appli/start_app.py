@@ -154,7 +154,6 @@ def start_app(app_path, standalone=False, argv=None):
 
 
 if __name__ == "__main__":
-
     if len(sys.argv) > 1:
         application_name = sys.argv[1]
         print(application_name)
@@ -165,4 +164,4 @@ if __name__ == "__main__":
 
         for element in path_to_app.iterdir():
             if element.is_dir() and not element.name.startswith('_'):
-                print(element.name)
+                print(f'Element Name : {element.name}')

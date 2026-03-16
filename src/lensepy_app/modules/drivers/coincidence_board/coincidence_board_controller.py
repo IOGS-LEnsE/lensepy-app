@@ -5,7 +5,7 @@ import numpy as np
 from PyQt6.QtCore import QThread, QObject, pyqtSignal
 from PyQt6.QtWidgets import QWidget
 
-from lensepy.drivers.coincidence_board.coincidence_board_model import NucleoWrapper
+from lensepy_app.modules.drivers.coincidence_board.coincidence_board_model import NucleoWrapper
 from lensepy_app.modules.drivers.coincidence_board.coincidence_board_views import (
     CoincidenceDisplayWidget, NucleoParamsWidget, TimeChartCoincidenceWidget)
 from lensepy_app.appli._app.template_controller import TemplateController

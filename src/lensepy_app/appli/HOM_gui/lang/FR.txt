@@ -1,3 +1,4 @@
 # value;translation
 # MAIN MENU
+main_menu;HOM-Bell-GRA
 coincidence_board_menu;Coincidence Board
