@@ -1,8 +1,4 @@
 # value;translation
 # Coincidence Board - module - ENGLISH
-name_cie_point;Name
-add_cie_point;Add a new point
-delete_all_cie_points;Remove ALL the points
-save_cie_button;Save the chart as PNG
-delete_point;Delete
-dialog_save_cie_png;Directory to save PNG
+coincidence_params_title;Coincidences per channel
+coincidence_max_value;Maximum value
