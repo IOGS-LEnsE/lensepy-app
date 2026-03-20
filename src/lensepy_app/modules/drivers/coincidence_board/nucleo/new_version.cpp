@@ -35,7 +35,7 @@
 
 
 #include "mbed.h"
-const char version[] = "1.1a";
+const char version[] = "1.2";
 
 //// Input and outputs
 UnbufferedSerial      usb_pc(USBTX, USBRX);
@@ -82,9 +82,6 @@ int main()
     usb_pc.baud(115200);
     usb_pc.attach(&ISR_my_pc_reception, UnbufferedSerial::RxIrq);
 
-		sprintf(output_string, "HOM Test / LEnsE");
-		usb_pc.write(output_string, strlen(output_string));
-
 	while (true){
 		// print the string when a newline arrives:
 		if (string_complete) {
@@ -97,6 +94,7 @@ int main()
 					while(is_ok == false){
 						thread_sleep_for(1);
 					}
+					blind_all();
 					sprintf(output_string, "!D:%d:%d:%d:%d:%d:%d;", cnt_A_bckp, cnt_B_bckp, cnt_C_bckp, cnt_AB_bckp, cnt_AC_bckp, cnt_ABC_bckp);
 					usb_pc.write(output_string, strlen(output_string));
 					break;
