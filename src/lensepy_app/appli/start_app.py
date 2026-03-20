@@ -1,8 +1,6 @@
 import sys, os
 from pathlib import Path
 
-from docutils.readers import standalone
-
 import lensepy_app
 from lensepy import translate, load_dictionary, dictionary
 
@@ -35,7 +33,10 @@ class My_Application(QApplication):
                 self.appli_root = f'{app_name}'
             else:
                 return
+
         self.config_name = f'{self.appli_root}/config/appli.xml'
+        # Parser for options
+        self.check_options()    # Change config_name if necessary
         self.config_ok = False
         self.config = {}
         # Dependencies
@@ -70,10 +71,12 @@ class My_Application(QApplication):
         else:
             return False
 
-    def init_app(self):
+    def check_options(self):
         if not self.standalone:
             module = importlib.import_module(self.app_name)
             module.init_app(self)
+
+    def init_app(self):
         self.manager.init_list_modules()
 
     def check_dependencies(self):

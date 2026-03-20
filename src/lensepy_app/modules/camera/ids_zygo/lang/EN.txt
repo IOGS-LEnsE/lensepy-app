@@ -1,0 +1,3 @@
+# value;translation
+# IDS Zygo - module - ENGLISH
+name_cie_point;Name

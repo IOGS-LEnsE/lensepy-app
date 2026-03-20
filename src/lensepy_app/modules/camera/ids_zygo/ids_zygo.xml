@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>ids_zygo</name>
+    <requirements></requirements>
+    <req_var>image,bits_depth,camera</req_var>
+    <display>MODE2</display>
+    <controller>IDSZygoController</controller>
+    <location>ids_zygo_controller</location>
+</appli>

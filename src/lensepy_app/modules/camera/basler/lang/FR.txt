@@ -1,0 +1,3 @@
+# value;translation
+# Basler - module - FRANCAIS
+name_cie_point;Nom

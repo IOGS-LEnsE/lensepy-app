@@ -3,9 +3,19 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QComboBox,
     QVBoxLayout, QLineEdit, QSlider, QProgressBar,
-    QSizePolicy, QFrame)
+    QSizePolicy, QFrame, QMessageBox)
 from lensepy.css import *
 
+def message_box(warning="Warning - No File Loaded", text=""):
+    """Open a warning dialog box."""
+    dlg = QMessageBox()
+    dlg.setWindowTitle(warning)
+    dlg.setText(text)
+    dlg.setStandardButtons(
+        QMessageBox.StandardButton.Ok
+    )
+    dlg.setIcon(QMessageBox.Icon.Warning)
+    return dlg.exec()
 
 def make_hline():
     line = QFrame()

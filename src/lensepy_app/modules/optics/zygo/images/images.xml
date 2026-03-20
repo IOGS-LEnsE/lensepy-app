@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>zygo_images</name>
+    <requirements></requirements>
+    <req_var></req_var>
+    <display>MODE1</display>
+    <controller>ZygoImagesController</controller>
+    <location>images_controller</location>
+</appli>
