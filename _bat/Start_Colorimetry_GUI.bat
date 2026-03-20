@@ -1,2 +1,2 @@
-cd ..\src\lensepy\appli\colorimetry\
-python colorimetry.py
+cd ..\src\lensepy_app\appli\
+python start_app.py colorimetry

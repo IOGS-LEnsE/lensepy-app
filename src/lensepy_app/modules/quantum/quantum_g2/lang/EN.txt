@@ -1,0 +1,4 @@
+# value;translation
+# Coincidence Board - module - ENGLISH
+coincidence_params_title;Coincidences per channel
+coincidence_max_value;Maximum value

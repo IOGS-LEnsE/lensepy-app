@@ -15,15 +15,15 @@
     </contributors>
 	<module>
 		<name>basler</name>
-		<location>lensepy.modules.camera</location>
+		<location>lensepy_app.modules.camera</location>
 	</module>
 	<module>
 		<name>spatial_camera</name>
-		<location>lensepy.modules.camera</location>
+		<location>lensepy_app.modules.camera</location>
 	</module>
 	<module>
 		<name>time_camera</name>
-		<location>lensepy.modules.camera</location>
+		<location>lensepy_app.modules.camera</location>
 	</module>
     <variable name="image"/>
     <variable name="bits_depth"/>
@@ -38,5 +38,6 @@
         <maxwidth>1920</maxwidth>
         <maxheight>1200</maxheight>
         <offset>8</offset>
+        <init_file>./config/camera_small.ini</init_file>
     </camera>
 </appli>

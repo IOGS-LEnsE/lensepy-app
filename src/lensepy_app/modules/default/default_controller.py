@@ -31,9 +31,6 @@ class DefaultController(TemplateController):
 
     def display(self):
         config = self.parent.parent.config
-
-        print(f'PATH IMG = {config["img_desc"]}')
-
         if 'html' in config:
             if config['html'] is not None:
                 self.top_left.show()

@@ -1,2 +1,2 @@
-cd ..\src\lensepy\appli\VI_gui\
-python VI_gui.py
+cd ..\src\lensepy_app\appli\
+python start_app.py VI_gui

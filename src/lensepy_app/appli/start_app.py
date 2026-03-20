@@ -1,6 +1,8 @@
 import sys, os
 from pathlib import Path
 
+from docutils.readers import standalone
+
 import lensepy_app
 from lensepy import translate, load_dictionary, dictionary
 
@@ -21,8 +23,11 @@ class My_Application(QApplication):
         super().__init__(argv)
         self.manager = MainManager(self)
         self.window = self.manager.main_window
+        self.standalone = standalone
         self.package_root = os.path.dirname(lensepy_app.__file__)
-        if not standalone:
+        self.app_name = app_name
+        self.appli_root = None
+        if not self.standalone:
             self.appli_root = os.path.dirname(os.path.abspath(__file__))
             self.appli_root += f'/{app_name}'
         else:
@@ -59,10 +64,6 @@ class My_Application(QApplication):
                 self.config['html'] = app_path + self.config['html']
             self.config['organization'] = xml_data.get_parameter_xml('organization') or None
             self.config['year'] = xml_data.get_parameter_xml('year') or None
-            appli_root = os.path.dirname(os.path.abspath(__file__))
-            self.config['camera_ini'] = f'{appli_root}/config/camera.ini'
-            self.config['camera_ini'] = f'{appli_root}/config/camera_small.ini'
-            self.config['img_dir'] = xml_data.get_parameter_xml('img_dir') or None
             if isinstance(self.manager.controller, DefaultController):
                 self.manager.controller.display()
             return True
@@ -70,6 +71,9 @@ class My_Application(QApplication):
             return False
 
     def init_app(self):
+        if not self.standalone:
+            module = importlib.import_module(self.app_name)
+            module.init_app(self)
         self.manager.init_list_modules()
 
     def check_dependencies(self):
@@ -156,7 +160,6 @@ def start_app(app_path, standalone=False, argv=None):
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         application_name = sys.argv[1]
-        print(application_name)
         start_app(application_name, standalone=False, argv=sys.argv)
     else:
         # Display all app

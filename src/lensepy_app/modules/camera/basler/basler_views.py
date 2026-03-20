@@ -2,12 +2,11 @@ from PyQt6.QtWidgets import QLineEdit, QSlider, QGridLayout, QPushButton
 
 from lensepy import translate
 from lensepy.utils import is_integer
-from lensepy.utils.pyqt6 import make_hline
-from lensepy.widgets import *
+from lensepy_app.widgets import *
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from lensepy.modules.basler.basler_controller import BaslerController
+    from lensepy_app.modules.camera.basler.basler_controller import BaslerController
 
 class CameraInfosWidget(QWidget):
     """

@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import QApplication
 import importlib
 import importlib.util
 
-
+'''
 class Colorimetry_App(QApplication):
     def __init__(self, *args):
         super().__init__(*args)
@@ -119,3 +119,5 @@ def main_colorimetry():
 
 if __name__ == "__main__":
     main_colorimetry()
+
+'''

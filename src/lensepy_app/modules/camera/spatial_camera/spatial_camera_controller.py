@@ -6,10 +6,10 @@ from PyQt6.QtCore import QThread
 
 from lensepy import translate
 from lensepy.css import *
-from lensepy.appli._app.template_controller import TemplateController, ImageLive
-from lensepy.widgets import ImageDisplayWithCrosshair, XYMultiChartWidget, HistoStatsWidget
-from lensepy.modules.camera.spatial_camera.spatial_camera_views import HistoSaveWidget
-from lensepy.widgets import CameraParamsWidget
+from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
+from lensepy_app.widgets import ImageDisplayWithCrosshair, XYMultiChartWidget, HistoStatsWidget
+from lensepy_app.modules.camera.spatial_camera.spatial_camera_views import HistoSaveWidget
+from lensepy_app.widgets import CameraParamsWidget
 
 
 class SpatialCameraController(TemplateController):

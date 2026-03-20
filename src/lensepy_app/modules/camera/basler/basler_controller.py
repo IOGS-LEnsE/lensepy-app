@@ -1,9 +1,9 @@
 import time
 from PyQt6.QtCore import QObject, QThread
-from lensepy.appli._app.template_controller import TemplateController, ImageLive
-from lensepy.modules.camera.basler.basler_views import *
-from lensepy.modules.camera.basler.basler_models import *
-from lensepy.widgets import *
+from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
+from lensepy_app.modules.camera.basler.basler_views import *
+from lensepy_app.modules.camera.basler.basler_models import *
+from lensepy_app.widgets import *
 from lensepy import translate
 
 

@@ -1,2 +1,2 @@
-cd ..\src\lensepy\appli\cmos_gui\
-python cmos_gui.py
+cd ..\src\lensepy_app\appli\
+python start_app.py cmos_gui

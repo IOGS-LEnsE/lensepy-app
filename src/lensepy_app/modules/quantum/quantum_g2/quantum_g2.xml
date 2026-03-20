@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>quantum_g2</name>
+    <requirements>coincidence_board</requirements>
+    <req_var>nucleo_wrapper,nucleo_connected</req_var>
+    <display>MODE3</display>
+    <controller>QuantumG2Controller</controller>
+    <location>quantum_g2_controller</location>
+</appli>
