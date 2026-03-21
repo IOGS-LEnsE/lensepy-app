@@ -54,12 +54,22 @@ class TemplateController:
         """
         self.controller_changed.emit(event)
 
-    def get_variables(self):
+    def get_variables(self, index=''):
         """
         Get variables dictionary from the main manager.
         :return:
         """
-        return self.parent.variables
+        if index == '':
+            return self.parent.variables
+        else:
+            return self.parent.variables[index]
+
+    def set_variables(self, var_name, value):
+        """Update a variable in the variables' dictionary.
+        :param var_name:    Key of the variable.
+        :param value:       Value of the variable.
+        """
+        self.parent.variables[var_name] = value
 
     def _get_image_dir(self, filepath):
         if filepath is None:

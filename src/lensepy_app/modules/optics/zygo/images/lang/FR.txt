@@ -1,0 +1,4 @@
+# value;translation
+# ZYGO Images - module - FRANCAIS
+image_opening_dialog;Gestion des images
+image_opening_button;Ouvrir une série d'images

@@ -16,12 +16,10 @@ Creation : march/2025
 import sys, os
 import numpy as np
 import scipy
-from lensepy_app.modules.optics.zygo.masks.masks_models import MasksModel
+
 from lensepy_app.modules.optics.zygo.utils import read_mat_file, split_3d_array
 
-
-
-class ImagesModel:
+class ImagesSet:
     """Class containing images data and parameters.
     Images are stored in sets of N images.
     """
@@ -30,6 +28,7 @@ class ImagesModel:
         :param set_size: Size of a set of images.
         """
         self.set_size = set_size
+        self.filepath = None
         self.images_list = []
         self.images_sets_number = 0
 
@@ -89,6 +88,7 @@ class ImagesModel:
         if filename != '':
             data_from_mat = read_mat_file(filename)
             if data_from_mat is not None:
+                self.filepath = filename
                 # Process images from MAT file
                 images_mat = data_from_mat['Images']
                 images_d = split_3d_array(images_mat)

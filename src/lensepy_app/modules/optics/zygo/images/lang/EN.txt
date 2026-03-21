@@ -1,0 +1,4 @@
+# value;translation
+# ZYGO Images - module - ENGLISH
+image_opening_dialog;Images management
+image_opening_button;Open a set of images...

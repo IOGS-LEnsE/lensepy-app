@@ -6,7 +6,7 @@
     <organization>LEnsE</organization>
     <year>2026</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
-    <img_dir>%USERPROFILE%\Documents</img_dir>
+    <img_dir>D:\_git\julien\lensepy-app\src\lensepy_app\modules\optics\zygo\_data</img_dir>
     <contributors>
         <contributor type="dev">
             <name>Julien VILLEMEJANE</name>
@@ -22,6 +22,11 @@
 		<name>images</name>
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>
-    <variable name="image"/>
+	<module>
+		<name>masks</name>
+		<location>lensepy_app.modules.optics.zygo</location>
+	</module>
+    <variable name="dataset"/>
     <variable name="bits_depth"/>
+    <variable name="dataset_loaded"/>
 </appli>

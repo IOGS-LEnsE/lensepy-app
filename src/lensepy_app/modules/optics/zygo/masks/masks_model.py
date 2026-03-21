@@ -16,7 +16,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from lensepy_app.modules.optics.zygo.utils import read_mat_file, split_3d_array
 import numpy as np
 
-class MasksModel:
+class MasksSet:
     """Class containing masks data and parameters.
     """
     def __init__(self):

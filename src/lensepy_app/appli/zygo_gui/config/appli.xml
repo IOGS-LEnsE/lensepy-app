@@ -22,9 +22,10 @@
 		<name>ids_zygo</name>
 		<location>lensepy_app.modules.camera</location>
 	</module>
-    <variable name="image"/>
+    <variable name="dataset"/>
     <variable name="bits_depth"/>
     <variable name="camera"/>
+    <variable name="dataset_loaded"/>
     <camera>
         <name>Basler</name>
         <colormode>Mono12:12,Mono10:10,Mono8:8,BayerRG8:8</colormode>
