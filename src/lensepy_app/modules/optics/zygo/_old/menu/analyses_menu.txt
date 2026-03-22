@@ -1,0 +1,7 @@
+# Menu Simple Analysis
+# Type; Title; Signal; Options List;
+B;corrected_phase_button;correctedphase_analyses;;
+S;;;;
+B;wrapped_phase_button;wrappedphase_analyses;;
+S;;;;
+E;;;;

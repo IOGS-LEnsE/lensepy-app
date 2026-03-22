@@ -1,0 +1,8 @@
+# Menu Images
+# Type; Title; Signal; Options List;
+B;open_dataset_button;open_images;;
+B;display_images_button;display_images;;
+S;;;;
+B;save_images_button;save_images;;
+S;;;;
+E;;;;

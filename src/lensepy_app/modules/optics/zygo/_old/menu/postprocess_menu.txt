@@ -1,0 +1,10 @@
+# Menu Post Process
+# Type; Title; Signal;
+B;psf_button;psf_process;;
+B;airy_button;airy_process;;
+S;;;;
+B;mtf_button;mtf_process;;
+S;;;;
+B;focal_button;focal_process;;
+S;;;;
+E;;;;

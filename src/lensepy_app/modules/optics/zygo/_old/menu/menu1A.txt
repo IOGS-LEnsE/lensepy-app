@@ -1,0 +1,13 @@
+# Menu MAIN
+# Type; Title; Signal; Options List;
+S;;;;
+S;;;;
+S;;;;
+B;acquisition_button;acquisition;nocam,nopiezo;
+B;load_images_button;images;;
+B;masks_button;masks;noimages;
+B;simple_analyses_button;analyses;nodata,nomask,noimages;
+S;;;;
+O;help_button;help;;
+O;options_button;options;;
+E;;;;

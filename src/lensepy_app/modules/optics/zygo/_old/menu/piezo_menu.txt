@@ -1,0 +1,6 @@
+# Menu Piezo
+# Type; Title; Signal;
+B;move_piezo_button;move_piezo;
+B;calibrate_piezo_button;calibrate_piezo;
+S;;;
+E;;;

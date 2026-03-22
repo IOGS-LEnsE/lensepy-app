@@ -1,8 +1,57 @@
-import os
+# -*- coding: utf-8 -*-
+"""*dataset_utils.py* file.
+
+./utils/dataset_utils.py contains tools for images processing.
+
+.. note:: LEnsE - Institut d'Optique - version 1.0
+
+.. moduleauthor:: Julien VILLEMEJANE (PRAG LEnsE) <julien.villemejane@institutoptique.fr>
+Creation : march/2025
+"""
+import sys, os
+from enum import Flag, auto
 import numpy as np
 import scipy
+import cv2
 
-from lensepy.utils.images import resize_image_ratio
+from lensepy.images.conversion import resize_image_ratio
+
+
+class DataSetStateValue(Flag):
+    # Flag - Analys. / Unw. / Wrap. / Crop. / Masks / Images / On
+    ON = auto()
+    IMAGES = auto()
+    MASKS = auto()
+    CROPPED = auto()
+    WRAPPED = auto()
+    UNWRAPPED = auto()
+    ANALYZED = auto()
+
+
+class DataSetState:
+    def __init__(self):
+        self.state = DataSetStateValue.ON
+
+    def reset(self):
+        self.state = DataSetStateValue.ON
+
+    def check_state(self, value: DataSetStateValue):
+        return bool(self.state & value)
+
+    def toggle_state(self, value: DataSetStateValue):
+        if self.state & value:
+            self.state = self.state & ~value
+        else:
+            self.state = self.state | value
+
+    def set_state(self, value: DataSetStateValue, state: bool = True):
+        actual_state = self.check_state(value)
+        if actual_state != state:
+            if state:
+                self.state = self.state | value
+            else:
+                self.state = self.state & ~value
+
 
 def generate_images_grid(images: list[np.ndarray]):
     """Generate a grid with 5 images.
@@ -50,6 +99,7 @@ def read_mat_file(file_path: str) -> dict:
     else:
         print('read_mat_file / No File')
 
+
 def write_mat_file(file_path, images: np.ndarray, masks: np.ndarray = None, masks_type: list = []):
     """
     Load data and masks from a .mat file.
@@ -70,6 +120,7 @@ def write_mat_file(file_path, images: np.ndarray, masks: np.ndarray = None, mask
         data['Masks_Type'] = masks_type
     scipy.io.savemat(file_path, data)
 
+
 def split_3d_array(array_3d, size: int = 5):
     # Ensure the array has the expected shape
     if array_3d.shape[2]%size != 0:
@@ -77,3 +128,34 @@ def split_3d_array(array_3d, size: int = 5):
     # Extract the 2D arrays
     arrays = [array_3d[:, :, i].astype(np.float32) for i in range(array_3d.shape[2])]
     return arrays
+
+def load_default_parameters(file_path: str) -> dict:
+    """
+    Load parameter from a CSV file.
+
+    :return: Dict containing 'key_1': 'language_word_1'.
+
+    Notes
+    -----
+    This function reads a CSV file that contains key-value pairs separated by semicolons (';')
+    and stores them in a global dictionary variable. The CSV file may contain comments
+    prefixed by '#', which will be ignored.
+
+    The file should have the following format:
+        # comment
+        # comment
+        key_1 ; language_word_1
+        key_2 ; language_word_2
+    """
+    dictionary_loaded = {}
+    if os.path.exists(file_path):
+        # Read the CSV file, ignoring lines starting with '//'
+        data = np.genfromtxt(file_path, delimiter=';',
+                             dtype=str, comments='#', encoding='UTF-8')
+        # Populate the dictionary with key-value pairs from the CSV file
+        for key, value in data:
+            dictionary_loaded[key.strip()] = value.strip()
+        return dictionary_loaded
+    else:
+        print('File error')
+        return {}

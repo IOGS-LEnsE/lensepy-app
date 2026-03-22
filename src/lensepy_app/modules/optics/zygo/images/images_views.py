@@ -6,7 +6,6 @@ from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog, QMessageBox, QHBoxLayout
 from lensepy_app.widgets.objects import make_hline
 from lensepy import translate
-from lensepy.utils import imread_rgb
 from lensepy.css import *
 
 
@@ -28,6 +27,7 @@ class ImagesOpeningWidget(QWidget):
         label.setStyleSheet(styleH2)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
+        layout.addWidget(make_hline())
 
         self.open_button = QPushButton(translate('image_opening_button'))
         self.open_button.setStyleSheet(unactived_button)
@@ -73,7 +73,8 @@ class ImagesOpeningWidget(QWidget):
 class ImagesChoiceView(QWidget):
     """Images Choice."""
 
-    images_changed = pyqtSignal(int, int)
+    images_changed = pyqtSignal(int, int)   # Image index, Set index
+    masks_changed = pyqtSignal(int, int, int)   # Image index, Set index, mask index
 
     def __init__(self, parent) -> None:
         super().__init__()
@@ -84,6 +85,7 @@ class ImagesChoiceView(QWidget):
         self.number_of_images_per_set = 0
         self.sets_of_images_number = 0
         self.selected_set = 1
+        self.selected_image = 1
 
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
@@ -94,15 +96,15 @@ class ImagesChoiceView(QWidget):
         self.label_images_choice_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # ---- Labels ----
-        self.label_set_of_images = QLabel("No dataset loaded")
+        self.label_set_of_images = QLabel(translate('no_data_loaded'))
         self.label_set_of_images.setStyleSheet(styleH2)
         self.label_set_of_images.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.label_status_images = QLabel("No Image")
+        self.label_status_images = QLabel(translate('no_image_loaded'))
         self.label_status_images.setStyleSheet(styleH2)
         self.label_status_images.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.label_status_masks = QLabel("No Mask")
+        self.label_status_masks = QLabel(translate('no_mask_loaded'))
         self.label_status_masks.setStyleSheet(styleH2)
         self.label_status_masks.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -125,16 +127,18 @@ class ImagesChoiceView(QWidget):
         self.sets_button_list = []
 
         # ---- Layout ----
+        self.layout.addWidget(make_hline())
         self.layout.addWidget(self.label_images_choice_title)
         self.layout.addWidget(make_hline())
         self.layout.addWidget(self.label_set_of_images)
         self.layout.addWidget(self.sets_of_images_widget)
         self.layout.addWidget(make_hline())
-        self.layout.addWidget(self.images_select_widget)
         self.layout.addWidget(self.label_status_images)
+        self.layout.addWidget(self.images_select_widget)
         self.layout.addWidget(make_hline())
         self.layout.addWidget(self.label_status_masks)
         self.layout.addWidget(self.masks_select_widget)
+        self.layout.addWidget(make_hline())
 
     def update_dataset(self, data_set):
         """Call this when dataset becomes available."""
@@ -146,15 +150,16 @@ class ImagesChoiceView(QWidget):
 
         self.build_sets_buttons()
         self.build_images_buttons()
-        self.set_images_status(True, 1)
-        self.set_masks_status(True, self.data_set.masks_sets.get_masks_number())
+        self.build_masks_buttons()
+        self.set_images_status(1)
+        self.set_masks_status(0)
 
     # =========================================================
     def reset_view(self):
         """UI when no dataset"""
-        self.label_set_of_images.setText("No dataset loaded")
-        self.label_status_images.setText("No Image")
-        self.label_status_masks.setText("No Mask")
+        self.label_set_of_images.setText(translate('no_data_loaded'))
+        self.label_status_images.setText(translate('no_image_loaded'))
+        self.label_status_masks.setText(translate('no_mask_loaded'))
 
         self.clear_layout(self.layout_images)
         self.clear_layout(self.layout_masks)
@@ -169,7 +174,7 @@ class ImagesChoiceView(QWidget):
             button = QPushButton(str(i + 1))
             button.setFixedWidth(40)
             button.setStyleSheet(unactived_button)
-            button.clicked.connect(self.display_image)
+            button.clicked.connect(self.handle_display_image)
             self.images_button_select.append(button)
             self.layout_images.addWidget(button)
 
@@ -191,74 +196,88 @@ class ImagesChoiceView(QWidget):
             self.sets_button_list.append(button)
             self.layout_set.addWidget(button)
 
-    # =========================================================
-    def set_images_status(self, value: bool, index: int = 1):
-        if not value or not self.data_set:
-            self.label_status_images.setText("No Image")
-            return
-
-        self.label_status_images.setText("Display image ?")
-
-        if self.images_button_select:
-            self.images_button_select[index - 1].setStyleSheet(actived_button)
-
-    def set_masks_status(self, value: bool, number: int = 0):
+    def build_masks_buttons(self):
         self.clear_layout(self.layout_masks)
         self.masks_button_select = []
 
-        if not value or not self.data_set:
-            self.label_status_masks.setText("No Mask")
+        if not self.data_set.has_mask():
+            self.label_status_masks.setText(translate('no_mask_loaded'))
             return
 
-        self.label_status_masks.setText(f"{number} Mask(s) / Display ?")
+        number = self.data_set.masks_sets.get_masks_number()
+        self.label_status_masks.setText(f'{number} {translate("mask_s_title")}')
 
-        for i in range(number):
-            button = QPushButton(str(i + 1))
+        for i in range(number + 1):
+            if i == 0:
+                button = QPushButton('OFF')
+            else:
+                button = QPushButton(str(i))
             button.setFixedWidth(40)
             button.setStyleSheet(unactived_button)
-            button.clicked.connect(self.display_mask)
+            button.clicked.connect(self.handle_display_mask)
             self.masks_button_select.append(button)
             self.layout_masks.addWidget(button)
 
     # =========================================================
-    def display_image(self, event):
+    def set_images_status(self, index: int = 1):
+        if not self.data_set:
+            self.label_status_images.setText(translate('no_image_loaded'))
+            return
+        self.label_status_images.setText(translate('image_displayed'))
+
+        if self.images_button_select:
+            self.images_button_select[index - 1].setStyleSheet(actived_button)
+
+    def set_masks_status(self, index: int = 0):
+        if not self.data_set.has_mask():
+            self.label_status_masks.setText(translate('no_mask_loaded'))
+            return
+        number = self.data_set.masks_sets.get_masks_number()
+        self.label_status_masks.setText(f'{number} {translate("mask_s_title")}')
+
+        self.masks_button_select[index].setStyleSheet(actived_button)
+
+
+    # =========================================================
+    def handle_display_image(self, event):
         if not self.data_set:
             return
 
         try:
-            self.inactivate_buttons()
+            self.inactivate_buttons_image()
             sender = self.sender()
             sender.setStyleSheet(actived_button)
 
             for i in range(self.number_of_images_per_set):
                 if sender == self.images_button_select[i]:
+                    self.selected_image = i + 1
                     self.images_changed.emit(i + 1, self.selected_set)
         except Exception as e:
             print(f"display : {e}")
 
-    def display_mask(self, event):
+    def handle_display_mask(self, event):
         if not self.data_set:
             return
 
         try:
-            self.inactivate_buttons()
+            self.inactivate_buttons_mask()
             sender = self.sender()
             sender.setStyleSheet(actived_button)
 
             mask_number = self.data_set.masks_sets.get_masks_number()
-            for i in range(mask_number):
+            for i in range(mask_number + 1):
                 if sender == self.masks_button_select[i]:
-                    image = self.data_set.images_sets.get_image_from_set(1, self.selected_set)
-                    mask, _ = self.data_set.masks_sets.get_mask(i + 1)
-                    image_disp = (mask * image).astype(np.uint8)
-                    self.controller.top_left_widget.set_image_from_array(image_disp)
+                    self.masks_changed.emit(self.selected_image, self.selected_set, i)
+
         except Exception as e:
             print(f"display_masks : {e}")
 
     # =========================================================
-    def inactivate_buttons(self):
+    def inactivate_buttons_image(self):
         for btn in self.images_button_select:
             btn.setStyleSheet(unactived_button)
+
+    def inactivate_buttons_mask(self):
         for btn in self.masks_button_select:
             btn.setStyleSheet(unactived_button)
 

@@ -1,0 +1,6 @@
+# Menu Camera
+# Type; Title; Signal;
+S;;;
+B;zoom_camera_button;zoom_camera;
+S;;;
+E;;;

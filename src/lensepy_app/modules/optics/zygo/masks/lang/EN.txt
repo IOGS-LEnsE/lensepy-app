@@ -1,4 +1,18 @@
 # value;translation
 # ZYGO Masks - module - ENGLISH
-image_opening_dialog;Images management
-image_opening_button;Open a set of images...
+add_mask_title;Add a new mask
+sub_menu_masks;Masks Management
+circular_mask_button;Circular Mask
+rectangular_mask_button;Rectangular Mask
+polygon_mask_button;Polygon Mask
+label_masks_options;Display Mask(s)
+masks_list_all;ALL
+delete_all;Delete ALL
+show_all;Show ALL
+show_mask;Show Mask
+delete_mask;Delete Mask
+masks_list_nb;Nb
+masks_list_type;Type
+masks_list_select;Select.
+masks_list_invert;Inv.
+masks_list_delete;Delete

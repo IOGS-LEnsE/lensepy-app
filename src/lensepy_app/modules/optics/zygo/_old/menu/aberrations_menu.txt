@@ -1,0 +1,8 @@
+# Menu Images
+# Type; Title; Signal; Options List;
+B;Zernike_coefficients_button;Zernikecoefficients_aberrations;;
+B;Seidel_coefficients_button;Seidelcoefficients_aberrations;;
+S;;;;
+B;coefficients_correction_button;coefficientscorrection_aberrations;;
+S;;;;
+E;;;;

@@ -1,0 +1,121 @@
+# -*- coding: utf-8 -*-
+# Dictionnaire Français
+#
+# --------------------
+# TitleWidget
+# --------------------
+label_title;Zygo - Analyse de surfaces / Aberrations
+label_subtitle;Interface développée par le LEnsE
+# --------------
+# MainMenuWidget
+# --------------
+label_title_main_menu;
+camera_button; Caméra
+load_images_button; Images pré-enregistrées
+masks_button; Gestion des masques
+acquisition_button; Acquisition
+aberrations_button; Aberrations
+help_button; Aide
+options_button; Options interface
+piezo_button; Gestion du piezo
+# --------------
+# Acquisition
+# --------------
+submenu_acquisition; Acquisition
+acquisition_multi_button; Acquisition multiple
+multi_analysis_button; Analyse multi-acquisition
+acquisition_simple_button; Acquisition simple
+label_progress_acq_bar; Progression de l'acquisition
+label_simple_acq_title; Acquisition de données
+start_acq_button; Lancer l'acquisition (suppression des masques)
+start_acq_keep_button; Lancer l'acquisition (conservation des masques)
+camera_zoom_button; Zoom
+title_camera_settings; Paramètres de la caméra
+label_title_camera_id; ID Caméra
+name_slider_exposure_time; Temps Exposition
+name_slider_black_level; Black Level
+frame_rate_label; Raffraichissement (FPS)
+label_piezo_move_title; Déplacement Piézo
+piezo_voltage_slider; Tension appliquée
+# --------------
+# Images
+# --------------
+no_image_to_disp; Pas d'image à afficher
+submenu_images; Gestion des images
+open_dataset_button; Ouverture d'un set
+display_images_button; Gestion du set
+save_images_button; Sauvegarde d'images
+label_images_choice_title; Choix de l'image à afficher
+dialog_open_image; Ouverture d'un set d'images (fichier *.mat)
+# --------------
+# Masques
+# --------------
+sub_menu_masks; Gestion des masques
+circular_mask_button; Masque Circulaire
+rectangular_mask_button; Masque Rectangulaire
+polygon_mask_button; Masque Polygonal
+label_masks_options; Affichage des masques
+masks_list_all; ALL
+delete_all; Tout supprimer
+show_all; Montrer tous
+show_mask; Montrer masque
+delete_mask; Supprimer masque
+masks_list_nb; Num.
+masks_list_type; Type
+masks_list_select; Select.
+masks_list_invert; Inv.
+masks_list_delete; Supp.
+# --------------
+# Analyses
+# --------------
+label_analyses_options; Analyse simple
+simple_analyses_button; Analyse
+submenu_analyses; Analyse simple
+wrapped_phase_button; Affichage Phase non déroulée
+unwrapped_phase_button; Affichage Surface
+corrected_phase_button; Affichage Surface
+histogram_phase_button; Histogramme de la phase
+label_sub_acquisition_title; Correction
+check_tilt; Tilt
+label_2D_3D_choice; Affichage 3D
+label_2D_3D_choice_gain; Affichage 3D (gain 10)
+label_pv_rms_uncorrected; Statistiques surface non corrigée
+label_pv_rms_corrected; Statistiques surface corrigée
+label_tilt_choice; Correction du tilt
+label_range_choice; Même échelle
+label_PV; Pic à Vallée
+label_RMS; Valeur RMS
+histo_corrected_phase; Histogramme de la phase affichée
+corrected_surface; Surface corrigée
+# --------------
+# Aberrations
+# --------------
+submenu_aberrations; Aberrations
+label_aberrations_start; Analyses des aberrations
+label_zernike_progress_bar; Progression des calculs
+Zernike_coefficients_button; Coefficients de Zernike
+Seidel_coefficients_button; Coefficients de Seidel
+coefficients_correction_button; Correction de la phase
+label_aberrations_options; Etude simplifiée
+label_wedge_value; Rapport frange/longueur d’onde
+label_pv_rms_corrected; Statistiques surface corrigée
+label_correct_disp_choice; Suppression coefficients corrigés
+label_correct_first_choice; Piston/Tilt (Bar graph)
+label_correct_defocus_choice; Correction du defocus
+ab_piston_title; Piston
+ab_tilt_title; Tilt
+ab_defocus_title; Defocus
+ab_astig_title; Astigmatisme
+ab_coma_title; Coma
+ab_trefoil_title; Trèfle
+ab_sphere_title; Ab. Sphériques
+label_lambda_value; Longueur d'Onde (nm)
+label_lambda_check; um
+initial_corrected_phase; Phase corrigée (Piston, Tilt)
+phase_value_in; Phase
+coeff_y_axis_label; Valeur des coefficients de Zernike
+coeff_x_axis_label; Indice des coefficients (Noll)
+# --------------
+# Aberrations - post process
+# --------------
+post_process_button; Post traitement

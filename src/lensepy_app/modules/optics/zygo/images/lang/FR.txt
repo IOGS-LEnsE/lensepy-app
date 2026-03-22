@@ -2,3 +2,10 @@
 # ZYGO Images - module - FRANCAIS
 image_opening_dialog;Gestion des images
 image_opening_button;Ouvrir une série d'images
+label_images_choice_title;Choix de l'image à afficher
+no_data_loaded;Pas de jeu de données chargé
+no_image_loaded;Pas d'image chargée
+no_mask_loaded;Pas de masque chargé
+image_displayed;Image à afficher
+mask_displayed;Masque à appliquer
+mask_s_title;Masque(s)

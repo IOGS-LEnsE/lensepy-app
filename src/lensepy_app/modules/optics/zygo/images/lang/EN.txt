@@ -2,3 +2,10 @@
 # ZYGO Images - module - ENGLISH
 image_opening_dialog;Images management
 image_opening_button;Open a set of images...
+label_images_choice_title;Image to display
+no_data_loaded;No dataset loaded
+no_image_loaded;No image loaded
+no_mask_loaded;No mask loaded
+image_displayed;Image to display
+mask_displayed;Masque to apply
+mask_s_title;Mask(s)

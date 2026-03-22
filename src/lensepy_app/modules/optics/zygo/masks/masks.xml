@@ -3,7 +3,7 @@
     <name>zygo_masks</name>
     <requirements>images</requirements>
     <req_var>dataset,dataset_loaded</req_var>
-    <display>MODE1</display>
+    <display>MODE2</display>
     <controller>ZygoMasksController</controller>
     <location>masks_controller</location>
 </appli>
