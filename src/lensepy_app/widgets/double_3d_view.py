@@ -24,7 +24,7 @@ from PyQt6.QtGui import QTransform
 
 
 class Surface3DView(QWidget):
-    def __init__(self):
+    def __init__(self, title=''):
         super().__init__()
         # Graphical structure
         self.main_layout = QVBoxLayout()
@@ -33,7 +33,7 @@ class Surface3DView(QWidget):
         self.layout1 = QHBoxLayout()
         self.widget1.setLayout(self.layout1)
         # Title of each graphic
-        self.label1 = QLabel('')
+        self.label1 = QLabel(title)
         self.label1.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout1.addWidget(self.label1, stretch=1)
         # OpenGL View

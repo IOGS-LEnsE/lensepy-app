@@ -32,6 +32,7 @@ class InterferControlView(QWidget):
     """Images Choice."""
 
     analyses_changed = pyqtSignal(str)
+    wedge_changed = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
         """Default constructor of the class.
@@ -49,19 +50,9 @@ class InterferControlView(QWidget):
         self.label_analyses_options.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_analyses_options)
 
-        # 2D/3D display
-        self.widget_2D_3D = QPushButton(translate('label_2D_3D_choice'))
-        self.widget_2D_3D.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.widget_2D_3D.setStyleSheet(unactived_button)
-        self.widget_2D_3D.clicked.connect(self.display_changed)
-        # 2D/3D display with gain
-        self.widget_2D_3D_gain = QPushButton(translate('label_2D_3D_choice_gain'))
-        self.widget_2D_3D_gain.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.widget_2D_3D_gain.setStyleSheet(unactived_button)
-        self.widget_2D_3D_gain.clicked.connect(self.display_changed)
         # Wedge Factor
         self.wedge_edit = LineEditView('wedge', translate('label_wedge_value'), '1')
-        self.wedge_edit.text_changed.connect(self.wedge_changed)
+        self.wedge_edit.text_changed.connect(lambda text: self.wedge_changed.emit(text))
 
         # PV/RMS displayed (for uncorrected phase)
         self.label_pv_rms_uncorrected = QLabel(translate('label_pv_rms_uncorrected'))
@@ -72,12 +63,6 @@ class InterferControlView(QWidget):
         # PV/RMS displayed (for corrected phase)
         self.label_pv_rms_corrected = QLabel(translate('label_pv_rms_corrected'))
         self.label_pv_rms_corrected.setStyleSheet(styleH2)
-        ## Button for TILT
-        self.widget_tilt = QPushButton(translate('label_tilt_choice'))
-        self.widget_tilt.setStyleSheet(unactived_button)
-        self.widget_tilt.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.widget_tilt.clicked.connect(self.tilt_changed)
-
         self.pv_rms_corrected = PVRMSView()
 
         # Add graphical elements to the layout.
@@ -85,11 +70,7 @@ class InterferControlView(QWidget):
         self.layout.addWidget(self.label_pv_rms_uncorrected)
         self.layout.addWidget(self.pv_rms_uncorrected)
         self.layout.addWidget(self.label_pv_rms_corrected)
-        self.layout.addWidget(self.widget_tilt)
         self.layout.addWidget(self.pv_rms_corrected)
-        self.layout.addStretch()
-        self.layout.addWidget(self.widget_2D_3D)
-        self.layout.addWidget(self.widget_2D_3D_gain)
         self.layout.addStretch()
         self.show_correction()
 
@@ -108,69 +89,10 @@ class InterferControlView(QWidget):
         Show the corrected option part of the widget.
         ## Only when corrected button in analyses is clicked.
         """
-        self.widget_tilt.show()
         self.label_pv_rms_uncorrected.show()
         self.pv_rms_uncorrected.show()
         self.label_pv_rms_corrected.show()
         self.pv_rms_corrected.show()
-
-    def set_enable_2D_3D(self, value: bool):
-        """
-        Set enable the 2D/3D display checkbox.
-        :param value: True or False.
-        """
-        self.widget_2D_3D.setEnabled(value)
-
-    def set_enable_tilt(self, value: bool):
-        """
-        Set enable the 2D/3D display checkbox.
-        :param value: True or False.
-        """
-        self.widget_tilt.setEnabled(value)
-
-    def is_tilt_checked(self):
-        """
-        Return if the tilt checkbox is checked.
-        :return: True if checked.
-        """
-        return self.tilt_on
-
-    def display_changed(self, event):
-        """
-        Action performed when the 2D/3D button is clicked.
-        """
-        sender = self.sender()
-        if sender == self.widget_2D_3D:
-            self.analyses_changed.emit('disp_3D,')
-        elif sender == self.widget_2D_3D_gain:
-            self.analyses_changed.emit('disp_3D_gain,')
-        else:
-            self.analyses_changed.emit(event)
-
-    def tilt_changed(self):
-        """
-        Action performed when the 2D/3D checkbox is checked.
-        """
-        if self.tilt_on:
-            self.tilt_on = False
-            self.analyses_changed.emit('tilt,off')
-            self.widget_tilt.setStyleSheet(unactived_button)
-        else:
-            self.tilt_on = True
-            self.analyses_changed.emit('tilt,on')
-            self.widget_tilt.setStyleSheet(actived_button)
-
-    def range_changed(self, event):
-        """
-        Action performed when the Range checkbox is checked.
-        """
-        self.analyses_changed.emit(event)
-
-    def wedge_changed(self, event):
-        """
-        Action performed when the wedge line edit changed.
-        """
-        self.analyses_changed.emit(event)
 
     def set_pv_uncorrected(self, value: float, unit: str = '\u03BB'):
         """
@@ -328,12 +250,26 @@ class SurfaceChoiceView(QWidget):
         self.wrap_2D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.wrap_2D_button)
 
+        self.unwrap_3D_button = QPushButton(translate('3D_unwrap_button'))
+        self.unwrap_3D_button.setStyleSheet(unactived_button)
+        self.unwrap_3D_button.setFixedHeight(BUTTON_HEIGHT)
+        self.unwrap_3D_button.clicked.connect(self.handle_selected)
+        layout.addWidget(self.unwrap_3D_button)
+
+        self.wrap_3D_button = QPushButton(translate('3D_wrap_button'))
+        self.wrap_3D_button.setStyleSheet(unactived_button)
+        self.wrap_3D_button.setFixedHeight(BUTTON_HEIGHT)
+        self.wrap_3D_button.clicked.connect(self.handle_selected)
+        layout.addWidget(self.wrap_3D_button)
+
         layout.addStretch()
 
     def inactivate_buttons(self):
         """Inactivate all the buttons."""
         self.wrap_2D_button.setStyleSheet(unactived_button)
         self.unwrap_2D_button.setStyleSheet(unactived_button)
+        self.wrap_3D_button.setStyleSheet(unactived_button)
+        self.unwrap_3D_button.setStyleSheet(unactived_button)
 
     def handle_selected(self):
         """Action performed when 2D unwrapped surface is selected."""
@@ -347,3 +283,9 @@ class SurfaceChoiceView(QWidget):
         elif sender == self.wrap_2D_button:
             self.wrap_2D_button.setStyleSheet(actived_button)
             self.surface_selected.emit('2D_wrap')
+        elif sender == self.unwrap_3D_button:
+            self.unwrap_3D_button.setStyleSheet(actived_button)
+            self.surface_selected.emit('3D_unwrap')
+        elif sender == self.wrap_3D_button:
+            self.wrap_3D_button.setStyleSheet(actived_button)
+            self.surface_selected.emit('3D_wrap')

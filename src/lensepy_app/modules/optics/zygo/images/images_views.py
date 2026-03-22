@@ -92,20 +92,20 @@ class ImagesChoiceView(QWidget):
 
         # ---- Title ----
         self.label_images_choice_title = QLabel(translate("label_images_choice_title"))
-        self.label_images_choice_title.setStyleSheet(styleH1)
+        self.label_images_choice_title.setStyleSheet(styleH2)
         self.label_images_choice_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # ---- Labels ----
         self.label_set_of_images = QLabel(translate('no_data_loaded'))
-        self.label_set_of_images.setStyleSheet(styleH2)
+        self.label_set_of_images.setStyleSheet(styleH3)
         self.label_set_of_images.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.label_status_images = QLabel(translate('no_image_loaded'))
-        self.label_status_images.setStyleSheet(styleH2)
+        self.label_status_images.setStyleSheet(styleH3)
         self.label_status_images.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.label_status_masks = QLabel(translate('no_mask_loaded'))
-        self.label_status_masks.setStyleSheet(styleH2)
+        self.label_status_masks.setStyleSheet(styleH3)
         self.label_status_masks.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # ---- Images widget ----

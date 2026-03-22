@@ -45,7 +45,7 @@ class MasksOptionsView(QWidget):
         self.setLayout(self.layout)
         ## Title of the widget
         self.label_masks_options = QLabel(translate("label_masks_options"))
-        self.label_masks_options.setStyleSheet(styleH1)
+        self.label_masks_options.setStyleSheet(styleH2)
         self.label_masks_options.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_masks_options)
         self.layout.addWidget(make_hline())

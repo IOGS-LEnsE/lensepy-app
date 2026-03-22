@@ -59,7 +59,7 @@ class ZygoInterferControlController(TemplateController):
             self.tilt_possible = True  # ???
         # Signals
         self.top_right.surface_selected.connect(self.handle_surface_selected)
-
+        self.bot_left.wedge_changed.connect(self.handle_wedge_changed)
 
     def handle_surface_selected(self, value):
         value_split = value.split('_')
@@ -70,15 +70,25 @@ class ZygoInterferControlController(TemplateController):
                 self.display_2D_unwrapped()
         elif value_split[0] == '3D':
             if value_split[1] == 'wrap':
-                pass
+                self.display_3D_wrapped()
             elif value_split[1] == 'unwrap':
-                pass
+                self.display_3D_unwrapped()
 
+    def handle_wedge_changed(self, text):
+        print(f'Wedge = {text}')
+
+    def replace_top_left_widget(self, new_widget):
+        self.parent.main_window.top_left_container.deleteLater()
+        self.top_left = new_widget
+        self.parent.main_window.top_left_container = self.top_left
+        self.update_view()
 
     def display_2D_wrapped(self):
         """
         Display Wrapped phase in 2D at the top right corner.
         """
+        widget = Surface2DView('Wrapped Phase', self.colormap_2D)
+        self.replace_top_left_widget(widget)
         wrapped = self.phase.get_wrapped_phase()
         wrapped_array = wrapped.filled(np.nan)
         # Display unwrapped and corrected in 2D
@@ -89,6 +99,8 @@ class ZygoInterferControlController(TemplateController):
         """
         Display unwrapped phase in 2D at the bottom right corner.
         """
+        widget = Surface2DView('Unwrapped Phase', self.colormap_2D)
+        self.replace_top_left_widget(widget)
         unwrapped = self.phase.get_unwrapped_phase()
         unwrapped_array = unwrapped.filled(np.nan)
         # Display unwrapped and corrected in 2D
@@ -129,20 +141,34 @@ class ZygoInterferControlController(TemplateController):
         self.top_right.set_pv_uncorrected(pv, '\u03BB')
         self.top_right.set_rms_uncorrected(rms, '\u03BB')
 
-    def display_3D(self, gain=1):
+    def display_3D_wrapped(self, gain=1):
+        widget = Surface3DView('Wrapped Phase')
+        self.replace_top_left_widget(widget)
+        mask, _ = self.phase.cropped_masks_sets.get_mask(1)
+        wrapped = self.phase.get_wrapped_phase()
+        wrapped_array = wrapped.filled(np.nan)
+        Z2 = np.ma.masked_where(np.logical_not(mask), wrapped_array)
+        # Gain ?
+        Z1 = Z2 * gain
+        x, y, w_s = self.top_left.prepare_data_for_mesh(Z1, undersampling=4)
+        self.top_left.create_mesh_surface(x, y, w_s)
+        self.top_left.showMaximized()
+        self.top_left.raise_()
+
+    def display_3D_unwrapped(self, gain=1):
+        widget = Surface3DView('Unwrapped Phase')
+        self.replace_top_left_widget(widget)
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         unwrapped = self.phase.get_unwrapped_phase()
         unwrapped_array = unwrapped.filled(np.nan)
         Z2 = np.ma.masked_where(np.logical_not(mask), unwrapped_array)
-        if self.options1_widget.is_tilt_checked():
-            Z1 = np.ma.masked_where(np.logical_not(mask), self.corrected_phase) * gain
-            self.w_3d_view.add_labels(name1='Corrected Phase', name2='Unwrapped Phase')
-        else:
-            Z1 = Z2 * gain
-        x, y, w_s = self.w_3d_view.prepare_data_for_mesh(Z1, undersampling=4)
-        self.w_3d_view.create_mesh_surface(x, y, w_s)
-        self.w_3d_view.showMaximized()
-        self.w_3d_view.raise_()
+        # Gain ?
+        Z1 = Z2 * gain
+        # Tilt ?
+        x, y, w_s = self.top_left.prepare_data_for_mesh(Z1, undersampling=4)
+        self.top_left.create_mesh_surface(x, y, w_s)
+        self.top_left.showMaximized()
+        self.top_left.raise_()
 
     def analyses_changed(self, event):
         """
