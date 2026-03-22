@@ -30,7 +30,10 @@ class ZygoMasksController(TemplateController):
 
         # Setup widgets
         self.top_left.set_image_from_array(self.first_image)
-
+        if self.data_set.has_mask():
+            self.parent.variables['mask_loaded'] = True
+            self.parent.update_menu()
+        self.data_set.reset_processes()
         # Signals
         self.bot_left.mask_added.connect(self.handle_mask_added)
         self.top_right.masks_changed.connect(self.handle_mask_changed)
@@ -62,6 +65,8 @@ class ZygoMasksController(TemplateController):
                 self.data_set.set_analyzed_state(False)
                 self.data_set.set_wrapped_state(False)
                 self.data_set.set_unwrapped_state(False)
+                self.parent.variables['mask_loaded'] = True
+                self.parent.update_menu()
 
                 # Refresh list
                 self.top_right.masks_list.update_display()
@@ -72,5 +77,7 @@ class ZygoMasksController(TemplateController):
         if mask is not None:
             image_disp = self.first_image * mask
         else:
+            self.parent.variables['mask_loaded'] = None
+            self.parent.update_menu()
             image_disp = self.first_image
         self.top_left.set_image_from_array(image_disp)

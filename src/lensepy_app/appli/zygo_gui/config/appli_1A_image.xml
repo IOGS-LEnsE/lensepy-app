@@ -26,7 +26,12 @@
 		<name>masks</name>
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>
+	<module>
+		<name>interfer_control</name>
+		<location>lensepy_app.modules.optics.zygo</location>
+	</module>
     <variable name="dataset"/>
     <variable name="bits_depth"/>
     <variable name="dataset_loaded"/>
+	<variable name="mask_loaded"/>
 </appli>

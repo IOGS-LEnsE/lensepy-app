@@ -13,7 +13,6 @@ import numpy as np
 import cv2
 from lensepy import load_dictionary, translate, dictionary
 from lensepy.css import *
-from lensepy_app.pyqt6 import *
 from lensepy_app.widgets import make_hline
 from lensepy.images.conversion import resize_image_ratio
 from lensepy_app.utils import array_to_qimage

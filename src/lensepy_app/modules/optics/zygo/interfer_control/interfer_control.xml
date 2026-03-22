@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>zygo_masks</name>
+    <requirements>images</requirements>
+    <req_var>dataset,dataset_loaded,mask_loaded</req_var>
+    <display>MODE2</display>
+    <controller>ZygoInterferControlController</controller>
+    <location>interfer_control_controller</location>
+</appli>

@@ -35,6 +35,7 @@ class ZygoImagesController(TemplateController):
         if self.get_variables('dataset') is not None:
             self.data_set = self.get_variables('dataset')
             self.update_images()
+            self.data_set.reset_processes()
         else:
             self.data_set = DataSet()
             self.set_variables('dataset', self.data_set)
@@ -42,7 +43,6 @@ class ZygoImagesController(TemplateController):
         self.bot_right.image_opened.connect(self.handle_image_opened)
         self.bot_left.images_changed.connect(self.handle_image_changed)
         self.bot_left.masks_changed.connect(self.handle_mask_changed)
-
 
     def update_images(self):
         images_grid = generate_images_grid(self.data_set.get_images_sets(1))
@@ -56,7 +56,10 @@ class ZygoImagesController(TemplateController):
     def handle_image_opened(self, filepath):
         im_ok = self.data_set.load_images_set_from_file(filepath)
         if im_ok:
-            self.data_set.load_masks_from_file(filepath)
+            mask_ok = self.data_set.load_masks_from_file(filepath)
+            if mask_ok:
+                self.parent.variables['mask_loaded'] = True
+                self.parent.update_menu()
             self.update_images()
 
     def handle_image_changed(self, index, set_index):

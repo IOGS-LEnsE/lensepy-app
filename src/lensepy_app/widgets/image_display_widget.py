@@ -99,7 +99,8 @@ class ImageDisplayWidget(QWidget):
         # Crée le pixmap et l'ajoute à la scène
         pixmap = QPixmap.fromImage(qimage)
         self.pixmap_item = self.scene.addPixmap(pixmap)
-        self.scene.setSceneRect(QRectF(pixmap.rect()))
+        #self.scene.setSceneRect(QRectF(pixmap.rect()))
+        self.scene.setSceneRect(self.pixmap_item.boundingRect())
 
         # Ajoute le texte (facultatif)
         if text:
@@ -110,7 +111,7 @@ class ImageDisplayWidget(QWidget):
             self.text_item.setPos(5, pixmap.height() - 25)
             self.scene.addItem(self.text_item)
 
-        # Si un point était sélectionné, on redessine la croix
+        # If a point was selected, point was redrawn
         if hasattr(self, 'selected_point') and self.selected_point:
             self._draw_crosshair(self.selected_point.x(), self.selected_point.y())
 
@@ -133,6 +134,7 @@ class ImageDisplayWidget(QWidget):
                 scale = 2 ** (self.bits_depth - 8)
                 pixels = (pixels / scale).astype(np.uint8)
             else:
+                pixels = np.nan_to_num(pixels, nan=0.0) # Force NaN to black level
                 pixels = pixels.astype(np.uint8)
             h, w = pixels.shape
             return QImage(pixels.data, w, h, pixels.strides[0], QImage.Format.Format_Grayscale8)
@@ -143,7 +145,7 @@ class ImageDisplayWidget(QWidget):
                 pixels = pixels.astype(np.uint8)
                 return QImage(pixels.data, w, h, pixels.strides[0], QImage.Format.Format_RGB888)
             elif c == 4:    # Remove alpha
-                pixels = pixels[:,:,0:2]
+                pixels = pixels[:, :, :3]
                 pixels = pixels.astype(np.uint8)
                 return QImage(pixels.data, w, h, pixels.strides[0], QImage.Format.Format_RGB888)
             else:
@@ -160,16 +162,14 @@ class ImageDisplayWidget(QWidget):
         if not self.pixmap_item:
             return
 
-        view_size = self.view.viewport().size()
-        img_size = self.scene.sceneRect().size()
+        if self.view.viewport().width() <= 1:
+            return
 
-        # Readjust image if bigger than the window.
-        if img_size.width() > view_size.width() or img_size.height() > view_size.height():
-            self.view.fitInView(self.scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
-        else:
-            # No adjustment if smaller than the window.
-            self.view.resetTransform()
-            self.view.centerOn(self.pixmap_item)
+        self.view.resetTransform()
+        self.view.fitInView(
+            self.pixmap_item,
+            Qt.AspectRatioMode.KeepAspectRatio
+        )
 
     def resizeEvent(self, event):
         """Ajuste l'image automatiquement lors du redimensionnement."""
@@ -481,10 +481,6 @@ class RectangleDisplayWidget(ImageDisplayWidget):
             self.text_item.setPos(5, pixmap.height() - 25)
             self.scene.addItem(self.text_item)
 
-        # Ajustement initial
-        if not hasattr(self, "_fit_done") or not self._fit_done:
-            QTimer.singleShot(0, self._update_view_fit)
-            self._fit_done = True
 
     def set_enabled(self, value=True):
         self.draw_enabled = value
