@@ -1,6 +1,6 @@
 [project]
 name = "lensepy-app"
-version = "1.0.3"
+version = "1.0.4"
 authors = [
   { name="Julien VILLEMEJANE", email="julien.villemejane@institutoptique.fr" },
 ]
@@ -10,7 +10,7 @@ requires-python = ">=3.11"
 
 dependencies = [
     "pyqt6>=6.1",
-	"lensepy>=2",
+    "lensepy>=3",
     "pypylon>=4.1.0",
     "pyqtgraph>=0.12",
     "colour-science",

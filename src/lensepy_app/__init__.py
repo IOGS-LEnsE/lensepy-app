@@ -6,6 +6,6 @@ __all__ = [
     'message_box'
 ]
 
-version = '1.0.3'
+version = '1.0.4'
 print('LEnsE Applications package (v.'+version+') / lensepy-app')
 
