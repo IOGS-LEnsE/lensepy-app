@@ -20,6 +20,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtGui import QPen, QColor, QFont
 from PyQt6.QtCore import Qt
 import pyqtgraph as pg
+import pyqtgraph.exporters
 from pyqtgraph.Qt import QtWidgets
 from pyqtgraph import ColorMap
 from matplotlib import colormaps as cm
@@ -129,6 +130,15 @@ class Surface2DView(QWidget):
         """
         min_val, max_val = self.imv.levels
         return min_val, max_val
+
+    def save_image(self, filename: str):
+        """
+        Save the current plot (image + colorbar + title) to a file.
+        :param filename: Path of the output image (e.g. 'output.png')
+        """
+        exporter = pg.exporters.ImageExporter(self.plot.plotItem)
+        exporter.parameters()['width'] = 800  # ou plus
+        exporter.export(filename)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

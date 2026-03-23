@@ -19,6 +19,7 @@ from PyQt6.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt6.QtCore import Qt, QTimer
 import pyqtgraph.opengl as gl
 import pyqtgraph as pg
+import pyqtgraph.exporters
 from OpenGL.GL import glClearColor
 from PyQt6.QtGui import QTransform
 
@@ -175,6 +176,13 @@ class Surface3DView(QWidget):
 
         # Ajouter à la scène
         view.addItem(img)
+
+    def save_image(self, filename: str):
+        """
+        Save the OpenGL view (3D scene) as an image.
+        """
+        image = self.view1.grabFramebuffer()
+        image.save(filename)
 
 
 class DoubleGraph3DView(QWidget):

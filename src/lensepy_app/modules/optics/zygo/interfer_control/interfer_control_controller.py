@@ -60,6 +60,7 @@ class ZygoInterferControlController(TemplateController):
         self.top_right.surface_selected.connect(self.handle_surface_selected)
         self.top_right.tilt_changed.connect(self.handle_tilt_changed)
         self.bot_left.wedge_changed.connect(self.handle_wedge_changed)
+        self.top_right.view_saved.connect(self.handle_saved)
 
     def init_view(self):
         super().init_view()
@@ -90,6 +91,10 @@ class ZygoInterferControlController(TemplateController):
         pv, rms = process_statistics_surface(self.corrected_phase)
         self.bot_left.set_pv_corrected(pv, '\u03BB')
         self.bot_left.set_rms_corrected(rms, '\u03BB')
+
+    def handle_saved(self, filepath):
+        """Saved the current view."""
+        self.top_left.save_image(filepath)
 
     def handle_surface_selected(self, value):
         value_split = value.split('_')

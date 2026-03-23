@@ -9,8 +9,6 @@
 Creation : march/2025
 """
 import sys, os, time
-import numpy as np
-import cv2
 from lensepy import load_dictionary, translate, dictionary, is_float
 from lensepy.css import *
 from lensepy_app.widgets import make_hline
@@ -213,6 +211,7 @@ class SurfaceChoiceView(QWidget):
 
     surface_selected = pyqtSignal(str)
     tilt_changed = pyqtSignal(bool)
+    view_saved = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -260,11 +259,22 @@ class SurfaceChoiceView(QWidget):
         self.wrap_3D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.wrap_3D_button)
         layout.addWidget(make_hline())
+        layout.addStretch()
+
+        self.save_button = QPushButton(translate('save_current_view'))
+        self.save_button.setStyleSheet(unactived_button)
+        self.save_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.save_button.clicked.connect(self.handle_saved)
+        layout.addWidget(self.save_button)
+        layout.addWidget(make_hline())
 
         layout.addStretch()
 
         # Signals
         self.tilt_check.clicked.connect(self.handle_tilt_clicked)
+
+    def handle_saved(self):
+        self.view_saved.emit('test.png')
 
     def handle_tilt_clicked(self):
         """Action performed when the tilt checkbox is clicked."""
