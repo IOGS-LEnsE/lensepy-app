@@ -11,7 +11,7 @@ Creation : march/2025
 import sys, os, time
 import numpy as np
 import cv2
-from lensepy import load_dictionary, translate, dictionary
+from lensepy import load_dictionary, translate, dictionary, is_float
 from lensepy.css import *
 from lensepy_app.widgets import make_hline
 from lensepy_app.widgets.widget_editline import LineEditView
@@ -72,27 +72,17 @@ class InterferControlView(QWidget):
         self.layout.addWidget(self.label_pv_rms_corrected)
         self.layout.addWidget(self.pv_rms_corrected)
         self.layout.addStretch()
-        self.show_correction()
 
-    def hide_correction(self):
-        """
-        Hide the corrected option part of the widget.
-        """
-        self.widget_tilt.hide()
-        self.label_pv_rms_uncorrected.hide()
-        self.pv_rms_uncorrected.hide()
-        self.label_pv_rms_corrected.hide()
-        self.pv_rms_corrected.hide()
+    def set_wegde(self, value):
+        """Set the value of the wedge factor."""
+        self.wedge_edit.set_value(value)
 
-    def show_correction(self):
-        """
-        Show the corrected option part of the widget.
-        ## Only when corrected button in analyses is clicked.
-        """
-        self.label_pv_rms_uncorrected.show()
-        self.pv_rms_uncorrected.show()
-        self.label_pv_rms_corrected.show()
-        self.pv_rms_corrected.show()
+    def get_wedge(self):
+        """Get the value of the wedge factor."""
+        result = self.wedge_edit.get_value()
+        if is_float(result):
+            return float(result)
+        return None
 
     def set_pv_uncorrected(self, value: float, unit: str = '\u03BB'):
         """
@@ -222,6 +212,7 @@ class PVRMSView(QWidget):
 class SurfaceChoiceView(QWidget):
 
     surface_selected = pyqtSignal(str)
+    tilt_changed = pyqtSignal(bool)
 
     def __init__(self):
         super().__init__()
@@ -244,25 +235,40 @@ class SurfaceChoiceView(QWidget):
         self.unwrap_2D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.unwrap_2D_button)
 
-        self.wrap_2D_button = QPushButton(translate('2D_wrap_button'))
-        self.wrap_2D_button.setStyleSheet(unactived_button)
-        self.wrap_2D_button.setFixedHeight(BUTTON_HEIGHT)
-        self.wrap_2D_button.clicked.connect(self.handle_selected)
-        layout.addWidget(self.wrap_2D_button)
-
         self.unwrap_3D_button = QPushButton(translate('3D_unwrap_button'))
         self.unwrap_3D_button.setStyleSheet(unactived_button)
         self.unwrap_3D_button.setFixedHeight(BUTTON_HEIGHT)
         self.unwrap_3D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.unwrap_3D_button)
 
+        layout.addWidget(make_hline())
+
+        self.tilt_check = QCheckBox(translate('tilt_check_box'))
+        self.tilt_check.setStyleSheet(styleH3)
+        layout.addWidget(self.tilt_check)
+
+        layout.addWidget(make_hline())
+        self.wrap_2D_button = QPushButton(translate('2D_wrap_button'))
+        self.wrap_2D_button.setStyleSheet(unactived_button)
+        self.wrap_2D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.wrap_2D_button.clicked.connect(self.handle_selected)
+        layout.addWidget(self.wrap_2D_button)
+
         self.wrap_3D_button = QPushButton(translate('3D_wrap_button'))
         self.wrap_3D_button.setStyleSheet(unactived_button)
-        self.wrap_3D_button.setFixedHeight(BUTTON_HEIGHT)
+        self.wrap_3D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
         self.wrap_3D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.wrap_3D_button)
+        layout.addWidget(make_hline())
 
         layout.addStretch()
+
+        # Signals
+        self.tilt_check.clicked.connect(self.handle_tilt_clicked)
+
+    def handle_tilt_clicked(self):
+        """Action performed when the tilt checkbox is clicked."""
+        self.tilt_changed.emit(self.tilt_check.isChecked())
 
     def inactivate_buttons(self):
         """Inactivate all the buttons."""
@@ -289,3 +295,17 @@ class SurfaceChoiceView(QWidget):
         elif sender == self.wrap_3D_button:
             self.wrap_3D_button.setStyleSheet(actived_button)
             self.surface_selected.emit('3D_wrap')
+
+    def activate_button(self, value):
+        value_split = value.split('_')
+        self.inactivate_buttons()
+        if value_split[0] == '2D':
+            if value_split[1] == 'wrap':
+                self.wrap_2D_button.setStyleSheet(actived_button)
+            elif value_split[1] == 'unwrap':
+                self.unwrap_2D_button.setStyleSheet(actived_button)
+        elif value_split[0] == '3D':
+            if value_split[1] == 'wrap':
+                self.wrap_3D_button.setStyleSheet(actived_button)
+            elif value_split[1] == 'unwrap':
+                self.unwrap_3D_button.setStyleSheet(actived_button)

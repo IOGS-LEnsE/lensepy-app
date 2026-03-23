@@ -3,10 +3,10 @@ from pathlib import Path
 import numpy as np
 from PyQt6 import sip
 from PyQt6.QtCore import pyqtSignal, QObject, QThread
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QMessageBox
 
 
-class TemplateController:
+class TemplateController(QObject):
     """
 
     """
@@ -17,11 +17,13 @@ class TemplateController:
         """
 
         """
+        super().__init__(None)
         self.parent = parent   # MainManager
         self.top_left = QWidget()
         self.top_right = QWidget()
         self.bot_left = QWidget()
         self.bot_right = QWidget()
+        self.destroyed.connect(self.on_destroy)
 
     def init_view(self):
         self.parent.main_window.top_left_container.deleteLater()
@@ -108,6 +110,12 @@ class TemplateController:
             dlg.setIcon(QMessageBox.Icon.Warning)
             button = dlg.exec()
             return ''
+
+    def on_destroy(self):
+        """Action performed when the object is destroyed"""
+        self.cleanup()
+        print('DESTROY !!')
+
 
 
 class ImageLive(QObject):

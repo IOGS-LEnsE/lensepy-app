@@ -226,7 +226,6 @@ class SliderBloc(QWidget):
         self.slider.blockSignals(True)
         self.slider.setValue(int(self.value * self.ratio))
         self.slider.blockSignals(False)
-
         self.slider_changed.emit(self.value)
 
     def handle_input_changed_finish(self):
@@ -445,8 +444,32 @@ class LineEditWidget(QWidget):
         # Line Edit
         self.line_edit = QLineEdit()
         self.line_edit.setText(value)
-        self.line_edit.editingFinished.connect(lambda: self.edit_changed.emit(self.line_edit.text()))
+        self.line_edit.textEdited.connect(self.handle_input_changed)
+        self.line_edit.editingFinished.connect(self.handle_input_changed_finish)
         layout.addWidget(self.line_edit, 2)
+
+    def update_block(self):
+        """Sync text."""
+        self.line_edit.setText(str(self.value))
+
+    def handle_input_changed(self):
+        """Triggered when user edits the numeric value."""
+        try:
+            val = float(self.line_edit.text())
+            self.value = val
+        except ValueError:
+            return
+        self.edit_changed.emit(self.value)
+
+    def handle_input_changed_finish(self):
+        """Triggered when user finishes to edit the numeric value."""
+        try:
+            val = float(self.line_edit.text())
+        except ValueError:
+            return
+        self.value = val
+        self.edit_changed.emit(self.value)
+        self.update_block()
 
     def set_value(self, value):
         """

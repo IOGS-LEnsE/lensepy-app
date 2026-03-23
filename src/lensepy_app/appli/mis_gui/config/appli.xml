@@ -26,11 +26,11 @@
     </contributors>
 	<module>
 		<name>basler</name>
-		<location>lensepy.modules.camera</location>
+		<location>lensepy_app.modules.camera</location>
 	</module>
 	<module>
 		<name>piezo_dmd</name>
-		<location>lensepy.modules.drivers</location>
+		<location>lensepy_app.modules.drivers</location>
 	</module>
     <variable name="image"/>
     <variable name="bits_depth"/>

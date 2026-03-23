@@ -3,3 +3,4 @@
 zygo_app;Zygo
 images_menu;Gestion Images
 masks_menu;Gestion Masques
+interfer_control_menu;Analyses / Figures

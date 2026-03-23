@@ -1,8 +1,14 @@
-from PyQt6.QtWidgets import QLineEdit, QSlider, QGridLayout, QPushButton
+from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtWidgets import (
+    QLineEdit, QGridLayout, QPushButton, QWidget, QVBoxLayout, QLabel, QHBoxLayout)
 
 from lensepy import translate
-from lensepy.utils import is_integer
+from lensepy.css import *
+from lensepy.utils import *
+from lensepy_app import *
 from lensepy_app.widgets import *
+from lensepy_app.widgets.objects import LabelWidget, SelectWidget
+
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:

@@ -26,6 +26,8 @@
     <variable name="bits_depth"/>
     <variable name="camera"/>
     <variable name="dataset_loaded"/>
+	<variable name="mask_loaded"/>
+	<variable name="phase"/>
     <camera>
         <name>Basler</name>
         <colormode>Mono12:12,Mono10:10,Mono8:8,BayerRG8:8</colormode>

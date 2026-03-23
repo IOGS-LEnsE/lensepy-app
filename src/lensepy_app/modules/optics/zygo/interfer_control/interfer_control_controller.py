@@ -26,9 +26,14 @@ class ZygoInterferControlController(TemplateController):
         super().__init__(parent)
         self.data_set : DataSet = self.parent.variables['dataset']
         self.number_of_repetition = 1
-        self.phase = PhaseModel(self.data_set)
+        if self.parent.variables['phase'] is None:
+            self.phase = PhaseModel(self.data_set)
+            self.parent.variables['phase'] = self.phase
+        else:
+            self.phase = self.parent.variables['phase']
         self.phase.prepare_data()
         self.zernike_coeffs = Zernike(self.phase)
+        self.displayed_surface = '2D_unwrap'
 
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         image = self.phase.cropped_images_sets.get_image_from_set(1, 1)
@@ -36,8 +41,8 @@ class ZygoInterferControlController(TemplateController):
         # TO DO  - default colormap in default_parameters
         self.colormap_2D = 'cividis'
         self.colormap_2D = 'plasma'
-
-        self.w_3d_view = Surface3DView()
+        self.corrected_phase = None
+        self.unwrapped_phase = None
 
         # Graphical layout
         self.top_left = Surface2DView('', self.colormap_2D)
@@ -47,6 +52,25 @@ class ZygoInterferControlController(TemplateController):
         
         # Setup widgets
         self.bot_right.set_image_from_array(self.masked_image)
+        self.process_surfaces()
+        self.tilt = False
+        self.wedge = 1
+
+        # Signals
+        self.top_right.surface_selected.connect(self.handle_surface_selected)
+        self.top_right.tilt_changed.connect(self.handle_tilt_changed)
+        self.bot_left.wedge_changed.connect(self.handle_wedge_changed)
+
+    def init_view(self):
+        super().init_view()
+        self.wedge = self.bot_left.get_wedge()
+        self.phase.set_wedge_factor(self.wedge)
+        self.phase.prepare_data()
+        self.correct_surface()
+        self.handle_surface_selected(self.displayed_surface)
+        self.top_right.activate_button(self.displayed_surface)
+
+    def process_surfaces(self):
         if not self.data_set.is_wrapped():
             self.process_wrapped_phase_calculation(self.number_of_repetition)
         if not self.data_set.is_unwrapped():
@@ -56,13 +80,20 @@ class ZygoInterferControlController(TemplateController):
             for k in range(3):
                 self.process_zernike_calculation(k)
             self.data_set.set_analyzed_state()
-            self.tilt_possible = True  # ???
-        # Signals
-        self.top_right.surface_selected.connect(self.handle_surface_selected)
-        self.bot_left.wedge_changed.connect(self.handle_wedge_changed)
+
+    def correct_surface(self):
+        self.unwrapped_phase = self.phase.get_unwrapped_phase()
+        _, self.corrected_phase = self.zernike_coeffs.process_surface_correction(['piston', 'tilt'])
+        pv, rms = process_statistics_surface(self.unwrapped_phase)
+        self.bot_left.set_pv_uncorrected(pv, '\u03BB')
+        self.bot_left.set_rms_uncorrected(rms, '\u03BB')
+        pv, rms = process_statistics_surface(self.corrected_phase)
+        self.bot_left.set_pv_corrected(pv, '\u03BB')
+        self.bot_left.set_rms_corrected(rms, '\u03BB')
 
     def handle_surface_selected(self, value):
         value_split = value.split('_')
+        self.displayed_surface = value
         if value_split[0] == '2D':
             if value_split[1] == 'wrap':
                 self.display_2D_wrapped()
@@ -74,8 +105,21 @@ class ZygoInterferControlController(TemplateController):
             elif value_split[1] == 'unwrap':
                 self.display_3D_unwrapped()
 
+    def handle_tilt_changed(self, value):
+        """Action performed when the tilt checkbox changed."""
+        self.tilt = value
+        self.handle_surface_selected(self.displayed_surface)
+
     def handle_wedge_changed(self, text):
-        print(f'Wedge = {text}')
+        wed_s = text.split(',')
+        old_value = self.wedge
+        if is_float(wed_s[1]):
+            self.wedge = float(wed_s[1])
+            self.phase.set_wedge_factor(float(wed_s[1]))
+            self.handle_surface_selected(self.displayed_surface)
+            self.data_set.reset_processes()
+            self.process_surfaces()
+            self.correct_surface()
 
     def replace_top_left_widget(self, new_widget):
         self.parent.main_window.top_left_container.deleteLater()
@@ -101,45 +145,15 @@ class ZygoInterferControlController(TemplateController):
         """
         widget = Surface2DView('Unwrapped Phase', self.colormap_2D)
         self.replace_top_left_widget(widget)
-        unwrapped = self.phase.get_unwrapped_phase()
-        unwrapped_array = unwrapped.filled(np.nan)
-        # Display unwrapped and corrected in 2D
-        self.top_left.set_title(translate('unwrapped_surface'))
-        self.top_left.set_array(unwrapped_array * gain)
-        pv, rms = process_statistics_surface(unwrapped_array)
-        self.bot_left.set_pv_uncorrected(pv, '\u03BB')
-        self.bot_left.set_rms_uncorrected(rms, '\u03BB')
-
-    def display_2D_correction(self, gain=1):
-        """
-        Display correction depending on tilt checkbox value.
-        """
-        self.main_widget.clear_top_right()
-        self.top_right_widget = Surface2DView(translate('corrected_surface'), colormap_2D=self.colormap_2D)
-        self.main_widget.set_right_widget(self.top_right_widget)
-        ## TO DO : update colorbar depending on the max range of TOP and BOT right area.
-        unwrapped = self.phase.get_unwrapped_phase()
-        unwrapped_array = unwrapped.filled(np.nan)
-
-        # Test if tilt !
-        if self.top_right.is_tilt_checked():
-            wedge_factor = self.phase.get_wedge_factor()
-            _, corrected = self.zernike_coeffs.process_surface_correction(['piston', 'tilt'])
-            corrected = corrected * wedge_factor
+        if self.tilt:
+            unwrapped_array = self.corrected_phase * self.wedge
+            title = translate('unwrapped_notilt_surface')
         else:
-            corrected = unwrapped
-        self.corrected_phase = corrected.filled(np.nan)
-        self.top_right_widget.set_array(self.corrected_phase * gain)
-        # Test if range is checked
-        self.top_right_widget.reset_z_range()
-        self.top_right.erase_pv_rms()
-        pv, rms = process_statistics_surface(self.corrected_phase)
-        self.top_right.set_pv_corrected(pv, '\u03BB')
-        self.top_right.set_rms_corrected(rms, '\u03BB')
-        pv, rms = process_statistics_surface(unwrapped_array)
-
-        self.top_right.set_pv_uncorrected(pv, '\u03BB')
-        self.top_right.set_rms_uncorrected(rms, '\u03BB')
+            unwrapped_array = self.unwrapped_phase.filled(np.nan)
+            title = translate('unwrapped_surface')
+        # Display unwrapped and corrected in 2D
+        self.top_left.set_title(title)
+        self.top_left.set_array(unwrapped_array * gain)
 
     def display_3D_wrapped(self, gain=1):
         widget = Surface3DView('Wrapped Phase')
@@ -159,8 +173,13 @@ class ZygoInterferControlController(TemplateController):
         widget = Surface3DView('Unwrapped Phase')
         self.replace_top_left_widget(widget)
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
-        unwrapped = self.phase.get_unwrapped_phase()
-        unwrapped_array = unwrapped.filled(np.nan)
+        if self.tilt:
+            unwrapped_array = self.corrected_phase * self.wedge
+            title = translate('unwrapped_notilt_surface')
+        else:
+            unwrapped_array = self.unwrapped_phase.filled(np.nan)
+            title = translate('unwrapped_surface')
+
         Z2 = np.ma.masked_where(np.logical_not(mask), unwrapped_array)
         # Gain ?
         Z1 = Z2 * gain
@@ -169,31 +188,6 @@ class ZygoInterferControlController(TemplateController):
         self.top_left.create_mesh_surface(x, y, w_s)
         self.top_left.showMaximized()
         self.top_left.raise_()
-
-    def analyses_changed(self, event):
-        """
-        Update controller data and views when options changed.
-        :param event: Signal that triggers the event.
-        """
-        change = event.split(',')
-        if change[0] == 'tilt':
-            if change[1] == 'on':
-                self.display_2D_correction()
-            else:
-                self.display_2D_unwrapped()
-        if change[0] == 'disp_3D':
-            self.display_3D(gain=2)
-
-        if change[0] == 'disp_3D_gain':
-            self.display_3D(gain=10)
-
-        if change[0] == 'wedge':
-            if is_float(change[1]):
-                self.phase.set_wedge_factor(float(change[1]))
-                if self.submode == 'unwrappedphase_analyses':
-                    self.display_2D_unwrapped()
-                elif self.submode == 'correctedphase_analyses':
-                    self.display_2D_correction()
 
     def process_wrapped_phase_calculation(self, set_number: int = 1):
         """

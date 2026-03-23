@@ -3,7 +3,9 @@ from PyQt6.QtCore import QObject, QThread
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.modules.camera.basler.basler_views import *
 from lensepy_app.modules.camera.basler.basler_models import *
-from lensepy_app.widgets import *
+from lensepy_app.widgets.camera_widget import *
+from lensepy_app.widgets.image_display_widget import *
+from lensepy_app.widgets.histogram_widget import *
 from lensepy import translate
 
 

@@ -39,6 +39,10 @@ class LineEditView(QWidget):
         """
         self.text_edit.setText(value)
 
+    def get_value(self):
+        """Get the value of the edit line."""
+        return self.text_edit.text()
+
     def _changed(self):
         """
         Action when the text changed.

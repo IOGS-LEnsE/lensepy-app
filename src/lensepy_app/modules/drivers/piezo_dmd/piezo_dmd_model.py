@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import serial
 from serial.tools import list_ports
-from lensepy.modules.drivers.piezo_dmd.pycrafter.pycrafter6500 import dmd
+from lensepy_app.modules.drivers.piezo_dmd.pycrafter.pycrafter6500 import dmd
 
 
 class DMDWrapper:

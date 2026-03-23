@@ -2,12 +2,12 @@ __all__ = ["PiezoDMDController"]
 
 import time
 from PyQt6.QtWidgets import QWidget
-from lensepy.widgets import ImageDisplayWidget
+from lensepy_app.widgets import ImageDisplayWidget
 
-from lensepy.modules.drivers.piezo_dmd.piezo_dmd_views import *
-from lensepy.modules.drivers.piezo_dmd.piezo_dmd_model import DMDWrapper, PiezoWrapper
-from lensepy.modules.camera.basler.basler_views import *
-from lensepy.appli._app.template_controller import TemplateController
+from lensepy_app.modules.drivers.piezo_dmd.piezo_dmd_views import *
+from lensepy_app.modules.drivers.piezo_dmd.piezo_dmd_model import DMDWrapper, PiezoWrapper
+from lensepy_app.widgets.camera_widget import CameraParamsWidget
+from lensepy_app.appli._app.template_controller import TemplateController
 
 
 class PiezoDMDController(TemplateController):

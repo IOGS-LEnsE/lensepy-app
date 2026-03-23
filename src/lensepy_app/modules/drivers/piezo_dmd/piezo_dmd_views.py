@@ -1,5 +1,5 @@
 import sys, time
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtWidgets import (
     QFileDialog, QMessageBox, QPushButton, QComboBox, QRadioButton,
@@ -8,8 +8,12 @@ from PyQt6.QtWidgets import (
 )
 
 from lensepy import translate
+from lensepy.css import *
 from lensepy.utils import *
-from lensepy.widgets import *
+
+from lensepy_app import *
+from lensepy_app.widgets import *
+from lensepy_app.widgets.objects import SliderBloc
 
 
 class DMDParamsView(QWidget):
