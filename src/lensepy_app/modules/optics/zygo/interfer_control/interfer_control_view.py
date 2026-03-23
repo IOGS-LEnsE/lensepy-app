@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import (
     QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
     QVBoxLayout,
     QApplication,
-    QTableWidget, QTableWidgetItem
+    QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox
 )
 from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent, QResizeEvent, QFont
@@ -213,9 +213,9 @@ class SurfaceChoiceView(QWidget):
     tilt_changed = pyqtSignal(bool)
     view_saved = pyqtSignal(str)
 
-    def __init__(self):
-        super().__init__()
-
+    def __init__(self, parent=None):
+        super().__init__(None)
+        self.parent = parent
         # Graphical objects
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -239,12 +239,11 @@ class SurfaceChoiceView(QWidget):
         self.unwrap_3D_button.setFixedHeight(BUTTON_HEIGHT)
         self.unwrap_3D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.unwrap_3D_button)
-
-        layout.addWidget(make_hline())
-
+        layout.addStretch()
         self.tilt_check = QCheckBox(translate('tilt_check_box'))
         self.tilt_check.setStyleSheet(styleH3)
         layout.addWidget(self.tilt_check)
+        layout.addStretch()
 
         layout.addWidget(make_hline())
         self.wrap_2D_button = QPushButton(translate('2D_wrap_button'))
@@ -274,7 +273,25 @@ class SurfaceChoiceView(QWidget):
         self.tilt_check.clicked.connect(self.handle_tilt_clicked)
 
     def handle_saved(self):
-        self.view_saved.emit('test.png')
+        file_dialog = QFileDialog()
+        # default dir ?
+        default_dir = self.parent.get_config('img_dir') or None
+        # dialog box
+        file_path, _ = file_dialog.getSaveFileName(self, translate('dialog_view_png_image'),
+                                                   default_dir, "Images (*.png)")
+        if file_path != '':
+            self.view_saved.emit(file_path)
+        else:
+            dlg = QMessageBox(self)
+            dlg.setWindowTitle("Warning - No File Saved")
+            dlg.setText("No Image File was saved...")
+            dlg.setStandardButtons(
+                QMessageBox.StandardButton.Ok
+            )
+            dlg.setIcon(QMessageBox.Icon.Warning)
+            button = dlg.exec()
+            return
+
 
     def handle_tilt_clicked(self):
         """Action performed when the tilt checkbox is clicked."""

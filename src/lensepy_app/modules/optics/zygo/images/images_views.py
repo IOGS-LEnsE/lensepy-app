@@ -15,6 +15,7 @@ class ImagesOpeningWidget(QWidget):
     """
 
     image_opened = pyqtSignal(str)
+    image_png_saving = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(None)
@@ -34,9 +35,37 @@ class ImagesOpeningWidget(QWidget):
         self.open_button.setFixedHeight(BUTTON_HEIGHT)
         self.open_button.clicked.connect(self.handle_opening)
         layout.addWidget(self.open_button)
+        layout.addStretch()
+
+        self.save_png_button = QPushButton(translate('image_saving_png_button'))
+        self.save_png_button.setStyleSheet(disabled_button)
+        self.save_png_button.setEnabled(False)
+        self.save_png_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.save_png_button.clicked.connect(self.handle_saving_png)
+        layout.addWidget(self.save_png_button)
 
         layout.addStretch()
         self.setLayout(layout)
+
+    def handle_saving_png(self):
+        file_dialog = QFileDialog()
+        # default dir ?
+        default_dir = self.parent.get_config('img_dir') or None
+        # dialog box
+        file_path, _ = file_dialog.getSaveFileName(self, translate('dialog_save_png_image'),
+                                                   default_dir, "Images (*.png)")
+        if file_path != '':
+            self.image_png_saving.emit(file_path)
+        else:
+            dlg = QMessageBox(self)
+            dlg.setWindowTitle("Warning - No File Saved")
+            dlg.setText("No Image File was saved...")
+            dlg.setStandardButtons(
+                QMessageBox.StandardButton.Ok
+            )
+            dlg.setIcon(QMessageBox.Icon.Warning)
+            button = dlg.exec()
+            return
 
     def handle_opening(self):
         sender = self.sender()
@@ -45,8 +74,11 @@ class ImagesOpeningWidget(QWidget):
             # Check if for a default directory for images.
             module_path = self.parent.parent.xml_app.get_parameter_xml('img_dir')
             image_filepath = self.open_image(module_path)
-            self.image_opened.emit(image_filepath)
-            self.open_button.setStyleSheet(unactived_button)
+            if image_filepath is not None:
+                self.image_opened.emit(image_filepath)
+                self.open_button.setStyleSheet(unactived_button)
+                self.save_png_button.setEnabled(True)
+                self.save_png_button.setStyleSheet(unactived_button)
 
     def open_image(self, default_dir: str = '') -> str:
         """

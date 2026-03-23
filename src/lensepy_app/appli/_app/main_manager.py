@@ -177,6 +177,15 @@ class MainManager:
         else:
             return None
 
+    def get_variables(self):
+        return self.variables
+
+    def get_config(self, name=''):
+        if name in self.parent.config:
+            return self.parent.config[name]
+        else:
+            return self.parent.config
+
     def update_menu(self):
         """Update the main menu of the application."""
         self.main_window.update_menu()

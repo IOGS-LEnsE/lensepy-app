@@ -1,8 +1,9 @@
 __all__ = ["ZygoImagesController"]
 
+import os
+import cv2
 import numpy as np
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QWidget
 from lensepy_app.modules.optics.zygo.images.images_views import (
     ImagesOpeningWidget, ImagesChoiceView)
 from lensepy_app.appli._app.template_controller import TemplateController
@@ -41,6 +42,7 @@ class ZygoImagesController(TemplateController):
             self.set_variables('dataset', self.data_set)
         # Signals
         self.bot_right.image_opened.connect(self.handle_image_opened)
+        self.bot_right.image_png_saving.connect(self.handle_saving_png)
         self.bot_left.images_changed.connect(self.handle_image_changed)
         self.bot_left.masks_changed.connect(self.handle_mask_changed)
 
@@ -52,6 +54,16 @@ class ZygoImagesController(TemplateController):
         self.bot_left.update_dataset(self.data_set)
         self.parent.variables['dataset_loaded'] = True
         self.parent.update_menu()
+
+    def handle_saving_png(self, filepath):
+        """Save grid and first image to png file."""
+        # Save first image of the first set in filepath
+        image1 = self.data_set.images_sets.get_image_from_set(1, 1).astype(np.uint8)
+        cv2.imwrite(filepath, image1)
+        # Save grid in filepath_grid.png file
+        images_grid = generate_images_grid(self.data_set.get_images_sets(1)).astype(np.uint8)
+        filepath_grid = f'{os.path.splitext(filepath)[0]}_grid.png'
+        cv2.imwrite(filepath_grid, images_grid)
 
     def handle_image_opened(self, filepath):
         im_ok = self.data_set.load_images_set_from_file(filepath)

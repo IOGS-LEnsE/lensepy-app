@@ -48,7 +48,7 @@ class ZygoInterferControlController(TemplateController):
         self.top_left = Surface2DView('', self.colormap_2D)
         self.bot_left = InterferControlView()
         self.bot_right = ImageDisplayWidget()
-        self.top_right = SurfaceChoiceView()
+        self.top_right = SurfaceChoiceView(self)
         
         # Setup widgets
         self.bot_right.set_image_from_array(self.masked_image)
@@ -121,10 +121,10 @@ class ZygoInterferControlController(TemplateController):
         if is_float(wed_s[1]):
             self.wedge = float(wed_s[1])
             self.phase.set_wedge_factor(float(wed_s[1]))
-            self.handle_surface_selected(self.displayed_surface)
             self.data_set.reset_processes()
             self.process_surfaces()
             self.correct_surface()
+            self.handle_surface_selected(self.displayed_surface)
 
     def replace_top_left_widget(self, new_widget):
         self.parent.main_window.top_left_container.deleteLater()
@@ -151,7 +151,7 @@ class ZygoInterferControlController(TemplateController):
         widget = Surface2DView('Unwrapped Phase', self.colormap_2D)
         self.replace_top_left_widget(widget)
         if self.tilt:
-            unwrapped_array = self.corrected_phase * self.wedge
+            unwrapped_array = self.corrected_phase.filled(np.nan) * self.wedge
             title = translate('unwrapped_notilt_surface')
         else:
             unwrapped_array = self.unwrapped_phase.filled(np.nan)
@@ -179,7 +179,7 @@ class ZygoInterferControlController(TemplateController):
         self.replace_top_left_widget(widget)
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         if self.tilt:
-            unwrapped_array = self.corrected_phase * self.wedge
+            unwrapped_array = self.corrected_phase.filled(np.nan) * self.wedge
             title = translate('unwrapped_notilt_surface')
         else:
             unwrapped_array = self.unwrapped_phase.filled(np.nan)

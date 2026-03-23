@@ -62,9 +62,9 @@ class TemplateController(QObject):
         :return:
         """
         if index == '':
-            return self.parent.variables
+            return self.parent.get_variables()
         else:
-            return self.parent.variables[index]
+            return self.parent.get_variable(index)
 
     def set_variables(self, var_name, value):
         """Update a variable in the variables' dictionary.
@@ -72,6 +72,10 @@ class TemplateController(QObject):
         :param value:       Value of the variable.
         """
         self.parent.variables[var_name] = value
+
+    def get_config(self, name=''):
+        """Return the config dictionary from the main manager."""
+        return self.parent.get_config(name)
 
     def _get_image_dir(self, filepath):
         if filepath is None:
