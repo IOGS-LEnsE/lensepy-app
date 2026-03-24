@@ -10,36 +10,8 @@ from PyQt6.QtWidgets import (
 from lensepy import translate
 from lensepy.utils import *
 
-from lensepy_app import *
-from lensepy_app.widgets import *
+from lensepy_app.widgets.objects import *
 from lensepy.css import *
-
-from lensepy_app.widgets.objects import SliderBlocVertical
-
-
-class CircleWidget(QWidget):
-    def __init__(self, color=QColor("red"), diameter=100):
-        """Create a widget that displays a circle."""
-        super().__init__()
-        self.color = color
-        self.diameter = diameter
-        self.setMinimumSize(diameter, diameter)
-
-    def paintEvent(self, event):
-        """Draw the circle in the widget."""
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        # Color
-        painter.setBrush(QBrush(self.color))
-        painter.setPen(Qt.PenStyle.NoPen)
-        # Process circle coordinates
-        w = self.width()
-        h = self.height()
-        x = (w - self.diameter) / 2
-        y = (h - self.diameter) / 2
-        # Draw the circle
-        circle_rect = QRectF(int(x), int(y), self.diameter, self.diameter)
-        painter.drawEllipse(circle_rect)
 
 
 class RGBLedControlWidget(QWidget):

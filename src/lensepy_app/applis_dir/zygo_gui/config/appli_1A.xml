@@ -23,10 +23,6 @@
         </contributor>
     </contributors>
 	<module>
-		<name>ids_zygo</name>
-		<location>lensepy_app.modules.camera</location>
-	</module>
-	<module>
 		<name>acquisition</name>
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>

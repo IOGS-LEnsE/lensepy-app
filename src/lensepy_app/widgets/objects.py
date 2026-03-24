@@ -3,12 +3,14 @@ __all__ = ['message_box', 'make_hline', 'make_vline',
            'SliderBloc', 'VerticalGauge', 'LineEditWidget',
            'SliderBlocVertical', 'ImageDisplayWithCrosshair',
            'ImageDisplayWidget', 'HistogramWidget',
-           'XYMultiChartWidget']
+           'XYMultiChartWidget', 'CircleWidget']
+
+from PyQt6.QtGui import QColor, QBrush, QPainter
 
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget, ImageDisplayWithCrosshair
 from lensepy_app.widgets.histogram_widget import HistogramWidget
 from lensepy_app.widgets.xy_multi_chart_widget import XYMultiChartWidget
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QRectF
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QComboBox,
     QVBoxLayout, QLineEdit, QSlider, QProgressBar,
@@ -570,6 +572,46 @@ class VerticalGauge(QWidget):
         :param text: title
         """
         self.label.setText(text)
+
+
+class CircleWidget(QWidget):
+    def __init__(self, color="red", diameter=100):
+        """Create a widget that displays a circle."""
+        super().__init__()
+        self.color = self._to_qcolor(color)
+        self.diameter = diameter
+        self.setMinimumSize(diameter, diameter)
+
+    def _to_qcolor(self, color):
+        """Convert different color formats to QColor."""
+        if isinstance(color, QColor):
+            return color
+        elif isinstance(color, str):
+            return QColor(color)
+        elif isinstance(color, tuple) and len(color) in (3, 4):
+            return QColor(*color)
+        else:
+            raise TypeError(f"Unsupported color type: {type(color)}")
+
+    def change_color(self, new_color):
+        self.color = self._to_qcolor(new_color)
+        self.repaint()
+
+    def paintEvent(self, event):
+        """Draw the circle in the widget."""
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        # Color
+        painter.setBrush(QBrush(self.color))
+        painter.setPen(Qt.PenStyle.NoPen)
+        # Process circle coordinates
+        w = self.width()
+        h = self.height()
+        x = (w - self.diameter) / 2
+        y = (h - self.diameter) / 2
+        # Draw the circle
+        circle_rect = QRectF(int(x), int(y), self.diameter, self.diameter)
+        painter.drawEllipse(circle_rect)
 
 if __name__ == "__main__":
     import sys
