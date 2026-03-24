@@ -18,7 +18,6 @@ class CIE1931Controller(TemplateController):
         """
         super().__init__(parent)
         self.image_dir = self._get_image_dir(self.parent.parent.config['img_dir'])
-        print(f'img_dir: {self.image_dir}')
         # Graphical layout
         self.top_left = CIE1931MatplotlibWidget()
         self.bot_left = QWidget()
@@ -83,7 +82,6 @@ class CIE1931Controller(TemplateController):
         )
 
         if file_path != '':
-            print(f'Saving path {file_path}')
             return file_path
         else:
             dlg = QMessageBox(self)

@@ -28,6 +28,23 @@ class XMLFileConfig:
                 return param_value.text
         return None
 
+    def get_contributors_by_type(self):
+        if self.xml_file is not None:
+            # Charger le fichier XML
+            tree = ET.parse(self.xml_file)
+            root = tree.getroot()
+            contributors_by_type = {}   # Empty dictionary
+            # Get contributors in XML file
+            for contributor in root.findall("./contributors/contributor"):
+                ctype = contributor.get("type")
+                info = {child.tag: child.text for child in contributor}
+                # Add to dict
+                if ctype not in contributors_by_type:
+                    contributors_by_type[ctype] = []
+                contributors_by_type[ctype].append(info)
+            return contributors_by_type
+        return None
+
     def get_app_name(self):
         """
 

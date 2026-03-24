@@ -1,9 +1,12 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout
+from lensepy import translate
 from lensepy.css import *
 from lensepy_app.widgets import make_hline
 
+
+contributors_type = ['main_dev','dev','sciexp']
 
 class DefaultTopLeftWidget(QWidget):
 
@@ -57,3 +60,30 @@ class DefaultBotLeftWidget(QWidget):
         label = QLabel('Bot Left')
         layout.addWidget(label)
         self.setLayout(layout)
+
+
+class DefaultBotRightWidget(QWidget):
+
+    def __init__(self, parent=None):
+        super().__init__(None)
+        self.parent = parent  # Controller
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+    def init_ui(self):
+        # Get list of contributors
+        contributors_by_type = self.parent.get_contributors_by_type()
+        for c_type in contributors_type:
+            contributors = contributors_by_type.get(c_type, [])
+            if len(contributors) != 0:
+                title_label = QLabel(translate(f'contributors_{c_type}'))
+                title_label.setStyleSheet(styleH3)
+                self.layout().addWidget(title_label)
+                for i, info in enumerate(contributors, 1):
+                    c_name = f"\t{info['name']} ({info.get('organization', 'N/A')})"
+                    contrib = QLabel(c_name)
+                    self.layout().addWidget(contrib)
+
+        self.layout().addStretch()
+
+

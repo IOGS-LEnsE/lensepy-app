@@ -215,7 +215,6 @@ class CoordinateTableWidget(QWidget):
         )
 
         if file_path != '':
-            print(f'Saving path {file_path}')
             return file_path
         else:
             dlg = QMessageBox(self)

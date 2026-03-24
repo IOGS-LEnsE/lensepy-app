@@ -1,10 +1,12 @@
-from PyQt6.QtWidgets import QLineEdit, QSlider, QGridLayout, QPushButton
-
+from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtWidgets import QLineEdit, QSlider, QGridLayout, QPushButton, QWidget, QVBoxLayout, QLabel
 from lensepy import translate
 from lensepy.utils import is_integer
-from lensepy_app.widgets import *
+from lensepy_app.widgets.objects import *
+from lensepy.css import *
 
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from lensepy_app.modules.camera.ids_zygo.ids_zygo_controller import IDSZygoController
 

@@ -48,6 +48,9 @@ class MainManager:
         else:
             return False
 
+    def get_xml_contributors(self):
+        return self.xml_app.get_contributors_by_type()
+
     def init_variables(self) -> bool:
         """
         Initialize variables from application XML file.
@@ -185,10 +188,6 @@ class MainManager:
             return self.parent.config[name]
         else:
             return self.parent.config
-
-    def update_menu(self):
-        """Update the main menu of the application."""
-        self.main_window.update_menu()
 
     def handle_menu_changed(self, event):
         """

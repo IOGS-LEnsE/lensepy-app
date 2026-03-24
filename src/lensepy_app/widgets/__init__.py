@@ -1,6 +1,8 @@
 __all__ = [
     'objects',
-    "qobject_to_widget"
+    "qobject_to_widget",
+    "RectangleDisplayWidget", "HistogramWidget",
+    "CameraParamsWidget"
 ]
 
 from .histogram_widget import *
@@ -8,12 +10,6 @@ from .image_display_widget import *
 from .xy_multi_chart_widget import *
 from .camera_widget import *
 from .surface_2D_view import *
-
-__all__ = [
-    'objects',
-    "qobject_to_widget"
-]
-
 
 
 from PyQt6.QtWidgets import QWidget, QHBoxLayout

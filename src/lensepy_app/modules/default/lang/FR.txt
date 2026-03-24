@@ -1,0 +1,3 @@
+contributors_main_dev;Développeur·se(s)
+contributors_dev;Développeur·se(s)
+contributors_sciexp;Expert·e(s) Scientifique(s)

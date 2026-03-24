@@ -1,0 +1,4 @@
+# value;translation
+# ZYGO Acquisition - module - FRANCAIS
+zygo;Zygo
+surface_choice_interfer;Surface à afficher

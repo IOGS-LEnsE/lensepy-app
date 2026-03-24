@@ -11,7 +11,7 @@
     <img_dir>%USERPROFILE%\Documents</img_dir>
     <default_langage>FR</default_langage>
     <contributors>
-        <contributor type="dev">
+        <contributor type="main_dev">
             <name>Julien VILLEMEJANE</name>
             <organization>LEnsE / IOGS</organization>
             <mail>julien.villemejane@institutoptique.fr</mail>

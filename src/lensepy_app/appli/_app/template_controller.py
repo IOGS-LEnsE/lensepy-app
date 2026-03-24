@@ -102,7 +102,6 @@ class TemplateController(QObject):
         )
 
         if file_path != '':
-            print(f'Saving path {file_path}')
             return file_path
         else:
             dlg = QMessageBox(self.bot_right)
@@ -118,8 +117,6 @@ class TemplateController(QObject):
     def on_destroy(self):
         """Action performed when the object is destroyed"""
         self.cleanup()
-        print('DESTROY !!')
-
 
 
 class ImageLive(QObject):

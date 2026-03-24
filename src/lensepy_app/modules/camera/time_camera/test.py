@@ -19,7 +19,6 @@ class MainManager:
         self.variables['image'] = None
         self.variables['camera'] = BaslerCamera()
         find_cam = self.variables['camera'].find_first_camera()
-        print(f'Find Cam ? {find_cam}')
         if find_cam:
             self.variables['camera'].set_parameter('ExposureTime', 1000)
             self.variables['camera'].set_parameter('PixelFormat', 'Mono12')

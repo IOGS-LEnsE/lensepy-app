@@ -46,11 +46,12 @@ class My_Application(QApplication):
 
     def init_config(self):
         self.check_options()    # Change config_name if necessary
-        print(self.config_name)
         self.config_ok = self.manager.set_xml_app(self.config_name)
 
         xml_data: XMLFileConfig = self.manager.xml_app
         if self.config_ok:
+            app_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            app_path += '/applis_dir/'
             self.config['default_lang'] = xml_data.get_parameter_xml('default_langage')
             if self.config['default_lang'] is None:
                 self.config['default_lang'] = DEFAULT_LANG
@@ -59,11 +60,11 @@ class My_Application(QApplication):
             self.config['name'] = xml_data.get_app_name() or None
             self.config['description'] = xml_data.get_app_desc() or None
             self.config['img_desc'] = xml_data.get_img_desc() or None
+            if self.config['img_desc'] is not None:
+                self.config['img_desc'] = app_path + self.config['img_desc']
             self.config['html'] = xml_data.get_html_page() or None
             if self.config['html'] is not None:
-                if not self.config['html'].startswith('http'):
-                    app_path = os.path.dirname(os.path.abspath(__file__))
-                else:
+                if self.config['html'].startswith('http'):
                     app_path = ''
                 self.config['html'] = app_path + self.config['html']
             self.config['organization'] = xml_data.get_parameter_xml('organization') or None

@@ -8,10 +8,22 @@
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>%USERPROFILE%\Documents</img_dir>
     <contributors>
-        <contributor type="dev">
+        <contributor type="main_dev">
             <name>Julien VILLEMEJANE</name>
             <organization>LEnsE / IOGS</organization>
             <mail>julien.villemejane@institutoptique.fr</mail>
+        </contributor>
+        <contributor type="dev">
+            <name>Dorian MENDES</name>
+            <organization>IOGS (Promo 2026)</organization>
+        </contributor>
+        <contributor type="dev">
+            <name>Noam CHOPINET</name>
+            <organization>IOGS (Promo 2027)</organization>
+        </contributor>
+        <contributor type="sciexp">
+            <name>Gaëlle LUCAS-LECLIN</name>
+            <organization>LCF / IOGS</organization>
         </contributor>
         <contributor type="sciexp">
             <name>Sébastien de ROSSI</name>
