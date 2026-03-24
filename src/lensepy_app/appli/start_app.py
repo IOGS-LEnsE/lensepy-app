@@ -36,7 +36,6 @@ class My_Application(QApplication):
 
         self.config_name = f'{self.appli_root}/config/appli.xml'
         # Parser for options
-        self.check_options()    # Change config_name if necessary
         self.config_ok = False
         self.config = {}
         # Dependencies
@@ -46,6 +45,8 @@ class My_Application(QApplication):
 
     def init_config(self):
         self.config_ok = self.manager.set_xml_app(self.config_name)
+        self.check_options()    # Change config_name if necessary
+
         xml_data: XMLFileConfig = self.manager.xml_app
         if self.config_ok:
             self.config['default_lang'] = xml_data.get_parameter_xml('default_langage')

@@ -9,6 +9,12 @@ from .xy_multi_chart_widget import *
 from .camera_widget import *
 from .surface_2D_view import *
 
+__all__ = [
+    'objects',
+    "qobject_to_widget"
+]
+
+
 
 from PyQt6.QtWidgets import QWidget, QHBoxLayout
 from PyQt6.QtCore import Qt

@@ -134,7 +134,7 @@ class PiezoDMDController(TemplateController):
         if file_path != '':
             return file_path
         else:
-            dlg = QMessageBox(self)
+            dlg = QMessageBox()
             dlg.setWindowTitle("Warning - No File Loaded")
             dlg.setText("No Image File was loaded...")
             dlg.setStandardButtons(

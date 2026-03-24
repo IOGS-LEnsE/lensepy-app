@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <appli name="My_App">
-    <name>CMOS Sensor GUI</name>
+    <name>Machine Vision GUI</name>
     <description>Machine Vision Labwork with CMOS Sensor</description>
-    <appname>CMOS GUI</appname>
+    <appname>Machine Vision GUI</appname>
     <organization>LEnsE</organization>
     <year>2025</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>

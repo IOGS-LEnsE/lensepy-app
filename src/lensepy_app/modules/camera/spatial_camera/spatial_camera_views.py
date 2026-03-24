@@ -1,14 +1,15 @@
 import cv2
+import numpy as np
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy, QHBoxLayout, QCheckBox, QPushButton, QFileDialog, \
     QMessageBox
 from lensepy.css import *
 from lensepy import translate
 from lensepy_app.modules.camera.basler import BaslerController, BaslerCamera
-from lensepy_app.widgets import make_hline
+from lensepy_app.widgets import *
 from lensepy.utils.images import process_hist_from_array, save_hist, save_slice
-from lensepy_app.widgets import LabelWidget, SliderBloc, HistogramWidget, CameraParamsWidget
-import numpy as np
+from lensepy_app.widgets import CameraParamsWidget, HistogramWidget
+from lensepy_app.widgets.objects import LabelWidget, SliderBloc
 
 
 

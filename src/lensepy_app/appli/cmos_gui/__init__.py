@@ -1,7 +1,8 @@
 
 def init_app(application):
-    application = application
     xml_data = application.manager.xml_app
+
+    print(f'XML_DATA = {xml_data}')
 
     init_file = xml_data.get_sub_parameter('camera', 'init_file')
     application.config['camera_ini'] = f'{application.appli_root}/{init_file}'

@@ -6,7 +6,8 @@ from lensepy.css import *
 from lensepy import translate
 from lensepy_app.modules.camera.basler import BaslerController, BaslerCamera
 from lensepy.utils import process_hist_from_array, save_hist, save_slice
-from lensepy_app.widgets import make_hline, LabelWidget, SliderBloc, HistogramWidget, CameraParamsWidget, LineEditWidget
+from lensepy_app.widgets import *
+from lensepy_app.widgets.objects import *
 import numpy as np
 
 

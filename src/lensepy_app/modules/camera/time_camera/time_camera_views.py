@@ -5,7 +5,8 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy, QHBoxLayo
 from lensepy.css import *
 from lensepy import translate
 from lensepy_app.modules.camera.basler import BaslerController, BaslerCamera
-from lensepy_app.widgets import make_hline, LabelWidget, SliderBloc, HistogramSimpleWidget
+from lensepy_app.widgets import *
+from lensepy_app.widgets.objects import *
 import numpy as np
 
 
