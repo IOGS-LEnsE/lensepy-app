@@ -27,7 +27,8 @@ class My_Application(QApplication):
         self.appli_root = None
         if not self.standalone:
             self.appli_root = os.path.dirname(os.path.abspath(__file__))
-            self.appli_root += f'/{app_name}'
+            self.appli_root = os.path.dirname(self.appli_root)
+            self.appli_root += f'/applis_dir/{app_name}'
         else:
             if app_name is not None:
                 self.appli_root = f'{app_name}'
@@ -45,6 +46,7 @@ class My_Application(QApplication):
 
     def init_config(self):
         self.check_options()    # Change config_name if necessary
+        print(self.config_name)
         self.config_ok = self.manager.set_xml_app(self.config_name)
 
         xml_data: XMLFileConfig = self.manager.xml_app
@@ -75,7 +77,8 @@ class My_Application(QApplication):
 
     def check_options(self):
         if not self.standalone:
-            module = importlib.import_module(self.app_name)
+            path = f'applis_dir.{self.app_name}'
+            module = importlib.import_module(path)
             module.init_app(self)
 
     def init_app(self):

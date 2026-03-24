@@ -12,15 +12,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QFont, QIcon
 import pyqtgraph as pg
 import pyqtgraph.exporters
-from serial import Serial, SerialException
-import serial
-import serial.tools.list_ports
-import random
-import time
 import interface_piezo
 import interface_g2_3det
-import struct
-import interface_g2_2det
 import interface_jauges
 # from class_piezo import *
 '''

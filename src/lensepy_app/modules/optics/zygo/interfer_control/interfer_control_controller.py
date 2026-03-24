@@ -117,7 +117,6 @@ class ZygoInterferControlController(TemplateController):
 
     def handle_wedge_changed(self, text):
         wed_s = text.split(',')
-        old_value = self.wedge
         if is_float(wed_s[1]):
             self.wedge = float(wed_s[1])
             self.phase.set_wedge_factor(float(wed_s[1]))
@@ -151,7 +150,7 @@ class ZygoInterferControlController(TemplateController):
         widget = Surface2DView('Unwrapped Phase', self.colormap_2D)
         self.replace_top_left_widget(widget)
         if self.tilt:
-            unwrapped_array = self.corrected_phase.filled(np.nan) * self.wedge
+            unwrapped_array = self.corrected_phase.filled(np.nan)
             title = translate('unwrapped_notilt_surface')
         else:
             unwrapped_array = self.unwrapped_phase.filled(np.nan)
@@ -179,7 +178,7 @@ class ZygoInterferControlController(TemplateController):
         self.replace_top_left_widget(widget)
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         if self.tilt:
-            unwrapped_array = self.corrected_phase.filled(np.nan) * self.wedge
+            unwrapped_array = self.corrected_phase.filled(np.nan)
             title = translate('unwrapped_notilt_surface')
         else:
             unwrapped_array = self.unwrapped_phase.filled(np.nan)
