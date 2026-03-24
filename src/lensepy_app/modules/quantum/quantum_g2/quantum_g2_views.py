@@ -1,13 +1,13 @@
 import sys, time
 from lensepy import translate
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor, QGuiApplication
 from PyQt6.QtWidgets import (
     QFileDialog, QMessageBox, QPushButton, QComboBox, QRadioButton,
     QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem,
     QHeaderView, QLineEdit, QHBoxLayout, QLabel, QFormLayout, QGroupBox, QProgressBar
 )
-from lensepy_app.pyqt6.widget_xy_chart import XYChartWidget
+from lensepy_app.widgets.widget_xy_chart import XYChartWidget
 from lensepy.utils import *
 from lensepy_app.widgets import *
 

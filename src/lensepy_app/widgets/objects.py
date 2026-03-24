@@ -1,4 +1,5 @@
-__all__ = ['message_box', 'make_hline', 'make_vline']
+__all__ = ['message_box', 'make_hline', 'make_vline', 'SelectWidget', 'LabelWidget',
+           'SliderBloc', 'VerticalGauge', 'LineEditWidget', 'SliderBlocVertical']
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
