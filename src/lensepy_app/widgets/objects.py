@@ -1,6 +1,13 @@
-__all__ = ['message_box', 'make_hline', 'make_vline', 'SelectWidget', 'LabelWidget',
-           'SliderBloc', 'VerticalGauge', 'LineEditWidget', 'SliderBlocVertical']
+__all__ = ['message_box', 'make_hline', 'make_vline',
+           'SelectWidget', 'LabelWidget',
+           'SliderBloc', 'VerticalGauge', 'LineEditWidget',
+           'SliderBlocVertical', 'ImageDisplayWithCrosshair',
+           'ImageDisplayWidget', 'HistogramWidget',
+           'XYMultiChartWidget']
 
+from lensepy_app.widgets.image_display_widget import ImageDisplayWidget, ImageDisplayWithCrosshair
+from lensepy_app.widgets.histogram_widget import HistogramWidget
+from lensepy_app.widgets.xy_multi_chart_widget import XYMultiChartWidget
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QComboBox,

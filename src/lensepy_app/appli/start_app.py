@@ -44,8 +44,8 @@ class My_Application(QApplication):
         self.error_modules = []
 
     def init_config(self):
-        self.config_ok = self.manager.set_xml_app(self.config_name)
         self.check_options()    # Change config_name if necessary
+        self.config_ok = self.manager.set_xml_app(self.config_name)
 
         xml_data: XMLFileConfig = self.manager.xml_app
         if self.config_ok:
@@ -116,11 +116,12 @@ class My_Application(QApplication):
                             if counter_req == 0:
                                 self.required_modules.append(r_module)
 
-        # Output
-        if len(self.missing_modules) == 0 and len(self.required_modules) == 0 and len(self.error_modules) == 0:
-            return True
-        else:
-            return False
+            # Output
+            if len(self.missing_modules) == 0 and len(self.required_modules) == 0 and len(self.error_modules) == 0:
+                return True
+            else:
+                return False
+        return False
 
     def show(self):
         # Create main window title

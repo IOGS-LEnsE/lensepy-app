@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>my_module</name>
+    <display>MODE2</display>
+    <controller>MyModuleController</controller>
+    <location>my_module_controller</location>
+</appli>

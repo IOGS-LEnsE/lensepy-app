@@ -1,0 +1,4 @@
+# value;translation
+# MAIN MENU
+basler_menu;Camera Basler
+test;Test
