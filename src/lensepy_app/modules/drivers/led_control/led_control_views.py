@@ -1,6 +1,6 @@
 import sys, time
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QBrush, QColor
+from PyQt6.QtCore import QSize, Qt, pyqtSignal, QRectF
+from PyQt6.QtGui import QBrush, QColor, QPainter
 from PyQt6.QtWidgets import (
     QFileDialog, QMessageBox, QPushButton, QComboBox, QRadioButton,
     QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem,
@@ -9,7 +9,12 @@ from PyQt6.QtWidgets import (
 
 from lensepy import translate
 from lensepy.utils import *
+
+from lensepy_app import *
 from lensepy_app.widgets import *
+from lensepy.css import *
+
+from lensepy_app.widgets.objects import SliderBlocVertical
 
 
 class CircleWidget(QWidget):
