@@ -1,13 +1,14 @@
 __all__ = ["ImagesOpeningWidget", "ImagesInfosWidget"]
 
-import os
-import cv2
+from PyQt6.QtCore import pyqtSignal, Qt
 from lensepy import translate
 from PyQt6.QtWidgets import (
-    QFileDialog, QMessageBox, QPushButton
+    QFileDialog, QMessageBox, QPushButton, QWidget, QLabel, QVBoxLayout
 )
 from lensepy.utils import *
+from lensepy_app import *
 from lensepy_app.widgets import *
+from lensepy.css import *
 
 
 class ImagesOpeningWidget(QWidget):

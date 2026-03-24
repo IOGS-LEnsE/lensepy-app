@@ -1,4 +1,4 @@
-from lensepy import translate
+import numpy as np
 from lensepy_app.appli._app.template_controller import TemplateController
 from lensepy_app.modules.images.spatial_images import *
 from lensepy_app.widgets import *
