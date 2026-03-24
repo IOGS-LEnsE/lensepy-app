@@ -1,7 +1,9 @@
 import numpy as np
+from lensepy import translate
 from lensepy_app.appli._app.template_controller import TemplateController
 from lensepy_app.modules.images.spatial_images import *
-from lensepy_app.widgets import *
+from lensepy_app.widgets.objects import *
+from lensepy.css import *
 
 
 class SpatialImagesController(TemplateController):
@@ -63,7 +65,9 @@ class SpatialImagesController(TemplateController):
         # Détection du type d'image et conversion en grayscale/luminance si nécessaire
         if image.ndim == 2:  # grayscale
             gray_image = image
-        elif image.ndim == 3 and image.shape[2] == 3:  # RGB
+        elif image.ndim == 3:  # RGB
+            gray_image = 0.299 * image[:, :, 0] + 0.587 * image[:, :, 1] + 0.114 * image[:, :, 2]
+        elif image.ndim == 4:
             gray_image = 0.299 * image[:, :, 0] + 0.587 * image[:, :, 1] + 0.114 * image[:, :, 2]
         else:
             raise ValueError("Image format non supporté")
