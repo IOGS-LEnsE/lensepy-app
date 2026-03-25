@@ -22,6 +22,8 @@ from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent,
 class AcquisitionView(QWidget):
     """Acquisition View."""
 
+    acquisition_started = pyqtSignal()
+
     def __init__(self, parent=None) -> None:
         """Default constructor of the class.
         :param parent: Parent widget or window of this widget.
@@ -32,13 +34,43 @@ class AcquisitionView(QWidget):
         self.setLayout(self.layout)
         ## Title of the widget
         self.layout.addWidget(make_hline())
+        self.label_alignment = QLabel(translate("label_alignment"))
+        self.label_alignment.setStyleSheet(styleH2)
+        self.label_alignment.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.label_alignment)
+        self.layout.addWidget(make_hline())
+        self.zoom_button = QPushButton(translate("zoom_button"))
+        self.zoom_button.setStyleSheet(unactived_button)
+        self.layout.addWidget(self.zoom_button)
+
+        self.layout.addStretch()
+
+        self.layout.addWidget(make_hline())
         self.label_acquisition = QLabel(translate("label_acquisition"))
         self.label_acquisition.setStyleSheet(styleH2)
         self.label_acquisition.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_acquisition)
         self.layout.addWidget(make_hline())
+        # Start acquisition - delete mask
+        self.start_acq_button = QPushButton(translate('start_acq_button'))
+        self.start_acq_button.setStyleSheet(unactived_button)
+        self.start_acq_button.setFixedHeight(BUTTON_HEIGHT)
+        self.start_acq_button.clicked.connect(self.handle_start_acquisition)
+        self.layout.addWidget(self.start_acq_button)
+
+        # Progression Bar
+        self.label_progress_bar = QLabel(translate('label_progress_acq_bar'))
+        self.label_progress_bar.setStyleSheet(styleH2)
+        self.progress_bar = QProgressBar(self)
+        self.progress_bar.setObjectName("IOGSProgressBar")
+        self.progress_bar.setStyleSheet(StyleSheet)
+        self.progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.label_progress_bar)
 
         self.layout.addStretch()
+
+    def handle_start_acquisition(self):
+        self.acquisition_started.emit()
 
     def _clear_layout(self, row: int, column: int) -> None:
         """Remove widgets from a specific position in the layout.
@@ -115,9 +147,9 @@ class PiezoControlView(QWidget):
         self.layout.addWidget(mini_widget)
         self.layout.addWidget(make_hline())
         self.slider = SliderBloc(translate('slider_piezo'), 'V', 0, 5)
+        self.slider.set_value(1)
         self.layout.addWidget(self.slider)
         self.layout.addStretch()
 
         # Signals
         self.slider.slider_changed.connect(lambda value: self.voltage_changed.emit(value))
-

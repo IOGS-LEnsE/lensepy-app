@@ -70,6 +70,9 @@ class CameraIDS:
         image = np.reshape(array, (self.height, self.width))
         return image
 
+    def is_connected(self):
+        return self.h_cam is not None
+
     @staticmethod
     def is_connected():
         """Test if almost one camera is connected."""

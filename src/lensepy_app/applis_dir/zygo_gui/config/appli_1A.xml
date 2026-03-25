@@ -27,6 +27,10 @@
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>
 	<module>
+		<name>images</name>
+		<location>lensepy_app.modules.optics.zygo</location>
+	</module>
+	<module>
 		<name>masks</name>
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>

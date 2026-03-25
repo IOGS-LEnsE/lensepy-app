@@ -8,6 +8,7 @@ from lensepy_app.appli._app.template_controller import TemplateController, Image
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget
 from lensepy_app.modules.optics.zygo.acquisition.ids_camera import *
 from lensepy_app.modules.optics.zygo.acquisition.acquisition_view import *
+from lensepy.optics.zygo.dataset import DataSet
 from lensepy.css import *
 
 
@@ -21,6 +22,8 @@ class ZygoAcquisitionController(TemplateController):
 
         """
         super().__init__(parent)
+        self.name = 'ZygoAcquisitionController'
+        self.data_set = DataSet()
 
         # Graphical layout
         self.top_left = ImageDisplayWidget()
@@ -33,6 +36,18 @@ class ZygoAcquisitionController(TemplateController):
         # Signals
         self.bot_right.voltage_changed.connect(self.handle_voltage_changed)
         self.bot_left.exposure_changed.connect(self.handle_exposure_changed)
+        self.top_right.acquisition_started.connect(self.handle_acquisition_started)
+
+    def handle_acquisition_started(self):
+        # TO DO - import from configuration !
+        volt_list = [0.80, 1.62, 2.43, 3.24, 4.05]
+        self.data_set.acquisition_mode.set_voltages(volt_list)
+
+        if self.data_set.acquisition_mode.is_possible():
+            self.data_set.acquisition_mode.start()
+            thread = threading.Thread(target=self.update_progress_bar)
+            time.sleep(0.01)
+            thread.start()
 
     def init_view(self):
         ## Test if a camera is connected
@@ -139,3 +154,17 @@ class ZygoAcquisitionController(TemplateController):
         self.top_left = new_widget
         self.parent.main_window.top_left_container = self.top_left
         self.update_view()
+
+    def cleanup(self):
+        """
+        Stop the camera cleanly and release resources.
+        """
+        print('CLEANUP Acquisition')
+        self.stop_live()
+        time.sleep(0.1)
+        camera = self.parent.variables["camera"]
+        if camera is not None:
+            camera.close()
+            camera.camera_acquiring = False
+        self.worker = None
+        self.thread = None

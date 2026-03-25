@@ -1,4 +1,4 @@
-import sys, os
+import sys, os, copy
 import lensepy_app
 from pathlib import Path
 from lensepy import translate, load_dictionary
@@ -22,6 +22,7 @@ class MainManager:
         self.list_modules = {}
         self.list_modules_name = []      # List of the required modules
         self.actual_module = 'default'
+        self.old_module = 'default'
         self.app_title = ''         # Title of the application
         self.app_logo = ''          # Logo (filepath) to display of the application
         self.variables = {}         # Application variables
@@ -86,10 +87,6 @@ class MainManager:
             self.xml_module = XMLFileModule(xml_path)
             self.controller = DefaultController(self)
         else:
-            # Delete old controller
-            if self.controller is not None:
-                if hasattr(self.controller, "cleanup"):
-                    self.controller.cleanup()
             # Find controller for actual module
             module_path = self.xml_app.get_module_path(self.actual_module)
             if module_path.startswith('./'):
@@ -108,7 +105,14 @@ class MainManager:
             def_lang = self.parent.config['default_lang']
             load_dictionary(f'{module_real_path}/lang/{def_lang}.txt')
             self.controller = controller_class(self)
+            # Delete old controller
+            if self.controller is not None:
+                if self.old_module != self.actual_module:
+                    print('SAME')
+                    if hasattr(self.controller, "cleanup"):
+                        self.old_controller.cleanup()
         self.controller.init_view()
+        self.old_module = copy.copy(self.actual_module)
 
     def init_list_modules(self):
         """

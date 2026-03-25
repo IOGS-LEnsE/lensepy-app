@@ -24,6 +24,7 @@ class DefaultController(TemplateController):
         """
         super().__init__(None)
         self.parent = parent # main manager
+        self.name = 'DefaultController'
         self.top_left = HTMLView()
         self.top_left.hide()
         self.top_right = ImageDisplayWidget(self)

@@ -23,6 +23,7 @@ class ZygoImagesController(TemplateController):
 
         """
         super().__init__(parent)
+        self.name = 'ZygoImagesController'
         self.mask_displayed = 0
 
         # Graphical layout

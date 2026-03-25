@@ -166,7 +166,12 @@ class MainWindow(QMainWindow):
         self.right_layout.setRowStretch(1, 0)
 
     def closeEvent(self, event):
+        if self.parent.controller is not None:
+            print('Controller closed')
+            if hasattr(self.parent.controller, "cleanup"):
+                self.parent.controller.cleanup()
         print('End of application')
+        event.accept()  # ou event.ignore()
 
     def resizeEvent(self, event):
         w_width = self.width()
