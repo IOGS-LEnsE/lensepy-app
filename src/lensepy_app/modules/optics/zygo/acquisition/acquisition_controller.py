@@ -39,7 +39,6 @@ class ZygoAcquisitionController(TemplateController):
             super().init_view()
             print('Camera connected')
         else:
-            '''
             print('Camera not connected')
             self.top_left = QLabel('No Camera is connected. \n'
                                    'Connect a camera first.\n'
@@ -48,7 +47,6 @@ class ZygoAcquisitionController(TemplateController):
             self.bot_left = QWidget()
             self.bot_right = QWidget()
             self.top_right = QWidget()
-            '''
             super().init_view()
 
     def handle_voltage_changed(self, value):
