@@ -37,6 +37,7 @@
     <variable name="dataset"/>
     <variable name="bits_depth"/>
     <variable name="camera"/>
+    <variable name="piezo"/>
     <variable name="dataset_loaded"/>
 	<variable name="mask_loaded"/>
 	<variable name="phase"/>

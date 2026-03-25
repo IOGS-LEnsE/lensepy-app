@@ -28,7 +28,8 @@ class NIDaqPiezo:
         self.name = None
         self.channel = 0
 
-    def is_piezo_here(self):
+    @staticmethod
+    def is_piezo_here():
         """
         Test if the piezo is connected.
         :return: True if piezo connected.
@@ -37,13 +38,20 @@ class NIDaqPiezo:
             ctypes.windll.LoadLibrary("nicaiu.dll")
             local_system = nidaqmx.system.System.local()
         except Exception:
-            print("nidaq_piezo.py / No Piezo connected")
             return False
         if len(local_system.devices) != 0:
-            device_first = local_system.devices[0]
-            self.name = device_first.name
             return True
         return False
+
+    def find_first_piezo(self):
+        try:
+            ctypes.windll.LoadLibrary("nicaiu.dll")
+            local_system = nidaqmx.system.System.local()
+        except Exception:
+            return False
+        device_first = local_system.devices[0]
+        self.name = device_first.name
+        return True
 
     def get_piezo(self):
         """Return the name of the piezo."""

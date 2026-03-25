@@ -23,6 +23,7 @@ class AcquisitionView(QWidget):
     """Acquisition View."""
 
     acquisition_started = pyqtSignal()
+    zoom_clicked = pyqtSignal()
 
     def __init__(self, parent=None) -> None:
         """Default constructor of the class.
@@ -42,18 +43,17 @@ class AcquisitionView(QWidget):
         self.zoom_button = QPushButton(translate("zoom_button"))
         self.zoom_button.setStyleSheet(unactived_button)
         self.layout.addWidget(self.zoom_button)
-
         self.layout.addStretch()
-
         self.layout.addWidget(make_hline())
         self.label_acquisition = QLabel(translate("label_acquisition"))
         self.label_acquisition.setStyleSheet(styleH2)
         self.label_acquisition.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_acquisition)
         self.layout.addWidget(make_hline())
-        # Start acquisition - delete mask
+        # Start acquisition
         self.start_acq_button = QPushButton(translate('start_acq_button'))
-        self.start_acq_button.setStyleSheet(unactived_button)
+        self.start_acq_button.setStyleSheet(disabled_button)
+        self.start_acq_button.setEnabled(False)
         self.start_acq_button.setFixedHeight(BUTTON_HEIGHT)
         self.start_acq_button.clicked.connect(self.handle_start_acquisition)
         self.layout.addWidget(self.start_acq_button)
@@ -66,11 +66,36 @@ class AcquisitionView(QWidget):
         self.progress_bar.setStyleSheet(StyleSheet)
         self.progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_progress_bar)
-
+        self.layout.addWidget(self.progress_bar)
         self.layout.addStretch()
 
+        # Signals
+        self.zoom_button.clicked.connect(self.handle_zoom_button)
+
+    def handle_zoom_button(self):
+        self.zoom_button.setEnabled(False)
+        self.zoom_button.setStyleSheet(actived_button)
+        self.zoom_clicked.emit()
+
+    def set_zoom_enabled(self, value=True):
+        if value:
+            self.zoom_button.setStyleSheet(unactived_button)
+        else:
+            self.zoom_button.setStyleSheet(disabled_button)
+        self.zoom_button.setEnabled(value)
+
     def handle_start_acquisition(self):
+        self.start_acq_button.setEnabled(False)
+        self.start_acq_button.setStyleSheet(actived_button)
         self.acquisition_started.emit()
+
+    def set_acq_enabled(self, value=True):
+        """Set the acquisition button enabled."""
+        if value:
+            self.start_acq_button.setStyleSheet(unactived_button)
+        else:
+            self.start_acq_button.setStyleSheet(disabled_button)
+        self.start_acq_button.setEnabled(value)
 
     def _clear_layout(self, row: int, column: int) -> None:
         """Remove widgets from a specific position in the layout.
@@ -118,6 +143,9 @@ class CameraParamsView(QWidget):
         # Signals
         self.slider_expo.slider_changed.connect(lambda value: self.exposure_changed.emit(value))
 
+    def set_enabled(self, value=True):
+        self.slider_expo.set_enabled(value)
+
 
 class PiezoControlView(QWidget):
     """Piezo Control View."""
@@ -147,9 +175,18 @@ class PiezoControlView(QWidget):
         self.layout.addWidget(mini_widget)
         self.layout.addWidget(make_hline())
         self.slider = SliderBloc(translate('slider_piezo'), 'V', 0, 5)
+        self.slider.set_enabled(False)
         self.slider.set_value(1)
         self.layout.addWidget(self.slider)
         self.layout.addStretch()
 
         # Signals
         self.slider.slider_changed.connect(lambda value: self.voltage_changed.emit(value))
+
+    def set_connected(self):
+        """Set Piezo connected. Change the color of the circle."""
+        self.circle_ok.change_color("green")
+        self.slider.set_enabled(True)
+
+    def set_enabled(self, value=True):
+        self.slider.set_enabled(value)

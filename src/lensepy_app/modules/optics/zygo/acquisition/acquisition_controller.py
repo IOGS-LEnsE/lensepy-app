@@ -1,12 +1,14 @@
 __all__ = ["ZygoAcquisitionController"]
 
 import numpy as np
-from PyQt6.QtCore import QThread
+from PyQt6.QtCore import QThread, QObject
+from PyQt6 import sip
 from PyQt6.QtWidgets import QWidget, QDialog, QLabel
 from lensepy import translate
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget
 from lensepy_app.modules.optics.zygo.acquisition.ids_camera import *
+from lensepy_app.modules.optics.zygo.acquisition.nidaq_piezo import *
 from lensepy_app.modules.optics.zygo.acquisition.acquisition_view import *
 from lensepy.optics.zygo.dataset import DataSet
 from lensepy.css import *
@@ -24,12 +26,20 @@ class ZygoAcquisitionController(TemplateController):
         super().__init__(parent)
         self.name = 'ZygoAcquisitionController'
         self.data_set = DataSet()
+        self.acquiring = False
+        self.camera_connected = False
+        self.piezo_connected = False
+        self.zoom_activated = False
+        self.volt_list = []
+        self.images = []
+        self.nb_images = 0
 
         # Graphical layout
         self.top_left = ImageDisplayWidget()
         self.top_right = AcquisitionView(self)
         self.bot_left = CameraParamsView()
         self.bot_right = PiezoControlView(self)
+        self.zoom_widget = ImageDisplayWidget()
         
         # Setup widgets
 
@@ -37,10 +47,20 @@ class ZygoAcquisitionController(TemplateController):
         self.bot_right.voltage_changed.connect(self.handle_voltage_changed)
         self.bot_left.exposure_changed.connect(self.handle_exposure_changed)
         self.top_right.acquisition_started.connect(self.handle_acquisition_started)
+        self.top_right.zoom_clicked.connect(self.handle_zoom_clicked)
 
     def handle_acquisition_started(self):
         # TO DO - import from configuration !
-        volt_list = [0.80, 1.62, 2.43, 3.24, 4.05]
+        self.volt_list = [0.80, 1.62, 2.43, 3.24, 4.05]
+        if self.get_variables("camera") is None or self.get_variables('piezo') is None:
+            print('NO PIEZO OR CAM')
+            # return
+        self.stop_live()
+        self.start_acquisition()
+        # Start live in a specific mode ?
+
+
+        '''
         self.data_set.acquisition_mode.set_voltages(volt_list)
 
         if self.data_set.acquisition_mode.is_possible():
@@ -48,12 +68,40 @@ class ZygoAcquisitionController(TemplateController):
             thread = threading.Thread(target=self.update_progress_bar)
             time.sleep(0.01)
             thread.start()
+        '''
+
+    def handle_zoom_clicked(self):
+        self.stop_live()
+        self.zoom_activated = True
+        self.zoom_widget.showMaximized()
+        self.zoom_widget.closeEvent = self.zoom_closed
+        self.start_live()
+
+    def zoom_closed(self, event):
+        """
+        Deactivate zoom window.
+        """
+        print('ZOOM CLOSED')
+        self.stop_live()
+        self.zoom_activated = False
+        self.top_right.set_zoom_enabled()
+        self.start_live()
 
     def init_view(self):
         ## Test if a camera is connected
         if CameraIDS.is_connected():
             # Check if camera is connected
             self.init_camera()
+            # Test if piezo connected ?
+            if NIDaqPiezo.is_piezo_here():
+                piezo = NIDaqPiezo()
+                if piezo.find_first_piezo():
+                    self.bot_right.set_connected()
+                    self.top_right.set_acq_enabled()
+                    # INIT PIEZO to move here
+                    self.set_variables('piezo', piezo)
+            self.top_right.set_acq_enabled()
+            self.init_piezo()   # only if piezo (to move - tab)
             super().init_view()
             self.start_live()
         else:
@@ -89,11 +137,27 @@ class ZygoAcquisitionController(TemplateController):
         else:
             self.camera_connected = True
 
+    def init_piezo(self):
+        """Initialization of the piezo wrapper."""
+        piezo = self.parent.variables["piezo"]
+        # Check if a piezo is connected
+        if piezo is None:
+            self.parent.variables["piezo"] = NIDaqPiezo()
+            self.piezo_connected = self.parent.variables["piezo"].find_first_piezo()
+            if self.piezo_connected is False:
+                self.parent.variables["piezo"] = None
+                return
+        else:
+            self.piezo_connected = True
+        piezo.set_channel(1)    # To change if Channel changed (default param)
+
     def start_live(self):
         """
         Start live acquisition from camera.
         """
+        print('LIVE - Start')
         if self.camera_connected:
+            self.acquiring = True
             self.thread = QThread()
             self.worker = ImageLive(self)
             self.worker.moveToThread(self.thread)
@@ -111,16 +175,19 @@ class ZygoAcquisitionController(TemplateController):
         """
         Stop live mode, i.e. continuous image acquisition.
         """
-        if self.worker is not None:
-            # Stop the worker
-            self.worker._running = False
-            # Wait for thread ending
-            if self.thread is not None:
-                self.thread.quit()
-                self.thread.wait()  # bloque jusqu'à la fin
-            # Free ressources
-            self.worker = None
-            self.thread = None
+        print('LIVE - Stop')
+        if self.acquiring:
+            if self.worker is not None:
+                # Stop the worker
+                self.worker._running = False
+                # Wait for thread ending
+                if self.thread is not None:
+                    self.thread.quit()
+                    self.thread.wait()  # bloque jusqu'à la fin
+                # Free ressources
+                self.worker = None
+                self.thread = None
+                self.acquiring = False
 
     def handle_image_ready(self, image: np.ndarray):
         """
@@ -128,9 +195,26 @@ class ZygoAcquisitionController(TemplateController):
         :param image:   Numpy array containing new image.
         """
         # Update Image
-        self.top_left.set_image_from_array(image)
+        if self.zoom_activated:
+            self.zoom_widget.set_image_from_array(image)
+        else:
+            self.top_left.set_image_from_array(image)
         # Store new image.
         self.parent.variables['image'] = image.copy()
+
+    def handle_acquisition_done(self, images, voltages):
+        print("ACQUISITION DONE")
+
+        # Stockage dans dataset
+        self.data_set.images = images
+        self.data_set.voltages = voltages
+
+        # Exemple : afficher la dernière image
+        if images:
+            self.top_left.set_image_from_array(images[-1])
+
+        # Tu peux lancer ton traitement ici
+        # ex : phase reconstruction
 
     def handle_exposure_changed(self, value):
         """
@@ -159,8 +243,8 @@ class ZygoAcquisitionController(TemplateController):
         """
         Stop the camera cleanly and release resources.
         """
-        print('CLEANUP Acquisition')
         self.stop_live()
+        self.stop_acquisition()
         time.sleep(0.1)
         camera = self.parent.variables["camera"]
         if camera is not None:
@@ -168,3 +252,185 @@ class ZygoAcquisitionController(TemplateController):
             camera.camera_acquiring = False
         self.worker = None
         self.thread = None
+        self.camera_connected = False
+        self.parent.variables["camera"] = None
+
+    def start_acquisition(self):
+        print('ACQQQ - Start')
+
+        self.top_right.set_zoom_enabled(False)
+        self.bot_right.set_enabled(False)
+        self.bot_left.set_enabled(False)
+
+        camera = self.parent.variables.get("camera")
+        piezo = self.parent.variables.get("piezo")
+
+        if camera is None:
+            return
+
+        self.thread = QThread()
+        self.worker = AcquisitionLive(self.volt_list, camera, piezo)
+
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.start)
+
+        self.worker.acquisition_done.connect(self.handle_acquisition_done)
+
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+
+        self.thread.start()
+
+    def stop_acquisition(self):
+        print('ACQQQ - Stop')
+
+        # Réactiver UI (protège avec blockSignals si besoin)
+        self.top_right.set_zoom_enabled()
+        self.bot_right.set_enabled()
+        self.bot_left.set_enabled()
+        self.top_right.set_acq_enabled()
+
+        # 🔥 SAFE STOP
+        if self.worker is not None:
+            try:
+                self.worker.stop()
+            except RuntimeError:
+                pass  # déjà deleted
+
+        if self.thread is not None:
+            try:
+                if self.thread.isRunning():
+                    self.thread.quit()
+                    self.thread.wait()
+            except RuntimeError:
+                pass  # déjà deleted
+
+        self.worker = None
+        self.thread = None
+
+
+class AcquisitionLive(QObject):
+    acquisition_ready = pyqtSignal(np.ndarray)
+    acquisition_done = pyqtSignal(list, list)  # images, voltages
+    finished = pyqtSignal()
+
+    def __init__(self, volt_list, camera, piezo=None,
+                 settle_ms=200, interval_ms=100):
+        super().__init__()
+
+        self.volt_list = volt_list
+        self.camera = camera
+        self.piezo = piezo
+
+        self.settle_ms = settle_ms
+        self.interval_ms = interval_ms
+
+        self.index = 0
+        self.images = []
+
+        self.timer = None  # ⚠️ créé dans start()
+        self.waiting_settle = False
+        self._running = False
+
+    # =========================
+    # 🚀 START (appelé par thread.started)
+    # =========================
+    def start(self):
+        print("Worker START")
+
+        if self.camera is None:
+            print("No camera")
+            self.finished.emit()
+            return
+
+        self._running = True
+        self.camera.camera_acquiring = True
+
+        self.index = 0
+        self.images = []
+        self.waiting_settle = False
+
+        # ✅ IMPORTANT : créer le timer dans CE thread
+        self.timer = QTimer()
+        self.timer.setSingleShot(True)  # on contrôle chaque étape
+        self.timer.timeout.connect(self._step)
+
+        self.timer.start(0)  # démarrage immédiat
+
+    # =========================
+    # 🔁 STEP (machine à états)
+    # =========================
+    def _step(self):
+        if not self._running:
+            self._finish()
+            return
+
+        # Fin acquisition
+        if self.index >= len(self.volt_list):
+            self._finish()
+            return
+
+        # -------------------------
+        # 1️⃣ Appliquer tension
+        # -------------------------
+        if not self.waiting_settle:
+            dac_val = self.volt_list[self.index]
+            print(f"DAC = {dac_val}")
+
+            if self.piezo is not None:
+                try:
+                    self.piezo.write_dac(dac_val)
+                except Exception as e:
+                    print(f"Piezo error: {e}")
+
+            self.waiting_settle = True
+            self.timer.start(self.settle_ms)
+            return
+
+        # -------------------------
+        # 2️⃣ Acquisition image
+        # -------------------------
+        image = None
+        try:
+            image = self.camera.get_image()
+        except Exception as e:
+            print(f"Camera error: {e}")
+
+        if image is not None:
+            self.images.append(image.copy())
+            self.acquisition_ready.emit(image)
+
+        self.index += 1
+        self.waiting_settle = False
+
+        # délai avant prochaine tension
+        self.timer.start(self.interval_ms)
+
+    # =========================
+    # 🛑 STOP externe
+    # =========================
+    def stop(self):
+        print("Worker STOP")
+        self._running = False
+
+        if self.timer is not None:
+            self.timer.stop()
+
+    # =========================
+    # 🏁 FIN propre
+    # =========================
+    def _finish(self):
+        print("Worker FINISH")
+
+        if self.timer is not None:
+            self.timer.stop()
+
+        if self.camera:
+            self.camera.camera_acquiring = False
+
+        # envoyer dataset complet
+        self.acquisition_done.emit(self.images, self.volt_list)
+
+        self.finished.emit()
+
