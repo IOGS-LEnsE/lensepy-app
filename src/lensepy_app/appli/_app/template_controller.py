@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 from PyQt6 import sip
 from PyQt6.QtCore import pyqtSignal, QObject, QThread
-from PyQt6.QtWidgets import QWidget, QMessageBox
+from PyQt6.QtWidgets import QWidget, QMessageBox, QFileDialog
 
 
 class TemplateController(QObject):
@@ -138,7 +138,6 @@ class ImageLive(QObject):
             return
 
         self._running = True
-        camera.open()
         camera.camera_acquiring = True
 
         while self._running:
@@ -148,7 +147,6 @@ class ImageLive(QObject):
             time.sleep(0.01)
 
         camera.camera_acquiring = False
-        camera.close()
         self.finished.emit()
 
     '''

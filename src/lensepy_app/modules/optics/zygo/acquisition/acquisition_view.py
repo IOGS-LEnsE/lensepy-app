@@ -78,7 +78,8 @@ class CameraParamsView(QWidget):
         self.label_camera_params.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_camera_params)
         self.layout.addWidget(make_hline())
-        self.slider_expo = SliderBloc(translate('slider_exposure'), 'ms', 0, 2000, integer=True)
+        self.slider_expo = SliderBloc(translate('slider_exposure'), 'ms', 10, 200, integer=True)
+        self.slider_expo.set_value(100)
         self.layout.addWidget(self.slider_expo)
         self.layout.addStretch()
 

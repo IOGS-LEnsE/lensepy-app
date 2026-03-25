@@ -4,37 +4,46 @@ import numpy as np
 
 class CameraIDS:
 
-    def __init__(self, camera_id=0):
-        self.h_cam = ueye.HIDS(camera_id)  # Handle de la caméra
+    def __init__(self):
+        self.h_cam = None  # Handle de la caméra
         self.mem_ptr = ueye.c_mem_p()
-        self.mem_id = ueye.INT()
-        self.width = 640
-        self.height = 480
-        self.color_mode = ueye.IS_CM_MONO8  # Par défaut : image monochrome
-        self.exposure = 10000  # en microsecondes
+        self.mem_id = ueye.int()
+        self.width = 0
+        self.height = 0
+        self.color_mode = ueye.IS_CM_MONO8  # Monochrome
+        self.exposure = ueye.double(100.0)  # microseconds
 
-        # Initialisation de la caméra
-        if ueye.is_InitCamera(self.h_cam, None) != ueye.IS_SUCCESS:
-            raise RuntimeError("Impossible d'initialiser la caméra IDS.")
+    def find_first_camera(self):
+        if not CameraIDS.is_connected():
+            return False
 
-        # Définir la taille de l'image
+        self.h_cam = ueye.HIDS(0)
+
+        # Camera initialization
+        ueye.is_InitCamera(self.h_cam, None)
+
+        ueye.is_SetBinning(self.h_cam, ueye.IS_BINNING_DISABLE)
+        ueye.is_SetSubSampling(self.h_cam, ueye.IS_SUBSAMPLING_DISABLE)
+
+        # AOI
         rect_aoi = ueye.IS_RECT()
-        rect_aoi.s32X = 0
-        rect_aoi.s32Y = 0
-        rect_aoi.s32Width = self.width
-        rect_aoi.s32Height = self.height
-        ueye.is_AOI(self.h_cam, ueye.IS_AOI_IMAGE_SET_AOI, rect_aoi, ueye.sizeof(rect_aoi))
+        ueye.is_AOI(self.h_cam, ueye.IS_AOI_IMAGE_GET_AOI, rect_aoi, ueye.sizeof(rect_aoi))
 
-        # Allouer la mémoire pour l'image
+        self.width = int(rect_aoi.s32Width)
+        self.height = int(rect_aoi.s32Height)
+
+        # Allocation of memory
         ueye.is_AllocImageMem(self.h_cam, self.width, self.height, 8, self.mem_ptr, self.mem_id)
         ueye.is_SetImageMem(self.h_cam, self.mem_ptr, self.mem_id)
 
-        # Activer le mode d'exposition automatique (facultatif)
-        ueye.is_Exposure(self.h_cam, ueye.IS_EXPOSURE_CMD_SET_EXPOSURE, self.exposure, ueye.sizeof(self.exposure))
+        # Start acquisition
+        ueye.is_CaptureVideo(self.h_cam, ueye.IS_DONT_WAIT)
+
+        return True
 
     def set_exposure(self, exposure_us):
         """Définir le temps d'intégration (microsecondes)"""
-        self.exposure = int(exposure_us)
+        self.exposure = ueye.double(exposure_us)
         ueye.is_Exposure(self.h_cam, ueye.IS_EXPOSURE_CMD_SET_EXPOSURE, self.exposure, ueye.sizeof(self.exposure))
 
     def set_color_mode(self, color=True):
@@ -47,9 +56,19 @@ class CameraIDS:
 
     def get_image(self):
         """Get an image as a numpy array."""
-        array = ueye.get_data(self.mem_ptr, self.width, self.height, 1, self.color_mode)
-        return np.reshape(array, (self.height, self.width, -1) if self.color_mode != ueye.IS_CM_MONO8
-        else (self.height, self.width))
+        ueye.is_CaptureVideo(self.h_cam, ueye.IS_DONT_WAIT)
+        pitch = ueye.int()
+        ueye.is_GetImageMemPitch(self.h_cam, pitch)
+        array = ueye.get_data(
+            self.mem_ptr,
+            self.width,
+            self.height,
+            8,  # bits per pixel (ex: 8 pour mono)
+            pitch,
+            True  # copy → IMPORTANT
+        )
+        image = np.reshape(array, (self.height, self.width))
+        return image
 
     @staticmethod
     def is_connected():
