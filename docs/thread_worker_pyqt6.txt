@@ -1,0 +1,41 @@
+Controller
+   │
+   │ start_acquisition()
+   ▼
++---------------------+
+| QThread             |  ← thread séparé
+|  (worker thread)    |
++---------------------+
+          │
+          │ moveToThread(worker)
+          ▼
++---------------------+
+| AcquisitionLive     |
+|  (QObject worker)   |
++---------------------+
+          │
+          │ start() called by thread.started
+          ▼
+    +-----------+
+    | QTimer    |  ← créé dans le thread du worker
+    +-----------+
+          │ timeout → _step()
+          ▼
+    ┌────────────────────────────┐
+    │ Machine à états (phase DAC │
+    │  → wait settle → image)   │
+    └────────────────────────────┘
+          │
+          │ emits
+          ▼
+   -------------------
+   | Signals Qt      |
+   |-----------------|
+   | acquisition_ready → Controller → update GUI (live) |
+   | acquisition_done  → Controller → store full dataset |
+   | finished          → thread.quit(), worker.deleteLater() |
+   -------------------
+          │
+          ▼
+    Controller GUI updates
+    safely (top_left, voltages, etc.)
