@@ -97,6 +97,12 @@ class AcquisitionView(QWidget):
             self.start_acq_button.setStyleSheet(disabled_button)
         self.start_acq_button.setEnabled(value)
 
+    def update_progress_bar(self, value):
+        """Update progress bar.
+        :param value:   value of progression, as integer between 0 and 100.
+        """
+        self.progress_bar.setValue(value)
+
     def _clear_layout(self, row: int, column: int) -> None:
         """Remove widgets from a specific position in the layout.
 

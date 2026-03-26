@@ -11,6 +11,7 @@ from lensepy_app.modules.optics.zygo.acquisition.ids_camera import *
 from lensepy_app.modules.optics.zygo.acquisition.nidaq_piezo import *
 from lensepy_app.modules.optics.zygo.acquisition.acquisition_view import *
 from lensepy.optics.zygo.dataset import DataSet
+from lensepy.optics.zygo.utils import generate_images_grid
 from lensepy.css import *
 
 
@@ -57,18 +58,6 @@ class ZygoAcquisitionController(TemplateController):
             # return
         self.stop_live()
         self.start_acquisition()
-        # Start live in a specific mode ?
-
-
-        '''
-        self.data_set.acquisition_mode.set_voltages(volt_list)
-
-        if self.data_set.acquisition_mode.is_possible():
-            self.data_set.acquisition_mode.start()
-            thread = threading.Thread(target=self.update_progress_bar)
-            time.sleep(0.01)
-            thread.start()
-        '''
 
     def handle_zoom_clicked(self):
         self.stop_live()
@@ -81,7 +70,6 @@ class ZygoAcquisitionController(TemplateController):
         """
         Deactivate zoom window.
         """
-        print('ZOOM CLOSED')
         self.stop_live()
         self.zoom_activated = False
         self.top_right.set_zoom_enabled()
@@ -155,7 +143,6 @@ class ZygoAcquisitionController(TemplateController):
         """
         Start live acquisition from camera.
         """
-        print('LIVE - Start')
         if self.camera_connected:
             self.acquiring = True
             self.thread = QThread()
@@ -175,7 +162,6 @@ class ZygoAcquisitionController(TemplateController):
         """
         Stop live mode, i.e. continuous image acquisition.
         """
-        print('LIVE - Stop')
         if self.acquiring:
             if self.worker is not None:
                 # Stop the worker
@@ -203,18 +189,27 @@ class ZygoAcquisitionController(TemplateController):
         self.parent.variables['image'] = image.copy()
 
     def handle_acquisition_done(self, images, voltages):
-        print("ACQUISITION DONE")
+        # Reinit UI
+        self.top_right.set_acq_enabled()
+        # Store new data in data_set
+        self.data_set.add_set_images(images)
+        self.set_variables('dataset', self.data_set)
 
-        # Stockage dans dataset
-        self.data_set.images = images
-        self.data_set.voltages = voltages
-
-        # Exemple : afficher la dernière image
+        # Display grid of images in an external view
         if images:
-            self.top_left.set_image_from_array(images[-1])
+            g_images = generate_images_grid(images)
+            self.zoom_widget.set_image_from_array(g_images)
+            self.zoom_activated = True
+            self.top_right.set_zoom_enabled(False)
+            self.zoom_widget.showMaximized()
+            self.zoom_widget.closeEvent = self.acquisition_closed
 
         # Tu peux lancer ton traitement ici
         # ex : phase reconstruction
+
+    def acquisition_closed(self, event):
+        self.zoom_activated = False
+        self.top_right.set_zoom_enabled()
 
     def handle_exposure_changed(self, value):
         """
@@ -256,8 +251,6 @@ class ZygoAcquisitionController(TemplateController):
         self.parent.variables["camera"] = None
 
     def start_acquisition(self):
-        print('ACQQQ - Start')
-
         self.top_right.set_zoom_enabled(False)
         self.bot_right.set_enabled(False)
         self.bot_left.set_enabled(False)
@@ -269,7 +262,7 @@ class ZygoAcquisitionController(TemplateController):
             return
 
         self.thread = QThread()
-        self.worker = AcquisitionLive(self.volt_list, camera, piezo)
+        self.worker = AcquisitionLive(self, self.volt_list, camera, piezo)
 
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.start)
@@ -283,31 +276,33 @@ class ZygoAcquisitionController(TemplateController):
         self.thread.start()
 
     def stop_acquisition(self):
-        print('ACQQQ - Stop')
+        if self.camera_connected:
+            # Reactivate UI
+            self.top_right.set_zoom_enabled()
+            self.bot_right.set_enabled()
+            self.bot_left.set_enabled()
+            self.top_right.set_acq_enabled()
 
-        # Réactiver UI (protège avec blockSignals si besoin)
-        self.top_right.set_zoom_enabled()
-        self.bot_right.set_enabled()
-        self.bot_left.set_enabled()
-        self.top_right.set_acq_enabled()
+            # 🔥 SAFE STOP
+            if self.worker is not None:
+                try:
+                    self.worker.stop()
+                except RuntimeError:
+                    pass  # déjà deleted
 
-        # 🔥 SAFE STOP
-        if self.worker is not None:
-            try:
-                self.worker.stop()
-            except RuntimeError:
-                pass  # déjà deleted
+            if self.thread is not None:
+                try:
+                    if self.thread.isRunning():
+                        self.thread.quit()
+                        self.thread.wait()
+                except RuntimeError:
+                    pass  # déjà deleted
 
-        if self.thread is not None:
-            try:
-                if self.thread.isRunning():
-                    self.thread.quit()
-                    self.thread.wait()
-            except RuntimeError:
-                pass  # déjà deleted
+            self.worker = None
+            self.thread = None
 
-        self.worker = None
-        self.thread = None
+    def update_progress_bar(self, value):
+        self.top_right.update_progress_bar(value)
 
 
 class AcquisitionLive(QObject):
@@ -315,10 +310,10 @@ class AcquisitionLive(QObject):
     acquisition_done = pyqtSignal(list, list)  # images, voltages
     finished = pyqtSignal()
 
-    def __init__(self, volt_list, camera, piezo=None,
-                 settle_ms=200, interval_ms=100):
+    def __init__(self, controller, volt_list, camera, piezo=None,
+                 settle_ms=400, interval_ms=10):
         super().__init__()
-
+        self.controller = controller
         self.volt_list = volt_list
         self.camera = camera
         self.piezo = piezo
@@ -329,18 +324,13 @@ class AcquisitionLive(QObject):
         self.index = 0
         self.images = []
 
-        self.timer = None  # ⚠️ créé dans start()
+        self.timer = None  # Created by start
         self.waiting_settle = False
         self._running = False
 
-    # =========================
-    # 🚀 START (appelé par thread.started)
-    # =========================
+    # Start thread / called by thread.started
     def start(self):
-        print("Worker START")
-
         if self.camera is None:
-            print("No camera")
             self.finished.emit()
             return
 
@@ -351,16 +341,14 @@ class AcquisitionLive(QObject):
         self.images = []
         self.waiting_settle = False
 
-        # ✅ IMPORTANT : créer le timer dans CE thread
+        # Create the timer
         self.timer = QTimer()
-        self.timer.setSingleShot(True)  # on contrôle chaque étape
+        self.timer.setSingleShot(True)  # To control each step time
         self.timer.timeout.connect(self._step)
 
-        self.timer.start(0)  # démarrage immédiat
+        self.timer.start(0)  # start timer
 
-    # =========================
-    # 🔁 STEP (machine à états)
-    # =========================
+    # State machine
     def _step(self):
         if not self._running:
             self._finish()
@@ -388,9 +376,7 @@ class AcquisitionLive(QObject):
             self.timer.start(self.settle_ms)
             return
 
-        # -------------------------
-        # 2️⃣ Acquisition image
-        # -------------------------
+        # Acquiring image
         image = None
         try:
             image = self.camera.get_image()
@@ -402,16 +388,14 @@ class AcquisitionLive(QObject):
             self.acquisition_ready.emit(image)
 
         self.index += 1
+        self.controller.update_progress_bar(int(100*self.index / len(self.volt_list)))
         self.waiting_settle = False
 
-        # délai avant prochaine tension
+        # Delay before next point
         self.timer.start(self.interval_ms)
 
-    # =========================
-    # 🛑 STOP externe
-    # =========================
+    # External stop
     def stop(self):
-        print("Worker STOP")
         self._running = False
 
         if self.timer is not None:
@@ -421,8 +405,6 @@ class AcquisitionLive(QObject):
     # 🏁 FIN propre
     # =========================
     def _finish(self):
-        print("Worker FINISH")
-
         if self.timer is not None:
             self.timer.stop()
 

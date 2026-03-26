@@ -1,4 +1,4 @@
-__all__ = ["ZygoInterferControlController"]
+__all__ = ["ZygoAberrationsController"]
 
 import numpy as np
 from PyQt6.QtWidgets import QWidget, QDialog
@@ -14,7 +14,7 @@ from lensepy_app.widgets.surface_2D_view import Surface2DView
 from lensepy_app.widgets.double_3d_view import Surface3DView, DoubleGraph3DView
 
 
-class ZygoInterferControlController(TemplateController):
+class ZygoAberrationsController(TemplateController):
     """
 
     """
@@ -81,9 +81,6 @@ class ZygoInterferControlController(TemplateController):
             for k in range(3):
                 self.process_zernike_calculation(k)
             self.data_set.set_analyzed_state()
-        self.set_variables('phase_calculated', True)
-        self.parent.update_menu()
-
 
     def correct_surface(self):
         self.unwrapped_phase = self.phase.get_unwrapped_phase()

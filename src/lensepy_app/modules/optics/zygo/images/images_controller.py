@@ -36,6 +36,7 @@ class ZygoImagesController(TemplateController):
 
         if self.get_variables('dataset') is not None:
             self.data_set = self.get_variables('dataset')
+            print('Data_set OK')
             if not self.data_set.is_empty():
                 self.update_images()
                 self.data_set.reset_processes()
