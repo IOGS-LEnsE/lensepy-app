@@ -3,9 +3,10 @@ from lensepy.optics.zygo.dataset import *
 from lensepy.optics.zygo.phase import *
 from lensepy.optics.zygo.zernike_coefficients import *
 from math import factorial
+import cv2
 
 # Get Data
-file_path = 'D:/_git/julien/lensepy-data/optics/zygo/test4.mat'
+file_path = 'D:/_git/julien/lensepy-data/optics/zygo/test5_V.mat'
 dataset = DataSet()
 dataset.load_images_set_from_file(file_path)
 dataset.load_masks_from_file(file_path)
@@ -21,19 +22,32 @@ zernike_coeffs.process_zernike_coefficient(36)
 unwrapped_phase = phase.get_unwrapped_phase()
 _, corrected_phase = zernike_coeffs.process_surface_correction(['piston', 'tilt'])
 
-print(type(corrected_phase))
-print(corrected_phase.dtype)
+data = unwrapped_phase.data
+mask = unwrapped_phase.mask
+
+filled = unwrapped_phase.filled(0)
+blurred = cv2.GaussianBlur(filled, (15, 15), 6)
+
+# Recréer un masked array avec le même masque
+unwrapped_phase = np.ma.array(blurred, mask=mask)
+
+pixel_size = 5.3e-6
+f_number = 12
+
 # -------------------------
 # 3️⃣ Front d'onde masqué
 # -------------------------
-W = corrected_phase               # np.ma.MaskedArray
-W_filled = W.filled(0.0)         # valeurs hors pupille = 0
-mask_pupil = ~W.mask              # True dans la pupille
+W = unwrapped_phase                 # np.ma.MaskedArray
+W_filled = W.filled(0.0)            # valeurs hors pupille = 0
+mask_pupil = ~W.mask                # True dans la pupille
 
 N = W.shape[0]
 y, x = np.indices((N, N))
 x = (x - N/2) / (N/2)
 y = (y - N/2) / (N/2)
+# centrage autour de zéro
+x_phys = x * pixel_size
+y_phys = y * pixel_size
 r = np.sqrt(x**2 + y**2)
 theta = np.arctan2(y, x)
 
@@ -94,12 +108,13 @@ W_rec[~pupil] = 0
 # -------------------------
 # 7️⃣ Pupille complexe correcte
 # -------------------------
-wavelength = 632.8e-9  # ex: HeNe
+wavelength = 1 #632.8e-9  # ex: HeNe
 P = np.zeros_like(W_rec, dtype=complex)
 P[pupil] = np.exp(1j * 2 * np.pi / wavelength * W_rec[pupil])
 
-print("Amplitude min/max pupille:", np.abs(P).min(), np.abs(P).max())
-print("Nombre de pixels pupille:", np.sum(np.abs(P) > 0))
+pixel_scale = wavelength * f_number  # m/pixel dans le plan focal
+x_psf = (np.arange(N) - N/2) * pixel_scale
+y_psf = (np.arange(N) - N/2) * pixel_scale
 
 # -------------------------
 # 8️⃣ PSF
@@ -140,13 +155,48 @@ encircled_energy /= encircled_energy.max()
 # 12️⃣ F-number
 # -------------------------
 f_number = 10
-pixel_scale = wavelength * f_number
+pixel_scale = wavelength * f_number  # m/pixel dans le plan focal
 x_psf = (np.arange(N) - N/2) * pixel_scale
+y_psf = (np.arange(N) - N/2) * pixel_scale
 
 
-print("Nombre de pixels pupille (masque géométrique + Zygo):", np.sum(pupil))
-print("Nombre de pixels masqués dans W:", np.sum(W.mask))
-print("Taille W:", W.shape)
+
+# Theory
+from scipy.special import j1
+
+# Coordonnées radiales dans le plan focal (en mètres)
+yy, xx = np.indices(PSF.shape)
+cx, cy = N//2, N//2
+
+r_pix = np.sqrt((xx - cx)**2 + (yy - cy)**2)
+r_phys = r_pix * pixel_scale  # m
+
+# Variable réduite
+u = np.pi * r_phys / (wavelength * f_number)
+
+# éviter division par 0
+u[cy, cx] = 1e-20
+
+# PSF idéale (Airy)
+PSF_airy = (2 * j1(u) / u)**2
+
+# normalisation
+PSF /= PSF.sum()
+PSF_airy /= PSF_airy.sum()
+
+center = N // 2
+
+plt.figure()
+plt.plot(x_psf*1e6, PSF[center, :], label="PSF mesurée")
+plt.plot(x_psf*1e6, PSF_airy[center, :], '--', label="Limite diffraction (Airy)")
+
+plt.yscale('log')
+plt.xlabel("Position (µm)")
+plt.ylabel("Intensité")
+plt.title("Comparaison PSF")
+plt.legend()
+plt.grid()
+plt.show()
 
 # -------------------------
 # 13️⃣ Affichage
@@ -170,13 +220,12 @@ plt.stem(coeffs)
 plt.xlabel("Index Noll")
 plt.ylabel("Coefficient (m)")
 plt.title("Coefficients de Zernike")
-'''
+
 plt.figure()
 plt.imshow(W_rec, cmap='RdBu')
 plt.colorbar(label='Front d’onde (m)')
 plt.title("Front d’onde reconstruit")
 
-'''
 error = (W_filled - W_rec) * pupil
 plt.figure()
 plt.imshow(error, cmap='RdBu')
@@ -191,22 +240,35 @@ plt.title("Phase optique")
 
 plt.figure()
 plt.imshow(np.abs(P), cmap='gray')
+plt.colorbar(label='Amplitude')
 plt.title("Amplitude pupille")
+'''
 
 plt.figure()
-plt.imshow(np.angle(P), cmap='twilight')
+plt.imshow(np.angle(P), cmap='twilight',
+           extent=[x_phys.min()*1e3, x_phys.max()*1e3, y_phys.min()*1e3, y_phys.max()*1e3])
 plt.colorbar(label='Phase')
 plt.title("Phase pupille")
 
+'''
 plt.figure()
-plt.imshow(PSF, cmap='inferno')
+plt.imshow(PSF, cmap='inferno',
+extent=[x_psf.min()*1e3, x_psf.max()*1e3, y_psf.min()*1e3, y_psf.max()*1e3])
 plt.colorbar()
 plt.title("PSF (linéaire)")
 
 plt.figure()
-plt.imshow(np.log10(PSF + 1e-12), cmap='inferno')
+plt.imshow(np.log10(PSF + 1e-12), cmap='gray',
+extent=[x_psf.min()*1e3, x_psf.max()*1e3, y_psf.min()*1e3, y_psf.max()*1e3])
 plt.colorbar(label='log10')
 plt.title("PSF (log)")
+'''
+
+plt.figure()
+plt.imshow(PSF**0.1, cmap='gray',
+extent=[x_psf.min()*1e3, x_psf.max()*1e3, y_psf.min()*1e3, y_psf.max()*1e3])
+plt.colorbar(label='log10')
+plt.title("PSF (gamma=0.1)")
 
 center = PSF.shape[0] // 2
 plt.figure()
@@ -234,5 +296,4 @@ plt.ylabel("Énergie normalisée")
 plt.title("Énergie encerclée")
 plt.grid()
 
-'''
 plt.show()
