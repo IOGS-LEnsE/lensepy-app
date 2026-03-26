@@ -214,6 +214,7 @@ for i in range(6):
     plt.title(f"Zernike {i+1}")
     plt.axis('off')
 plt.suptitle("Premiers modes de Zernike")
+'''
 
 plt.figure()
 plt.stem(coeffs)
@@ -226,6 +227,7 @@ plt.imshow(W_rec, cmap='RdBu')
 plt.colorbar(label='Front d’onde (m)')
 plt.title("Front d’onde reconstruit")
 
+'''
 error = (W_filled - W_rec) * pupil
 plt.figure()
 plt.imshow(error, cmap='RdBu')
@@ -242,7 +244,6 @@ plt.figure()
 plt.imshow(np.abs(P), cmap='gray')
 plt.colorbar(label='Amplitude')
 plt.title("Amplitude pupille")
-'''
 
 plt.figure()
 plt.imshow(np.angle(P), cmap='twilight',
@@ -250,7 +251,6 @@ plt.imshow(np.angle(P), cmap='twilight',
 plt.colorbar(label='Phase')
 plt.title("Phase pupille")
 
-'''
 plt.figure()
 plt.imshow(PSF, cmap='inferno',
 extent=[x_psf.min()*1e3, x_psf.max()*1e3, y_psf.min()*1e3, y_psf.max()*1e3])
@@ -278,10 +278,12 @@ plt.title("Coupe PSF")
 plt.xlabel("Pixels")
 plt.ylabel("Intensité")
 
+'''
 plt.figure()
 plt.imshow(MTF, cmap='viridis')
 plt.colorbar()
 plt.title("MTF")
+'''
 
 plt.figure()
 plt.plot(MTF[center, :])
