@@ -118,6 +118,9 @@ class TemplateController(QObject):
         """Action performed when the object is destroyed"""
         self.cleanup()
 
+    def cleanup(self):
+        pass
+
 
 class ImageLive(QObject):
     """

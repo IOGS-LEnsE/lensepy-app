@@ -2,7 +2,7 @@ __all__ = ['message_box', 'make_hline', 'make_vline',
            'SelectWidget', 'LabelWidget',
            'SliderBloc', 'VerticalGauge', 'LineEditWidget',
            'SliderBlocVertical', 'ImageDisplayWithCrosshair',
-           'ImageDisplayWidget', 'HistogramWidget',
+           'ImageDisplayWidget', 'HistogramWidget', 'XYChartWidget',
            'XYMultiChartWidget', 'CircleWidget',
            'ProgressBarView', 'QProgressBar']
 
@@ -11,6 +11,7 @@ from lensepy_app.widgets.widget_progress_bar import ProgressBarView, QProgressBa
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget, ImageDisplayWithCrosshair
 from lensepy_app.widgets.histogram_widget import HistogramWidget
 from lensepy_app.widgets.xy_multi_chart_widget import XYMultiChartWidget
+from lensepy_app.widgets.widget_xy_chart import XYChartWidget
 from PyQt6.QtCore import Qt, pyqtSignal, QRectF
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QComboBox,

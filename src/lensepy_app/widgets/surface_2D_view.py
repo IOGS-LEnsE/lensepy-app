@@ -42,7 +42,7 @@ class Surface2DView(QWidget):
     Class Surface 2D allowing to display a 2D array in a widget.
     """
 
-    def __init__(self, title: str='', colormap_2D='cividis'):
+    def __init__(self, title: str='', colormap_2D='cividis', adapt_size=14):
         """
         Default constructor.
         :param title: Title of the image to display.
@@ -52,6 +52,7 @@ class Surface2DView(QWidget):
         # Data
         self.array_2D = np.random.rand(20, 20)
         self.title = title
+        self.adapt_size = adapt_size
         self.z_axis_label = ''
         self.colormap_2D = colormap_2D
         # Graphic area for image
@@ -63,11 +64,11 @@ class Surface2DView(QWidget):
         self.plot.setBackground('lightgray')
         self.color_bar = None
         layout.addWidget(self.plot)
-        self.plot.setTitle(self.title, color="b", size="14pt")
+        self.plot.setTitle(self.title, color="b", size=f"{self.adapt_size}pt")
 
     def set_title(self, title:str):
         self.title = title
-        self.plot.setTitle(self.title, color="b", size="14pt")
+        self.plot.setTitle(self.title, color="b", size=f"{self.adapt_size}pt")
 
     def set_array(self, array: np.ndarray):
         """
@@ -89,9 +90,12 @@ class Surface2DView(QWidget):
         self.plot.hideButtons()
         self.plot.showAxes(True)
         self.plot.invertY(True)
+        font = QFont("Arial", self.adapt_size)
+        for ax in ["left", "bottom"]:
+            self.plot.getAxis(ax).setTickFont(font)
 
         axis = self.color_bar.axis
-        font = QFont("Arial", 14)
+        font = QFont("Arial", self.adapt_size)
         axis.setTickFont(font)
 
 

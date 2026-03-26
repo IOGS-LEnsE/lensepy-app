@@ -24,8 +24,6 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent, QResizeEvent, QFont
 
-MINIMUM_WIDTH = 75
-
 class InterferControlView(QWidget):
     """Images Choice."""
 
@@ -144,32 +142,38 @@ class PVRMSView(QWidget):
     Class to display PV (Peak-to-Valley) and RMS value of a wavefront.
     """
 
-    def __init__(self):
+    def __init__(self, size=''):
         """
         Default constructor.
         """
         super().__init__()
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
+        if size == '':
+            style_L = styleL
+            style_T = styleT
+            MINIMUM_WIDTH = 75
+        else:
+            style_L = styleL_s
+            style_T = styleT_s
+            MINIMUM_WIDTH = 40
 
-        styleL = f"font-size:14px; padding:0px; color:{ORANGE_IOGS}; font-weight: bold;"
-        styleT = f"font-size:14px; padding:5px; font-weight: bold; background-color: white;"
         self.label_PV = QLabel(translate('label_PV'))
-        self.label_PV.setStyleSheet(styleL)
+        self.label_PV.setStyleSheet(style_L)
         self.text_PV = QLabel()
-        self.text_PV.setStyleSheet(styleT)
+        self.text_PV.setStyleSheet(style_T)
         self.text_PV.setMinimumWidth(MINIMUM_WIDTH)
         self.text_PV.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.unit_PV = QLabel()
-        self.unit_PV.setMinimumWidth(MINIMUM_WIDTH)
+        self.unit_PV.setMinimumWidth(MINIMUM_WIDTH//2)
         self.label_RMS = QLabel(translate('label_RMS'))
-        self.label_RMS.setStyleSheet(styleL)
+        self.label_RMS.setStyleSheet(style_L)
         self.text_RMS = QLabel()
-        self.text_RMS.setStyleSheet(styleT)
+        self.text_RMS.setStyleSheet(style_T)
         self.text_RMS.setMinimumWidth(MINIMUM_WIDTH)
         self.text_RMS.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.unit_RMS = QLabel()
-        self.unit_RMS.setMinimumWidth(MINIMUM_WIDTH)
+        self.unit_RMS.setMinimumWidth(MINIMUM_WIDTH//2)
         self.layout.addWidget(self.label_PV)
         self.layout.addWidget(self.text_PV)
         self.layout.addWidget(self.unit_PV)

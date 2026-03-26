@@ -84,7 +84,6 @@ class ZygoInterferControlController(TemplateController):
         self.set_variables('phase_calculated', True)
         self.parent.update_menu()
 
-
     def correct_surface(self):
         self.unwrapped_phase = self.phase.get_unwrapped_phase()
         _, self.corrected_phase = self.zernike_coeffs.process_surface_correction(['piston', 'tilt'])
