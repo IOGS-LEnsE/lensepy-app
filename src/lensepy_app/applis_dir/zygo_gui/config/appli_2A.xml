@@ -46,6 +46,10 @@
 		<name>aberrations</name>
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>
+	<module>
+		<name>simulation</name>
+		<location>lensepy_app.modules.optics.zygo</location>
+	</module>
     <variable name="dataset"/>
     <variable name="bits_depth"/>
     <variable name="camera"/>

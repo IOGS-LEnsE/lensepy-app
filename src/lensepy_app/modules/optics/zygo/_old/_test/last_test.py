@@ -6,7 +6,8 @@ from math import factorial
 import cv2
 
 # Get Data
-file_path = 'D:/_git/julien/lensepy-data/optics/zygo/test5_V.mat'
+# file_path = 'D:/_git/julien/lensepy-data/optics/zygo/test5_V.mat'
+file_path = 'D:/tools/git_repo/LEnsE/lensepy-data/optics/zygo/test5_V.mat'
 dataset = DataSet()
 dataset.load_images_set_from_file(file_path)
 dataset.load_masks_from_file(file_path)
@@ -96,6 +97,9 @@ for j in range(1, 37):
     den = np.sum(Zj**2 * pupil)
     coeffs.append(num / den)
     Z.append(Zj)
+
+print(f'Coeffs = {type(coeffs)} / Dtype = {type(coeffs[0])}')
+print(f'Z = {type(Z[0])}')
 
 # -------------------------
 # 6️⃣ Reconstruction du front d'onde
