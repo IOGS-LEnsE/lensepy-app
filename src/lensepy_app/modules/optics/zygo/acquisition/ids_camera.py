@@ -16,7 +16,6 @@ class CameraIDS:
     def find_first_camera(self):
         if not CameraIDS.is_connected():
             return False
-
         self.h_cam = ueye.HIDS(0)
 
         # Camera initialization

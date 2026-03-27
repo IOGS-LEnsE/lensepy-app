@@ -208,7 +208,6 @@ class CoefficientsView(QWidget):
         self.init_view()
 
     def init_view(self):
-        print('Init')
         for k in range(self.number+1):
             slider = SliderBlocVertical(f'C{k}', '',-5,5)
             slider.slider_changed.connect(self.handle_slider_changed)

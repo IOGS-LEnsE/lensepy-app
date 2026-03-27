@@ -80,6 +80,7 @@ class ZygoAcquisitionController(TemplateController):
         if CameraIDS.is_connected():
             # Check if camera is connected
             self.init_camera()
+            '''
             # Test if piezo connected ?
             if NIDaqPiezo.is_piezo_here():
                 piezo = NIDaqPiezo()
@@ -90,6 +91,7 @@ class ZygoAcquisitionController(TemplateController):
                     self.set_variables('piezo', piezo)
             self.top_right.set_acq_enabled()
             self.init_piezo()   # only if piezo (to move - tab)
+            '''
             super().init_view()
             self.start_live()
         else:
@@ -117,11 +119,12 @@ class ZygoAcquisitionController(TemplateController):
             else:
                 # Initial parameters
                 camera_ini_file = self.parent.parent.config.get('camera_ini')
-                ''' NOT WORKING
+
+            '''
                 if os.path.isfile(camera_ini_file):
                     camera.init_camera_parameters(camera_ini_file)
                     print(f'Camera ini file {camera_ini_file} successfully initialized.')
-                '''
+            '''
         else:
             self.camera_connected = True
 
