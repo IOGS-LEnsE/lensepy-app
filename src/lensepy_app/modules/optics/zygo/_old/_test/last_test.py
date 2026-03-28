@@ -6,8 +6,8 @@ from math import factorial
 import cv2
 
 # Get Data
-# file_path = 'D:/_git/julien/lensepy-data/optics/zygo/test5_V.mat'
-file_path = 'D:/tools/git_repo/LEnsE/lensepy-data/optics/zygo/test5_V.mat'
+file_path = 'D:/_git/julien/lensepy-data/optics/zygo/test5_V.mat'
+#file_path = 'D:/tools/git_repo/LEnsE/lensepy-data/optics/zygo/test5_V.mat'
 dataset = DataSet()
 dataset.load_images_set_from_file(file_path)
 dataset.load_masks_from_file(file_path)
@@ -100,6 +100,9 @@ for j in range(1, 37):
 
 print(f'Coeffs = {type(coeffs)} / Dtype = {type(coeffs[0])}')
 print(f'Z = {type(Z[0])}')
+coeffs[0] = 0
+coeffs[1] = 0
+coeffs[2] = 0
 
 # -------------------------
 # 6️⃣ Reconstruction du front d'onde
@@ -112,9 +115,9 @@ W_rec[~pupil] = 0
 # -------------------------
 # 7️⃣ Pupille complexe correcte
 # -------------------------
-wavelength = 1 #632.8e-9  # ex: HeNe
+wavelength = 632.8e-9  # ex: HeNe
 P = np.zeros_like(W_rec, dtype=complex)
-P[pupil] = np.exp(1j * 2 * np.pi / wavelength * W_rec[pupil])
+P[pupil] = np.exp(1j * W_rec[pupil])  # COrrecte en divisant par lambda
 
 pixel_scale = wavelength * f_number  # m/pixel dans le plan focal
 x_psf = (np.arange(N) - N/2) * pixel_scale
@@ -189,7 +192,7 @@ PSF /= PSF.sum()
 PSF_airy /= PSF_airy.sum()
 
 center = N // 2
-
+'''
 plt.figure()
 plt.plot(x_psf*1e6, PSF[center, :], label="PSF mesurée")
 plt.plot(x_psf*1e6, PSF_airy[center, :], '--', label="Limite diffraction (Airy)")
@@ -201,7 +204,7 @@ plt.title("Comparaison PSF")
 plt.legend()
 plt.grid()
 plt.show()
-
+'''
 # -------------------------
 # 13️⃣ Affichage
 # -------------------------
@@ -219,13 +222,13 @@ for i in range(6):
     plt.axis('off')
 plt.suptitle("Premiers modes de Zernike")
 '''
-
+'''
 plt.figure()
 plt.stem(coeffs)
 plt.xlabel("Index Noll")
 plt.ylabel("Coefficient (m)")
 plt.title("Coefficients de Zernike")
-
+'''
 plt.figure()
 plt.imshow(W_rec, cmap='RdBu')
 plt.colorbar(label='Front d’onde (m)')
@@ -244,17 +247,18 @@ plt.imshow(phase_opt, cmap='twilight')
 plt.colorbar(label='Phase (rad)')
 plt.title("Phase optique")
 
+'''
 plt.figure()
 plt.imshow(np.abs(P), cmap='gray')
 plt.colorbar(label='Amplitude')
 plt.title("Amplitude pupille")
 
 plt.figure()
-plt.imshow(np.angle(P), cmap='twilight',
+plt.imshow(np.angle(P), cmap='RdBu',
            extent=[x_phys.min()*1e3, x_phys.max()*1e3, y_phys.min()*1e3, y_phys.max()*1e3])
 plt.colorbar(label='Phase')
 plt.title("Phase pupille")
-
+'''
 plt.figure()
 plt.imshow(PSF, cmap='inferno',
 extent=[x_psf.min()*1e3, x_psf.max()*1e3, y_psf.min()*1e3, y_psf.max()*1e3])
@@ -266,7 +270,6 @@ plt.imshow(np.log10(PSF + 1e-12), cmap='gray',
 extent=[x_psf.min()*1e3, x_psf.max()*1e3, y_psf.min()*1e3, y_psf.max()*1e3])
 plt.colorbar(label='log10')
 plt.title("PSF (log)")
-'''
 
 plt.figure()
 plt.imshow(PSF**0.1, cmap='gray',
@@ -282,12 +285,10 @@ plt.title("Coupe PSF")
 plt.xlabel("Pixels")
 plt.ylabel("Intensité")
 
-'''
 plt.figure()
 plt.imshow(MTF, cmap='viridis')
 plt.colorbar()
 plt.title("MTF")
-'''
 
 plt.figure()
 plt.plot(MTF[center, :])
@@ -302,4 +303,5 @@ plt.ylabel("Énergie normalisée")
 plt.title("Énergie encerclée")
 plt.grid()
 
+'''
 plt.show()

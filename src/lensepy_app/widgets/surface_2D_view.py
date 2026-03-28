@@ -24,6 +24,7 @@ import pyqtgraph.exporters
 from pyqtgraph.Qt import QtWidgets
 from pyqtgraph import ColorMap
 from matplotlib import colormaps as cm
+from matplotlib import pyplot as plt
 
 pg.setConfigOptions(imageAxisOrder='row-major')
 
@@ -55,8 +56,7 @@ class Surface2DView(QWidget):
         self.adapt_size = adapt_size
         self.z_axis_label = ''
         self.colormap_2D = colormap_2D
-        # Graphic area for image
-        self.imv = pg.ImageItem(image=self.array_2D)
+
         # Création du layout principal
         layout = QHBoxLayout()
         self.setLayout(layout)
@@ -66,11 +66,22 @@ class Surface2DView(QWidget):
         layout.addWidget(self.plot)
         self.plot.setTitle(self.title, color="b", size=f"{self.adapt_size}pt")
 
+        # Graphic area for image
+        self.imv = pg.ImageItem(image=self.array_2D)
+        self.plot.addItem(self.imv)
+        pg_cmap = pg.colormap.getFromMatplotlib(self.colormap_2D)
+        self.imv.setColorMap(pg_cmap)
+        pen = QPen(QColor('black'))
+        self.color_bar = self.plot.addColorBar(
+            self.imv, colorMap=pg_cmap, interactive=False, pen=pen
+        )
+
+
     def set_title(self, title:str):
         self.title = title
         self.plot.setTitle(self.title, color="b", size=f"{self.adapt_size}pt")
 
-    def set_array(self, array: np.ndarray):
+    def set_array2(self, array: np.ndarray):
         """
         Set an array to the surface viewer.
         :param array: Array to display.
@@ -98,6 +109,26 @@ class Surface2DView(QWidget):
         font = QFont("Arial", self.adapt_size)
         axis.setTickFont(font)
 
+    def set_array(self, array: np.ndarray):
+        if isinstance(array, np.ma.MaskedArray):
+            self.array_2D = array.filled(np.nan)  # remplace les masques par NaN
+        else:
+            self.array_2D = array
+
+        # 🔥 update image uniquement
+        self.imv.setImage(self.array_2D)
+        self.plot.setAspectLocked(True)
+
+        '''
+        pen = QPen(QColor('black'))
+        pg_cmap = pg.colormap.getFromMatplotlib(self.colormap_2D)
+
+        self.color_bar = self.plot.addColorBar(
+            self.imv, colorMap=pg_cmap, interactive=False, pen=pen
+        )
+
+        self.imv.setColorMap(pg_cmap)
+        '''
 
     def set_z_axis_label(self, label: str):
         """

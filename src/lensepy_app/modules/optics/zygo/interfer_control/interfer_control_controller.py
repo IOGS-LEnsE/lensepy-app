@@ -86,6 +86,7 @@ class ZygoInterferControlController(TemplateController):
 
     def correct_surface(self):
         self.unwrapped_phase = self.phase.get_unwrapped_phase()
+        print(f'Unwrap DTYPE = {self.unwrapped_phase.dtype} Type = {type(self.unwrapped_phase)}')
         _, self.corrected_phase = self.zernike_coeffs.process_surface_correction(['piston', 'tilt'])
         pv, rms = process_statistics_surface(self.unwrapped_phase)
         self.bot_left.set_pv_uncorrected(pv, '\u03BB')

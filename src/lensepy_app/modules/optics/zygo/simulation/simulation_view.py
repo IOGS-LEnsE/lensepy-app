@@ -27,7 +27,7 @@ import numpy as np
 class SimulationChoiceView(QWidget):
     """Images Choice."""
 
-    analyses_changed = pyqtSignal(str)
+    display_changed = pyqtSignal(str)
     wedge_changed = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
@@ -59,13 +59,14 @@ class SimulationChoiceView(QWidget):
         self.layout.addWidget(make_hline())
         self.layout.addWidget(self.label_pv_rms_uncorrected)
         self.layout.addWidget(self.pv_rms_uncorrected)
-        self.layout.addWidget(self.label_pv_rms_corrected)
-        self.layout.addWidget(self.pv_rms_corrected)
         self.layout.addWidget(make_hline())
         self.layout.addStretch()
         self.layout.addWidget(make_hline())
 
 
+        self.angle_button = QPushButton("Angle")
+        self.angle_button.setStyleSheet(unactived_button)
+        self.angle_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
         self.psf_button = QPushButton("PSF")
         self.psf_button.setStyleSheet(unactived_button)
         self.psf_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
@@ -82,6 +83,7 @@ class SimulationChoiceView(QWidget):
         self.cir_button.setStyleSheet(unactived_button)
         self.cir_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
 
+        self.layout.addWidget(self.angle_button)
         self.layout.addWidget(self.psf_button)
         self.layout.addWidget(self.airy_button)
         self.layout.addWidget(self.mtf_button)
@@ -118,6 +120,13 @@ class SimulationChoiceView(QWidget):
         sender = self.sender()
         self.inactivate_buttons()
         sender.setStyleSheet(actived_button)
+        if sender == self.angle_button:
+            self.display_changed.emit('angle')
+        elif sender == self.psf_button:
+            self.display_changed.emit('PSF')
+        elif sender == self.airy_button:
+            self.display_changed.emit('airy')
+
 
     def set_pv_uncorrected(self, value: float, unit: str = '\u03BB'):
         """
@@ -134,22 +143,6 @@ class SimulationChoiceView(QWidget):
         :param unit: Unit of the RMS value.
         """
         self.pv_rms_uncorrected.set_rms(value, unit)
-
-    def set_pv_corrected(self, value: float, unit: str = '\u03BB'):
-        """
-        Update the value and the unit of the PV value.
-        :param value: value of the peak-to-valley.
-        :param unit: Unit of the PV value.
-        """
-        self.pv_rms_corrected.set_pv(value, unit)
-
-    def set_rms_corrected(self, value: float, unit: str = '\u03BB'):
-        """
-        Update the value and the unit of the RMS value.
-        :param value: value of the RMS.
-        :param unit: Unit of the RMS value.
-        """
-        self.pv_rms_corrected.set_rms(value, unit)
 
     def _clear_layout(self, row: int, column: int) -> None:
         """Remove widgets from a specific position in the layout.
@@ -173,8 +166,13 @@ class SimulationChoiceView(QWidget):
         Erase PV and RMS values.
         """
         self.pv_rms_uncorrected.erase_pv_rms()
-        self.pv_rms_corrected.erase_pv_rms()
 
+
+coeff_order = [1, 1, 1, 3, 3, 3, 3, 3, 5, 5,
+               5, 5, 5, 5, 5, 7, 7, 7, 7, 7,
+               7, 7, 7, 7, 9, 9, 9, 9, 9, 9,
+               9, 9, 9, 9, 9, 11]
+coeff_colors = ['orange', 'lightblue', 'red', 'green', 'cyan', 'magenta']
 
 class CoefficientsView(QWidget):
 
@@ -208,8 +206,10 @@ class CoefficientsView(QWidget):
         self.init_view()
 
     def init_view(self):
-        for k in range(self.number+1):
-            slider = SliderBlocVertical(f'C{k}', '',-5,5)
+        for k in range(self.number):
+            slider = SliderBlocVertical(f'C{k+1}', '',-1,1)
+            color = coeff_colors[coeff_order[k]//2]
+            slider.set_background_color(color)
             slider.slider_changed.connect(self.handle_slider_changed)
             self.sliders.append(slider)
             self.sliders[k].set_value(0)

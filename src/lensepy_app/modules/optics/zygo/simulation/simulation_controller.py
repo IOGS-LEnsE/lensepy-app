@@ -10,6 +10,7 @@ from lensepy.optics.zygo import *
 from lensepy_app import *
 from lensepy_app.widgets.surface_2D_view import Surface2DView
 
+from matplotlib import pyplot as plt
 
 class ZygoSimulationController(TemplateController):
     """
@@ -27,10 +28,11 @@ class ZygoSimulationController(TemplateController):
         self.colormap_2D = 'plasma'
         self.corrected_phase = None
         self.simulated_phase = SimulatedPhase()
+        self.new_surface = None
 
         # Graphical layout
         self.top_left = Surface2DView('', self.colormap_2D)
-        self.bot_left = CoefficientsView(self, number=15)
+        self.bot_left = CoefficientsView(self, number=8)
         self.bot_right = QWidget()
         self.top_right = SimulationChoiceView()
         
@@ -38,17 +40,40 @@ class ZygoSimulationController(TemplateController):
 
         # Signals
         self.bot_left.sliders_changed.connect(self.handle_coeffs_changed)
+        self.top_right.display_changed.connect(self.handle_display_changed)
 
     def init_view(self):
-        super().init_view()
-
-    def handle_coeffs_changed(self, index, value):
-        print(f'Slider changed / {index} = {value}')
         coeffs = self.bot_left.get_coeffs()
         self.simulated_phase.set_coefficients(coeffs)
-        surface = self.simulated_phase.process_surface()
-        self.top_left.set_array(surface)
+        self.new_surface, _ = self.simulated_phase.process_surface()
+        self.top_left.set_array(self.new_surface)
+        self.top_left.reset_z_range()
+        self.top_left.set_title(translate('unwrapped_notilt_surface'))
+        self.update_pv_rms()
+        super().init_view()
 
+    def handle_display_changed(self, value):
+        print(value)
+        from matplotlib import pyplot as plt
+        plt.figure()
+        if value == 'angle':
+            c_pupil, x_psf, y_psf = self.simulated_phase.get_complex_pupil()
+            print(f'Complex = {c_pupil.dtype}')
+            plt.imshow(np.angle(c_pupil))
+            plt.colorbar()
+        elif value == 'PSF':
+            pass
+
+        plt.show()
+
+    def handle_coeffs_changed(self, index, value):
+        coeffs = self.bot_left.get_coeffs()
+        self.simulated_phase.set_coefficients(coeffs)
+        self.new_surface, _ = self.simulated_phase.process_surface()
+        self.top_left.set_array(self.new_surface)
+        self.top_left.reset_z_range()
+        self.top_left.set_title(translate('unwrapped_notilt_surface'))
+        self.update_pv_rms()
 
     def replace_top_left_widget(self, new_widget):
         self.parent.main_window.top_left_container.deleteLater()
@@ -56,16 +81,7 @@ class ZygoSimulationController(TemplateController):
         self.parent.main_window.top_left_container = self.top_left
         self.update_view()
 
-    def display_2D_unwrapped(self, gain=1):
-        """
-        Display unwrapped phase in 2D at the bottom right corner.
-        """
-        unwrapped_array = self.corrected_phase.filled(np.nan)
-        title = translate('unwrapped_notilt_surface')
-        # Display unwrapped and corrected in 2D
-        self.bot_right.set_title(title)
-        self.bot_right.set_array(unwrapped_array * gain)
-
-    def process_zernike_calculation(self, coeff: int):
-        """Process Zernike coefficients for correction."""
-        self.zernike_coeffs.process_zernike_coefficient(coeff)
+    def update_pv_rms(self):
+        pv, rms = process_statistics_surface(self.new_surface)
+        self.top_right.set_rms_uncorrected(rms)
+        self.top_right.set_pv_uncorrected(pv)

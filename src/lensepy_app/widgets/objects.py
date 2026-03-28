@@ -317,6 +317,7 @@ class SliderBlocVertical(QWidget):
         self.max_value = max_value
         self.ratio = 1 if integer else 100
         self.value = 0
+        self.background_color = 'white'
 
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -324,7 +325,7 @@ class SliderBlocVertical(QWidget):
 
         # Slider title
         self.label_name = QLabel(name)
-        self.label_name.setStyleSheet(styleH2)
+        self.label_name.setStyleSheet(f'{styleH2};background-color: {self.background_color}')
         self.label_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_name)
 
@@ -433,6 +434,10 @@ class SliderBlocVertical(QWidget):
     def set_enabled(self, enabled: bool):
         self.slider.setEnabled(enabled)
         self.lineedit_value.setEnabled(enabled)
+
+    def set_background_color(self, bg_color):
+        self.background_color = bg_color
+        self.label_name.setStyleSheet(f"{styleH2};background-color: {self.background_color}")
 
     @staticmethod
     def _clamp(val, vmin, vmax):
