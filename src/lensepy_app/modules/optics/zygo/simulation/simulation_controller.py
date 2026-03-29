@@ -57,25 +57,14 @@ class ZygoSimulationController(TemplateController):
         from matplotlib import pyplot as plt
         plt.figure()
         if value == 'angle':
-            c_pupil, x_psf, y_psf, _ = self.simulated_phase.get_complex_pupil()
+            c_pupil, N = self.simulated_phase.get_complex_pupil()
             print(f'Complex = {c_pupil.dtype}')
             plt.imshow(np.angle(c_pupil))
             plt.colorbar()
         elif value == 'PSF':
-            c_pupil, x_psf, y_psf, _ = self.simulated_phase.get_complex_pupil()
-            N = c_pupil.shape[0]
-            # FFT with padding
-            pad_factor = 4
-            U_padded_perfect = np.zeros((pad_factor * N, pad_factor * N), dtype=complex)
-            U_padded_perfect[N // 2:N // 2 + N, N // 2:N // 2 + N] = c_pupil
-            PSF_perfect = np.abs(np.fft.fftshift(np.fft.fft2(U_padded_perfect))) ** 2
-            # Centering
-            center = pad_factor * N // 2
-            half_width = N // 2
-            PSF_center_perfect = PSF_perfect[
-                center - half_width:center + half_width, center - half_width:center + half_width]
-            PSF_center_perfect /= PSF_center_perfect.max()
-            plt.imshow(PSF_center_perfect)
+            c_pupil, N = self.simulated_phase.get_complex_pupil()
+            psf_c, psf_perfect = self.simulated_phase.get_psf()
+            plt.imshow(psf_c)
             plt.colorbar()
 
         plt.show()

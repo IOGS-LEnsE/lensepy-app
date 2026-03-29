@@ -101,6 +101,7 @@ class SimulationChoiceView(QWidget):
         self.focal_view = FocalView(self)
         self.cir_view = CircledEnergyView(self)
         '''
+        self.angle_button.clicked.connect(self.update_action)
         self.psf_button.clicked.connect(self.update_action)
         self.airy_button.clicked.connect(self.update_action)
         self.mtf_button.clicked.connect(self.update_action)
@@ -110,6 +111,7 @@ class SimulationChoiceView(QWidget):
         # Setup Plugin
 
     def inactivate_buttons(self):
+        self.angle_button.setStyleSheet(unactived_button)
         self.psf_button.setStyleSheet(unactived_button)
         self.airy_button.setStyleSheet(unactived_button)
         self.mtf_button.setStyleSheet(unactived_button)
