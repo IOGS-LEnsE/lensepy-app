@@ -56,6 +56,8 @@ class ZygoSimulationController(TemplateController):
         self.top_left.set_title(translate('unwrapped_notilt_surface'))
         self.update_pv_rms()
         c_pupil, N = self.simulated_phase.get_complex_pupil()
+        psf = PSFModel(self.simulated_phase)
+        self.psf_display, self.psf_display_perfect = psf.get_psf()
         super().init_view()
 
     def _create_2D_display(self):
@@ -63,8 +65,8 @@ class ZygoSimulationController(TemplateController):
         return widget
 
     def _create_xy_chart(self):
-        widget = XYChartWidget()
-        widget.set_background('lightgray')
+        widget = TwoChartWidget()
+        widget.set_background('white')
         return widget
 
 
@@ -93,11 +95,18 @@ class ZygoSimulationController(TemplateController):
             self.bot_right.set_array(surface)
             psf_slice = self.psf_display[N//2, :]
             psf_p_slice = self.psf_display_perfect[N//2, :]
+            psf_slice_y = self.psf_display[:, N//2]
+            psf_p_slice_y = self.psf_display_perfect[:, N//2]
             psf_x = np.arange(1, N+1, 1)
             xy_chart = self._create_xy_chart()
-            xy_chart.set_data(psf_x, [psf_slice, psf_p_slice])
-            xy_chart.set_legend([translate('psf_real_disp_legend'),
+            xy_chart.set_data1(psf_x, [psf_slice, psf_p_slice])
+            xy_chart.set_legend1([translate('psf_real_disp_legend'),
                                  translate('psf_perf_disp_legend')])
+            xy_chart.set_title1(translate('psf_in_x_axe'))
+            xy_chart.set_data2(psf_x, [psf_slice_y, psf_p_slice_y])
+            xy_chart.set_legend2([translate('psf_real_y_disp_legend'),
+                                 translate('psf_perf_y_disp_legend')])
+            xy_chart.set_title2(translate('psf_in_y_axe'))
             self.replace_top_left_widget(xy_chart)
             self.top_left.refresh_chart()
         self.update_view()

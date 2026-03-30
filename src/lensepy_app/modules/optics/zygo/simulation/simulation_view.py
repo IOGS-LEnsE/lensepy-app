@@ -24,6 +24,42 @@ from lensepy.images import slice_image
 
 import numpy as np
 
+class TwoChartWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.chart_1 = XYChartWidget()
+        self.chart_2 = XYChartWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(self.chart_1)
+        layout.addWidget(self.chart_2)
+        self.setLayout(layout)
+
+    def set_background(self, color):
+        self.chart_1.set_background(color)
+        self.chart_2.set_background(color)
+
+    def set_data1(self, x_axis, y_axis, x_label: str = '', y_label: str = ''):
+        self.chart_1.set_data(x_axis, y_axis, x_label, y_label)
+
+    def set_legend1(self, y_legend, x=0, y=0):
+        self.chart_1.set_legend(y_legend, x, y)
+
+    def set_legend2(self, y_legend, x=0, y=0):
+        self.chart_2.set_legend(y_legend, x, y)
+
+    def set_data2(self, x_axis, y_axis, x_label: str = '', y_label: str = ''):
+        self.chart_2.set_data(x_axis, y_axis, x_label, y_label)
+
+    def set_title1(self, title):
+        self.chart_1.set_title(title)
+
+    def set_title2(self, title):
+        self.chart_2.set_title(title)
+
+    def refresh_chart(self):
+        self.chart_1.refresh_chart()
+        self.chart_2.refresh_chart()
+
 class SimulationChoiceView(QWidget):
     """Images Choice."""
 
@@ -62,6 +98,10 @@ class SimulationChoiceView(QWidget):
         self.layout.addWidget(make_hline())
         self.layout.addStretch()
         self.layout.addWidget(make_hline())
+        self.switch_scale = SwitchWidget('\u03BB','nm')
+        self.layout.addWidget(self.switch_scale)
+        self.layout.addWidget(make_hline())
+        self.layout.addStretch()
 
 
         self.angle_button = QPushButton("surface_display")
