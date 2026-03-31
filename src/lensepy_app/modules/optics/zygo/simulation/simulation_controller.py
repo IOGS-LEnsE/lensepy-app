@@ -33,6 +33,7 @@ class ZygoSimulationController(TemplateController):
         self.psf_display = None
         self.psf_display_perfect = None
         self.mode_display = 'surface'
+        self.wavelength = 632.8 # nm
 
         # Graphical layout
         self.top_left = Surface2DView('', self.colormap_2D)
@@ -42,9 +43,11 @@ class ZygoSimulationController(TemplateController):
         
         # Setup widgets
         self.bot_right.hide()
+        self.top_right.set_wavelength(self.wavelength)
         # Signals
         self.bot_left.sliders_changed.connect(self.handle_coeffs_changed)
         self.top_right.display_changed.connect(self.handle_display_changed)
+        self.top_right.wavelength_changed.connect(self.handle_wavelength_changed)
 
     def init_view(self):
         coeffs = self.bot_left.get_coeffs()
@@ -69,6 +72,8 @@ class ZygoSimulationController(TemplateController):
         widget.set_background('white')
         return widget
 
+    def handle_wavelength_changed(self, value):
+        print(f'Value = {value}')
 
     def handle_display_changed(self, value):
         self.mode_display = value

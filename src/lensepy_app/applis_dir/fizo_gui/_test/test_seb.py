@@ -17,21 +17,41 @@ from skimage.restoration import unwrap_phase
 
 def cercle_par_3_points(p1, p2, p3):
 
-    x1, y1 = p1
-    x2, y2 = p2
-    x3, y3 = p3
-    
-    A = np.array([[2*(x2-x1), 2*(y2-y1)], [2*(x3-x1), 2*(y3-y1)]])
-    B = np.array([x2**2 + y2**2 - x1**2 - y1**2, x3**2 + y3**2 - x1**2 - y1**2])
+x1, y1 = p1
 
-    xc, yc = np.linalg.solve(A, B)
-    R = np.sqrt((x1-xc)**2 + (y1-yc)**2)
-    return xc, yc, R
+x2, y2 = p2
+
+x3, y3 = p3
+
+
+A = np.array([
+
+[2*(x2-x1), 2*(y2-y1)],
+
+[2*(x3-x1), 2*(y3-y1)]
+
+])
+
+B = np.array([
+
+x2**2 + y2**2 - x1**2 - y1**2,
+
+x3**2 + y3**2 - x1**2 - y1**2
+
+])
+
+
+xc, yc = np.linalg.solve(A, B)
+
+R = np.sqrt((x1-xc)**2 + (y1-yc)**2)
+
+
+return xc, yc, R
 
 
 # -------- Chargement et affichage interférogramme 
 
-img = img_as_float(io.imread("interference.png", as_gray=True))
+img = img_as_float(io.imread("interfero.png", as_gray=True))
 
 N, M = img.shape 
 

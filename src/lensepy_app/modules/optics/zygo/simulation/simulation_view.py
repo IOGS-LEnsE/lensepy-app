@@ -65,6 +65,7 @@ class SimulationChoiceView(QWidget):
 
     display_changed = pyqtSignal(str)
     wedge_changed = pyqtSignal(str)
+    wavelength_changed = pyqtSignal(str)
 
     def __init__(self, parent=None) -> None:
         """Default constructor of the class.
@@ -85,11 +86,11 @@ class SimulationChoiceView(QWidget):
         # PV/RMS displayed (for uncorrected phase)
         self.label_pv_rms_uncorrected = QLabel(translate('label_pv_rms_uncorrected'))
         self.label_pv_rms_uncorrected.setStyleSheet(styleH3)
-        self.pv_rms_uncorrected = PVRMSView(size='s')
+        self.pv_rms_uncorrected = PVRMSView()
         # PV/RMS displayed (for corrected phase)
         self.label_pv_rms_corrected = QLabel(translate('label_pv_rms_uncorrected'))
         self.label_pv_rms_corrected.setStyleSheet(styleH3)
-        self.pv_rms_corrected = PVRMSView(size='s')
+        self.pv_rms_corrected = PVRMSView()
 
         # Add graphical elements to the layout.
         self.layout.addWidget(make_hline())
@@ -98,11 +99,12 @@ class SimulationChoiceView(QWidget):
         self.layout.addWidget(make_hline())
         self.layout.addStretch()
         self.layout.addWidget(make_hline())
+        self.wavelength_label = LineEditWidget(translate("wavelength_label"), units='nm')
+        self.layout.addWidget(self.wavelength_label)
         self.switch_scale = SwitchWidget('\u03BB','nm')
         self.layout.addWidget(self.switch_scale)
         self.layout.addWidget(make_hline())
         self.layout.addStretch()
-
 
         self.angle_button = QPushButton("surface_display")
         self.angle_button.setStyleSheet(unactived_button)
@@ -156,6 +158,8 @@ class SimulationChoiceView(QWidget):
         self.mtf_button.clicked.connect(self.update_action)
         self.foca_button.clicked.connect(self.update_action)
         self.cir_button.clicked.connect(self.update_action)
+        self.wavelength_label.edit_changed.connect(lambda:
+                                                   self.wavelength_changed.emit(self.wavelength_label.get_value()))
 
         # Setup Plugin
 
@@ -167,6 +171,9 @@ class SimulationChoiceView(QWidget):
         self.mtf_button.setStyleSheet(unactived_button)
         self.foca_button.setStyleSheet(unactived_button)
         self.cir_button.setStyleSheet(unactived_button)
+
+    def set_wavelength(self, value):
+        self.wavelength_label.set_value(str(value))
 
     def update_action(self):
         sender = self.sender()

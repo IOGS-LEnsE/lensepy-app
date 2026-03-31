@@ -450,11 +450,12 @@ class LineEditWidget(QWidget):
     Widget for line edit, including a title.
     """
     edit_changed = pyqtSignal(str)
-    def __init__(self, title:str='', value='', parent=None):
+    def __init__(self, title:str='', value='', units='', parent=None):
         super().__init__(None)
         layout = QHBoxLayout()
         self.setLayout(layout)
         self.value = value
+        self.units = units
 
         # Label
         self.label = QLabel(title)
@@ -465,6 +466,10 @@ class LineEditWidget(QWidget):
         self.line_edit.textEdited.connect(self.handle_input_changed)
         self.line_edit.editingFinished.connect(self.handle_input_changed_finish)
         layout.addWidget(self.line_edit, 2)
+        # Label for units
+        self.units_label = QLabel(self.units)
+        if units != '':
+            layout.addWidget(self.units_label, 1)
 
     def update_block(self):
         """Sync text."""
@@ -502,6 +507,9 @@ class LineEditWidget(QWidget):
         :param value:   True or False.
         """
         self.line_edit.setEnabled(value)
+
+    def get_value(self):
+        return self.line_edit.text()
 
 
 class VerticalGauge(QWidget):
