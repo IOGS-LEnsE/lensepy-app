@@ -106,21 +106,18 @@ class SimulationChoiceView(QWidget):
         self.layout.addWidget(make_hline())
         self.layout.addStretch()
 
-        self.angle_button = QPushButton("surface_display")
+        self.angle_button = QPushButton(translate('surface_display'))
         self.angle_button.setStyleSheet(unactived_button)
         self.angle_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.psf_button = QPushButton("PSF")
+        self.psf_button = QPushButton(translate('psf_button'))
         self.psf_button.setStyleSheet(unactived_button)
         self.psf_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.psf_slice_button = QPushButton("PSF Slice")
+        self.psf_slice_button = QPushButton(translate('psf_slice_button'))
         self.psf_slice_button.setStyleSheet(unactived_button)
         self.psf_slice_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.airy_button = QPushButton("Airy")
-        self.airy_button.setStyleSheet(unactived_button)
-        self.airy_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.mtf_button = QPushButton("MTF")
-        self.mtf_button.setStyleSheet(unactived_button)
-        self.mtf_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.ftm_button = QPushButton(translate('ftm_button'))
+        self.ftm_button.setStyleSheet(unactived_button)
+        self.ftm_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
         self.foca_button = QPushButton("Focal view")
         self.foca_button.setStyleSheet(unactived_button)
         self.foca_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
@@ -132,9 +129,9 @@ class SimulationChoiceView(QWidget):
         self.layout.addWidget(self.psf_button)
         self.layout.addWidget(self.psf_slice_button)
         self.layout.addWidget(make_hline())
-        self.layout.addWidget(self.airy_button)
+        self.layout.addStretch()
         self.layout.addWidget(make_hline())
-        self.layout.addWidget(self.mtf_button)
+        self.layout.addWidget(self.ftm_button)
         self.layout.addWidget(make_hline())
         self.layout.addWidget(self.foca_button)
         self.layout.addWidget(make_hline())
@@ -154,8 +151,7 @@ class SimulationChoiceView(QWidget):
         self.angle_button.clicked.connect(self.update_action)
         self.psf_button.clicked.connect(self.update_action)
         self.psf_slice_button.clicked.connect(self.update_action)
-        self.airy_button.clicked.connect(self.update_action)
-        self.mtf_button.clicked.connect(self.update_action)
+        self.ftm_button.clicked.connect(self.update_action)
         self.foca_button.clicked.connect(self.update_action)
         self.cir_button.clicked.connect(self.update_action)
         self.wavelength_label.edit_changed.connect(lambda:
@@ -167,8 +163,7 @@ class SimulationChoiceView(QWidget):
         self.angle_button.setStyleSheet(unactived_button)
         self.psf_button.setStyleSheet(unactived_button)
         self.psf_slice_button.setStyleSheet(unactived_button)
-        self.airy_button.setStyleSheet(unactived_button)
-        self.mtf_button.setStyleSheet(unactived_button)
+        self.ftm_button.setStyleSheet(unactived_button)
         self.foca_button.setStyleSheet(unactived_button)
         self.cir_button.setStyleSheet(unactived_button)
 
@@ -185,8 +180,8 @@ class SimulationChoiceView(QWidget):
             self.display_changed.emit('PSF')
         elif sender == self.psf_slice_button:
             self.display_changed.emit('PSF_slice')
-        elif sender == self.airy_button:
-            self.display_changed.emit('airy')
+        elif sender == self.ftm_button:
+            self.display_changed.emit('ftm')
 
 
     def set_pv_uncorrected(self, value: float, unit: str = '\u03BB'):

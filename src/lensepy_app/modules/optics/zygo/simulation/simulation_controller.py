@@ -61,6 +61,7 @@ class ZygoSimulationController(TemplateController):
         c_pupil, N = self.simulated_phase.get_complex_pupil()
         psf = PSFModel(self.simulated_phase)
         self.psf_display, self.psf_display_perfect = psf.get_psf()
+        self.ftm, self.ftm_perfect = psf.get_ftm()
         super().init_view()
 
     def _create_2D_display(self):
@@ -95,26 +96,43 @@ class ZygoSimulationController(TemplateController):
             disp_2D.reset_z_range()
             self.replace_top_left_widget(disp_2D)
         elif value == 'PSF_slice':
-            self.bot_right.show()
-            self.bot_right.reset_z_range()
-            self.bot_right.set_array(surface)
-            psf_slice = self.psf_display[N//2, :]
-            psf_p_slice = self.psf_display_perfect[N//2, :]
-            psf_slice_y = self.psf_display[:, N//2]
-            psf_p_slice_y = self.psf_display_perfect[:, N//2]
-            psf_x = np.arange(1, N+1, 1)
-            xy_chart = self._create_xy_chart()
-            xy_chart.set_data1(psf_x, [psf_slice, psf_p_slice])
-            xy_chart.set_legend1([translate('psf_real_disp_legend'),
-                                 translate('psf_perf_disp_legend')])
-            xy_chart.set_title1(translate('psf_in_x_axe'))
-            xy_chart.set_data2(psf_x, [psf_slice_y, psf_p_slice_y])
-            xy_chart.set_legend2([translate('psf_real_y_disp_legend'),
-                                 translate('psf_perf_y_disp_legend')])
-            xy_chart.set_title2(translate('psf_in_y_axe'))
-            self.replace_top_left_widget(xy_chart)
-            self.top_left.refresh_chart()
+            self.process_psf_slice()
+        elif value == 'ftm':
+            self.process_ftm()
         self.update_view()
+
+    def process_psf_slice(self):
+        surface, N = self.simulated_phase.get_surface()
+        self.bot_right.show()
+        self.bot_right.reset_z_range()
+        self.bot_right.set_array(surface)
+        psf_slice = self.psf_display[N // 2, :]
+        psf_p_slice = self.psf_display_perfect[N // 2, :]
+        psf_slice_y = self.psf_display[:, N // 2]
+        psf_p_slice_y = self.psf_display_perfect[:, N // 2]
+        psf_x = np.arange(1, N + 1, 1)
+        xy_chart = self._create_xy_chart()
+        xy_chart.set_data1(psf_x, [psf_slice, psf_p_slice])
+        xy_chart.set_legend1([translate('psf_real_disp_legend'),
+                              translate('psf_perf_disp_legend')])
+        xy_chart.set_title1(translate('psf_in_x_axe'))
+        xy_chart.set_data2(psf_x, [psf_slice_y, psf_p_slice_y])
+        xy_chart.set_legend2([translate('psf_real_y_disp_legend'),
+                              translate('psf_perf_y_disp_legend')])
+        xy_chart.set_title2(translate('psf_in_y_axe'))
+        self.replace_top_left_widget(xy_chart)
+        self.top_left.refresh_chart()
+
+    def process_ftm(self):
+        surface, N = self.simulated_phase.get_surface()
+        self.bot_right.show()
+        self.bot_right.reset_z_range()
+        self.bot_right.set_array(surface)
+        disp_2D = self._create_2D_display()
+        disp_2D.set_array(self.ftm)
+        disp_2D.set_title(translate('ftm_display'))
+        disp_2D.reset_z_range()
+        self.replace_top_left_widget(disp_2D)
 
     def handle_coeffs_changed(self, index, value):
         coeffs = self.bot_left.get_coeffs()
@@ -125,6 +143,7 @@ class ZygoSimulationController(TemplateController):
         # Process PSF
         psf = PSFModel(self.simulated_phase)
         self.psf_display, self.psf_display_perfect = psf.get_psf()
+        self.ftm, self.ftm_perfect = psf.get_ftm()
         self.update_pv_rms()
         self.handle_display_changed(self.mode_display)
 
