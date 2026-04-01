@@ -149,6 +149,45 @@ class PVRMSView(QWidget):
         super().__init__()
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
+
+        self.pv_label = LabelWidget(translate('label_PV'), size=size)
+        self.rms_label = LabelWidget(translate('label_RMS'), size=size)
+
+        self.layout.addStretch()
+        self.layout.addWidget(self.pv_label)
+        self.layout.addStretch()
+        self.layout.addWidget(self.rms_label)
+        self.layout.addStretch()
+
+    def set_pv(self, value: float, unit: str = ''):
+        """
+        Update the value and the unit of the PV value.
+        :param value: value of the peak-to-valley.
+        :param unit: Unit of the PV value.
+        """
+        self.pv_label.set_value(str(value), unit)
+
+    def set_rms(self, value: float, unit: str = ''):
+        """
+        Update the value and the unit of the RMS value.
+        :param value: value of the RMS.
+        :param unit: Unit of the RMS value.
+        """
+        self.rms_label.set_value(str(value), unit)
+
+    def erase_pv_rms(self):
+        """
+        Erase PV and RMS values.
+        """
+        self.pv_label.set_value('', '')
+        self.rms_label.set_value('', '')
+
+
+class LabelWidget(QWidget):
+
+    def __init__(self, title='', value='', unit='', parent=None, size=''):
+        super().__init__(parent)
+
         if size == '':
             style_L = styleL
             style_T = styleT
@@ -158,57 +197,24 @@ class PVRMSView(QWidget):
             style_T = styleT_s
             MINIMUM_WIDTH = 40
 
-        self.label_PV = QLabel(translate('label_PV'))
-        self.label_PV.setStyleSheet(style_L)
-        self.text_PV = QLabel()
-        self.text_PV.setStyleSheet(style_T)
-        self.text_PV.setMinimumWidth(MINIMUM_WIDTH)
-        self.text_PV.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.unit_PV = QLabel()
-        self.unit_PV.setMinimumWidth(MINIMUM_WIDTH//2)
-        self.label_RMS = QLabel(translate('label_RMS'))
-        self.label_RMS.setStyleSheet(style_L)
-        self.text_RMS = QLabel()
-        self.text_RMS.setStyleSheet(style_T)
-        self.text_RMS.setMinimumWidth(MINIMUM_WIDTH)
-        self.text_RMS.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.unit_RMS = QLabel()
-        self.unit_RMS.setMinimumWidth(MINIMUM_WIDTH//2)
-        self.layout.addWidget(self.label_PV)
-        self.layout.addWidget(self.text_PV)
-        self.layout.addWidget(self.unit_PV)
-        self.layout.addStretch()
-        self.layout.addWidget(self.label_RMS)
-        self.layout.addWidget(self.text_RMS)
-        self.layout.addWidget(self.unit_RMS)
-        self.layout.addStretch()
+        layout = QHBoxLayout()
 
-    def set_pv(self, value: float, unit: str = ''):
-        """
-        Update the value and the unit of the PV value.
-        :param value: value of the peak-to-valley.
-        :param unit: Unit of the PV value.
-        """
-        self.text_PV.setText(str(value))
-        self.unit_PV.setText(unit)
+        self.label = QLabel(title)
+        self.label.setStyleSheet(style_L)
+        self.text = QLabel(value)
+        self.text.setStyleSheet(style_T)
+        self.text.setMinimumWidth(MINIMUM_WIDTH)
+        self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.unit = QLabel(unit)
+        self.unit.setMinimumWidth(MINIMUM_WIDTH//2)
+        layout.addWidget(self.label)
+        layout.addWidget(self.text)
+        layout.addWidget(self.unit)
+        self.setLayout(layout)
 
-    def set_rms(self, value: float, unit: str = ''):
-        """
-        Update the value and the unit of the RMS value.
-        :param value: value of the RMS.
-        :param unit: Unit of the RMS value.
-        """
-        self.text_RMS.setText(str(value))
-        self.unit_RMS.setText(unit)
-
-    def erase_pv_rms(self):
-        """
-        Erase PV and RMS values.
-        """
-        self.text_PV.setText('')
-        self.unit_PV.setText('')
-        self.text_RMS.setText('')
-        self.unit_RMS.setText('')
+    def set_value(self, value, unit=''):
+        self.text.setText(str(value))
+        self.unit.setText(unit)
 
 
 class SurfaceChoiceView(QWidget):

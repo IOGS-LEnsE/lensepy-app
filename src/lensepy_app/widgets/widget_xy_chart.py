@@ -115,14 +115,12 @@ class XYChartWidget(QWidget):
         self.x_label = x_label
         self.y_label = y_label
         self.y_name = ''
-        self.x_legend = 0
-        self.y_legend = 0
+        self.legend_position = 'top_right'
 
-    def set_legend(self, y_legend, x=0, y=0):
-        """Add a legend to the graph."""
+    def set_legend(self, y_legend, position="top_right"):
+        """Add a legend to the graph with predefined positions."""
         self.y_name = y_legend
-        self.x_legend = x
-        self.y_legend = y
+        self.legend_position = position
 
     def set_y_range(self, min_val, max_val):
         """Set Y axis range."""
@@ -137,8 +135,17 @@ class XYChartWidget(QWidget):
         self.plot_chart_widget.clear()
         if self.y_name != '':
             legend = self.plot_chart_widget.addLegend()
-            if self.y_legend != 0 or self.x_legend !=0:
-                legend.setOffset((self.x_legend, self.y_legend))
+
+            # Positions prédéfinies
+            positions = {
+                "top_left": (10, 10),
+                "top_right": (-10, 10),
+                "bottom_right": (-10, -10),
+            }
+
+            if hasattr(self, "legend_position"):
+                offset = positions.get(self.legend_position, (10, 10))
+                legend.setOffset(offset)
 
         if self.nb_data == 1:
             if last != 0:

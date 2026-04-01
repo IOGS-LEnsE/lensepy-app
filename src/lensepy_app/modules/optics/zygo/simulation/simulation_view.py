@@ -24,6 +24,8 @@ from lensepy.images import slice_image
 
 import numpy as np
 
+BUTTON_WIDTH = 50
+
 class TwoChartWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -41,11 +43,11 @@ class TwoChartWidget(QWidget):
     def set_data1(self, x_axis, y_axis, x_label: str = '', y_label: str = ''):
         self.chart_1.set_data(x_axis, y_axis, x_label, y_label)
 
-    def set_legend1(self, y_legend, x=0, y=0):
-        self.chart_1.set_legend(y_legend, x, y)
+    def set_legend1(self, y_legend, position='top_right'):
+        self.chart_1.set_legend(y_legend, position=position)
 
-    def set_legend2(self, y_legend, x=0, y=0):
-        self.chart_2.set_legend(y_legend, x, y)
+    def set_legend2(self, y_legend, position='top_right'):
+        self.chart_2.set_legend(y_legend, position=position)
 
     def set_data2(self, x_axis, y_axis, x_label: str = '', y_label: str = ''):
         self.chart_2.set_data(x_axis, y_axis, x_label, y_label)
@@ -97,45 +99,41 @@ class SimulationChoiceView(QWidget):
         self.layout.addWidget(self.label_pv_rms_uncorrected)
         self.layout.addWidget(self.pv_rms_uncorrected)
         self.layout.addWidget(make_hline())
-        self.layout.addStretch()
-        self.layout.addWidget(make_hline())
-        self.wavelength_label = LineEditWidget(translate("wavelength_label"), units='nm')
-        self.layout.addWidget(self.wavelength_label)
+        ##
+        widget_nm = QWidget()
+        layout_nm = QHBoxLayout()
+        widget_nm.setLayout(layout_nm)
         self.switch_scale = SwitchWidget('\u03BB','nm')
-        self.layout.addWidget(self.switch_scale)
+        self.wavelength_label = LineEditWidget(translate("wavelength_label"), units='nm')
+        layout_nm.addWidget(self.switch_scale)
+        layout_nm.addWidget(self.wavelength_label)
+        self.layout.addWidget(widget_nm)
+        ##
+        self.layout.addWidget(make_hline())
+        self.strehl_label = LabelWidget(translate("strehl_label"))
+        self.layout.addWidget(self.strehl_label)
         self.layout.addWidget(make_hline())
         self.layout.addStretch()
 
         self.angle_button = QPushButton(translate('surface_display'))
         self.angle_button.setStyleSheet(unactived_button)
         self.angle_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.psf_button = QPushButton(translate('psf_button'))
-        self.psf_button.setStyleSheet(unactived_button)
-        self.psf_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.psf_slice_button = QPushButton(translate('psf_slice_button'))
-        self.psf_slice_button.setStyleSheet(unactived_button)
-        self.psf_slice_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.ftm_button = QPushButton(translate('ftm_button'))
-        self.ftm_button.setStyleSheet(unactived_button)
-        self.ftm_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.foca_button = QPushButton("Focal view")
-        self.foca_button.setStyleSheet(unactived_button)
-        self.foca_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.cir_button = QPushButton("Circled energy")
-        self.cir_button.setStyleSheet(unactived_button)
-        self.cir_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+
+        select_widget = QWidget()
+        select_layout = QGridLayout()
+        select_widget.setLayout(select_layout)
+
+        ## BUTTONS
+        self.dict_buttons = {}
+        self.list_display = ['psf', 'ftm', 'circled']
+        self.type_display = ['2D', 'slice', '3D']
+        for k, disp in enumerate(self.list_display):
+            choice = ChoiceItem(select_layout, k, translate(disp), self.update_action)
+            buttons = choice.get_list()
+            self.dict_buttons[disp] = buttons
 
         self.layout.addWidget(self.angle_button)
-        self.layout.addWidget(self.psf_button)
-        self.layout.addWidget(self.psf_slice_button)
-        self.layout.addWidget(make_hline())
-        self.layout.addStretch()
-        self.layout.addWidget(make_hline())
-        self.layout.addWidget(self.ftm_button)
-        self.layout.addWidget(make_hline())
-        self.layout.addWidget(self.foca_button)
-        self.layout.addWidget(make_hline())
-        self.layout.addWidget(self.cir_button)
+        self.layout.addWidget(select_widget)
         self.layout.addWidget(make_hline())
         self.layout.addStretch()
 
@@ -149,11 +147,6 @@ class SimulationChoiceView(QWidget):
         self.cir_view = CircledEnergyView(self)
         '''
         self.angle_button.clicked.connect(self.update_action)
-        self.psf_button.clicked.connect(self.update_action)
-        self.psf_slice_button.clicked.connect(self.update_action)
-        self.ftm_button.clicked.connect(self.update_action)
-        self.foca_button.clicked.connect(self.update_action)
-        self.cir_button.clicked.connect(self.update_action)
         self.wavelength_label.edit_changed.connect(lambda:
                                                    self.wavelength_changed.emit(self.wavelength_label.get_value()))
 
@@ -161,14 +154,15 @@ class SimulationChoiceView(QWidget):
 
     def inactivate_buttons(self):
         self.angle_button.setStyleSheet(unactived_button)
-        self.psf_button.setStyleSheet(unactived_button)
-        self.psf_slice_button.setStyleSheet(unactived_button)
-        self.ftm_button.setStyleSheet(unactived_button)
-        self.foca_button.setStyleSheet(unactived_button)
-        self.cir_button.setStyleSheet(unactived_button)
+        for k, disp in enumerate(self.list_display):
+            for j in range(3):
+                self.dict_buttons[disp][j].setStyleSheet(unactived_button)
 
     def set_wavelength(self, value):
         self.wavelength_label.set_value(str(value))
+
+    def set_strehl_ratio(self, value):
+        self.strehl_label.set_value(str(value))
 
     def update_action(self):
         sender = self.sender()
@@ -176,12 +170,11 @@ class SimulationChoiceView(QWidget):
         sender.setStyleSheet(actived_button)
         if sender == self.angle_button:
             self.display_changed.emit('surface')
-        elif sender == self.psf_button:
-            self.display_changed.emit('PSF')
-        elif sender == self.psf_slice_button:
-            self.display_changed.emit('PSF_slice')
-        elif sender == self.ftm_button:
-            self.display_changed.emit('ftm')
+        else:
+            for k, disp in enumerate(self.list_display):
+                for j in range(3):
+                    if sender == self.dict_buttons[disp][j]:
+                        self.display_changed.emit(f'{disp}_{self.type_display[j]}')
 
 
     def set_pv_uncorrected(self, value: float, unit: str = '\u03BB'):
@@ -222,6 +215,40 @@ class SimulationChoiceView(QWidget):
         Erase PV and RMS values.
         """
         self.pv_rms_uncorrected.erase_pv_rms()
+
+
+class ChoiceItem:
+
+    def __init__(self, layout, position, base_name, handle_function):
+        self.list_button = []
+        label = QLabel(translate(f"{base_name}"))
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label.setStyleSheet(styleH3)
+        layout.addWidget(label, position, 0)
+        button = QPushButton(translate('2D'))
+        button.setStyleSheet(unactived_button)
+        button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        button.setFixedWidth(BUTTON_WIDTH)
+        button.clicked.connect(handle_function)
+        self.list_button.append(button)
+        layout.addWidget(button, position, 1)
+        button = QPushButton(translate('slice'))
+        button.setStyleSheet(unactived_button)
+        button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        button.setFixedWidth(BUTTON_WIDTH)
+        button.clicked.connect(handle_function)
+        self.list_button.append(button)
+        layout.addWidget(button, position, 2)
+        button = QPushButton(translate('3D'))
+        button.setStyleSheet(unactived_button)
+        button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        button.setFixedWidth(BUTTON_WIDTH)
+        button.clicked.connect(handle_function)
+        self.list_button.append(button)
+        layout.addWidget(button, position, 3)
+
+    def get_list(self):
+        return self.list_button
 
 
 coeff_order = [1, 1, 1, 3, 3, 3, 3, 3, 5, 5,

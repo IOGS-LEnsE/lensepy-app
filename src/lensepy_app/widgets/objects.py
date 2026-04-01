@@ -4,7 +4,7 @@ __all__ = ['message_box', 'make_hline', 'make_vline',
            'SliderBlocVertical', 'ImageDisplayWithCrosshair',
            'ImageDisplayWidget', 'HistogramWidget', 'XYChartWidget',
            'XYMultiChartWidget', 'CircleWidget',
-           'ProgressBarView', 'QProgressBar', 'SwitchWidget']
+           'ProgressBarView', 'QProgressBar', 'SwitchWidget', 'LabelWidget']
 
 from PyQt6.QtGui import QColor, QBrush, QPainter
 from lensepy_app.widgets.switch import SwitchWidget
@@ -113,35 +113,6 @@ class SelectWidget(QWidget):
     def set_enabled(self, value=True):
         """Set enabled state."""
         self.combo_box.setEnabled(value)
-
-
-class LabelWidget(QWidget):
-    """Widget to display a label, with title, value and units."""
-    def __init__(self, title: str, value: str, units: str = None):
-        super().__init__()
-        widget_w = QWidget()
-        layout_w = QHBoxLayout()
-        widget_w.setLayout(layout_w)
-
-        self.title = QLabel(title)
-        self.value = QLabel(value)
-        self.title.setStyleSheet(styleH2)
-        self.value.setStyleSheet(styleH2)
-        self.value.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout_w.addWidget(self.title, 2)
-        layout_w.addWidget(self.value, 2)
-        if units is not None:
-            self.units = QLabel(units)
-            self.units.setStyleSheet(styleH3)
-            self.units.setStyleSheet(styleH3)
-            layout_w.addWidget(self.units, 1)
-        else:
-            self.units = QLabel('')
-        self.setLayout(layout_w)
-
-    def set_value(self, value):
-        """Update widget value."""
-        self.value.setText(value)
 
 
 class SliderBloc(QWidget):
@@ -450,6 +421,7 @@ class LineEditWidget(QWidget):
     Widget for line edit, including a title.
     """
     edit_changed = pyqtSignal(str)
+
     def __init__(self, title:str='', value='', units='', parent=None):
         super().__init__(None)
         layout = QHBoxLayout()
@@ -478,7 +450,6 @@ class LineEditWidget(QWidget):
     def handle_input_changed(self):
         """Triggered when user edits the numeric value."""
         try:
-            val = float(self.line_edit.text())
             self.value = val
         except ValueError:
             return
@@ -628,6 +599,41 @@ class CircleWidget(QWidget):
         # Draw the circle
         circle_rect = QRectF(int(x), int(y), self.diameter, self.diameter)
         painter.drawEllipse(circle_rect)
+
+
+class LabelWidget(QWidget):
+
+    def __init__(self, title='', value='', unit='', parent=None, size=''):
+        super().__init__(parent)
+
+        if size == '':
+            style_L = styleL
+            style_T = styleT
+            MINIMUM_WIDTH = 75
+        else:
+            style_L = styleL_s
+            style_T = styleT_s
+            MINIMUM_WIDTH = 40
+
+        layout = QHBoxLayout()
+
+        self.label = QLabel(title)
+        self.label.setStyleSheet(style_L)
+        self.text = QLabel(value)
+        self.text.setStyleSheet(style_T)
+        self.text.setMinimumWidth(MINIMUM_WIDTH)
+        self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.unit = QLabel(unit)
+        self.unit.setMinimumWidth(MINIMUM_WIDTH//2)
+        layout.addWidget(self.label)
+        layout.addWidget(self.text)
+        layout.addWidget(self.unit)
+        self.setLayout(layout)
+
+    def set_value(self, value, unit=''):
+        self.text.setText(str(value))
+        self.unit.setText(unit)
+
 
 if __name__ == "__main__":
     import sys

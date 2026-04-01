@@ -168,30 +168,6 @@ y_psf = (np.arange(N) - N/2) * pixel_scale
 
 
 
-# Theory
-from scipy.special import j1
-
-# Coordonnées radiales dans le plan focal (en mètres)
-yy, xx = np.indices(PSF.shape)
-cx, cy = N//2, N//2
-
-r_pix = np.sqrt((xx - cx)**2 + (yy - cy)**2)
-r_phys = r_pix * pixel_scale  # m
-
-# Variable réduite
-u = np.pi * r_phys / (wavelength * f_number)
-
-# éviter division par 0
-u[cy, cx] = 1e-20
-
-# PSF idéale (Airy)
-PSF_airy = (2 * j1(u) / u)**2
-
-# normalisation
-PSF /= PSF.sum()
-PSF_airy /= PSF_airy.sum()
-
-center = N // 2
 '''
 plt.figure()
 plt.plot(x_psf*1e6, PSF[center, :], label="PSF mesurée")
