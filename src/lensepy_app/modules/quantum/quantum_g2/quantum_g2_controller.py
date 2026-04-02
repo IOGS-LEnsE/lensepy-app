@@ -6,9 +6,12 @@ from PyQt6.QtCore import QThread, QObject, pyqtSignal
 from PyQt6.QtWidgets import QWidget
 
 from lensepy_app.modules.drivers.coincidence_board.coincidence_board_model import NucleoWrapper
+from lensepy_app.modules.quantum.quantum_g2 import G2OptionsView
 from lensepy_app.modules.quantum.quantum_g2.quantum_g2_views import (
     QuantumG2DisplayWidget, TimeChartQuantumG2Widget)
 from lensepy_app.appli._app.template_controller import TemplateController
+from lensepy_app.widgets import ImageDisplayWidget
+from lensepy_app.widgets.widget_xy_chart import XYChartWidget
 
 
 class QuantumG2Controller(TemplateController):
@@ -32,16 +35,20 @@ class QuantumG2Controller(TemplateController):
         self.data_time_ab = np.zeros(30)
         self.data_time_ac = np.zeros(30)
         self.data_time_abc = np.zeros(30)
+        self.data_time_g2_2 = np.zeros(30)
+        self.data_time_g2_3 = np.zeros(30)
         self.x_axis = np.arange(0,30)
         self.exposure_time = 0
         # Nucleo wrapper
         self.nucleo_wrapper = self.parent.variables['nucleo_wrapper']
-        self.connected = self.nucleo_wrapper.is_connected()
+        self.connected = False
+        #self.connected = self.nucleo_wrapper.is_connected()
+
         # Graphical layout
         self.top_left = QuantumG2DisplayWidget()
         self.bot_left = TimeChartQuantumG2Widget()
-        self.top_right = QWidget()
-        self.bot_right = QWidget()
+        self.top_right = XYChartWidget()
+        self.bot_right = G2OptionsView()
         # Setup widgets
         self.top_left.set_max_values(self.top_left.init_max_value())
         self.bot_left.set_range(0, self.top_left.init_max_value())
@@ -51,15 +58,23 @@ class QuantumG2Controller(TemplateController):
         self.exposure_time = float(self.top_left.time_value_label.get_selected_value())
         if self.connected:
             self.nucleo_wrapper.set_sampling_period(self.exposure_time * 1000)
-        ## List of piezo
-        self.boards_list = self.nucleo_wrapper.list_serial_hardware()
+            ## List of piezo
+            self.boards_list = self.nucleo_wrapper.list_serial_hardware()
+        else:
+            self.boards_list = []
+
+        self.top_right.set_background('white')
 
         # Signals
         self.top_left.max_val_changed.connect(self.handle_max_value_changed)
         self.top_left.time_changed.connect(self.handle_time_changed)
-        self.top_left.log_selected.connect(self.handle_log_selected)
+        self.bot_right.acq_started.connect(self.handle_acq_started)
+        self.bot_right.mean_value_changed.connect(self.handle_mean_changed)
 
         # Init view
+
+    def handle_mean_changed(self, value):
+        print(value)
 
     def handle_acq_started(self):
         """Action performed when acquisition is required."""
@@ -71,14 +86,16 @@ class QuantumG2Controller(TemplateController):
             self.data_time_ab = np.zeros(30)
             self.data_time_ac = np.zeros(30)
             self.data_time_abc = np.zeros(30)
-            self.nucleo_wrapper.stop_acq()
+            self.data_time_g2_2 = np.zeros(30)
+            self.data_time_g2_3 = np.zeros(30)
+            # self.nucleo_wrapper.stop_acq()
             self.acquiring = False
             self.bot_right.set_acquisition(False)
             self.top_left.set_acquisition(False)
         else:
             self.acquiring = True
-            self.bot_right.set_acquisition()
             self.top_left.set_acquisition()
+            self.bot_right.set_acquisition()
             self.start_acq()
 
     def handle_max_value_changed(self, value):
@@ -92,31 +109,19 @@ class QuantumG2Controller(TemplateController):
             self.exposure_time = value
             self.nucleo_wrapper.set_sampling_period(self.exposure_time * 1000)
 
-    def handle_log_selected(self, value):
-        """Action performed when log checkbox is selected."""
-        self.log_display = value
-
     def handle_data_ready(self, data):
         """Action performed when data are ready to display."""
         if data is not None:
             if len(data) == 6:
                 # Display in gauge
-                if not self.log_display:
-                    self.top_left.set_a_b_c(int(data[0]), int(data[1]), int(data[2]))
-                    self.top_left.set_ab_ac_abc(int(data[3]), int(data[4]), int(data[5]))
-                else:
-                    # NOT WORKING !
-                    a_val = int(np.ceil(np.log(int(data[0])))) if int(data[0]) > 0 else 0
-                    b_val = int(np.ceil(np.log(int(data[1])))) if int(data[1]) > 0 else 0
-                    c_val = int(np.ceil(np.log(int(data[2])))) if int(data[2]) > 0 else 0
-                    self.top_left.set_a_b_c(a_val, b_val, c_val)
-
+                self.top_left.set_ab_ac_abc(int(data[3]), int(data[4]), int(data[5]))
                 # Display data in XY chart
-                self._shift_data(data)
+                self._shift_data_g2(data)
                 self.bot_left.set_data(self.x_axis, [self.data_time_a, self.data_time_b, self.data_time_c,
                                                      self.data_time_ab, self.data_time_ac, self.data_time_abc])
+                self.top_right.set_data(self.x_axis, [self.data_time_g2_2, self.data_time_g2_3,])
 
-    def _shift_data(self, data):
+    def _shift_data_g2(self, data):
         """Left shift of data."""
         if len(data) == 6:
             self.data_time_a[:-1] = self.data_time_a[1:]
@@ -131,6 +136,14 @@ class QuantumG2Controller(TemplateController):
             self.data_time_ac[-1] = data[4]
             self.data_time_abc[:-1] = self.data_time_abc[1:]
             self.data_time_abc[-1] = data[5]
+
+            g2_3det = self.data_time_abc[-1] * self.data_time_a[-1] / (self.data_time_ab[-1] * self.data_time_ac[-1])
+            g2_2det = self.data_time_ab[-1] * self.data_time_a[-1] / self.data_time_b[-1]
+
+            self.data_time_g2_2[:-1] = self.data_time_g2_2[1:]
+            self.data_time_g2_2[-1] = g2_2det
+            self.data_time_g2_3[:-1] = self.data_time_g2_2[1:]
+            self.data_time_g2_3[-1] = g2_3det
 
     def start_acq(self):
         """

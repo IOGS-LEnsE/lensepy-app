@@ -85,6 +85,11 @@ class ZygoSimulationController(TemplateController):
         widget.set_background('white')
         return widget
 
+    def _create_1xy_chart(self):
+        widget = XYChartWidget()
+        widget.set_background('white')
+        return widget
+
     def handle_wavelength_changed(self, value):
         print(f'Value = {value}')
 
@@ -129,9 +134,6 @@ class ZygoSimulationController(TemplateController):
                 self.process_ftm_3D()
 
         elif 'circled' in value:
-            self.bot_right.show()
-            self.bot_right.reset_z_range()
-            self.bot_right.set_array(surface)
             self.process_circled_slice()
         self.update_view()
 
@@ -219,11 +221,11 @@ class ZygoSimulationController(TemplateController):
         circ_disp = self.circled # / np.max(self.psf_display)  # Normalization
         circ_disp_perfect = self.circled_perfect # / np.max(self.psf_display_perfect)  # Normalization
         circ_x = np.arange(1, N // 2 + 1, 1)
-        xy_chart = self._create_xy_chart()
-        xy_chart.set_data1(circ_x, [circ_disp, circ_disp_perfect])
-        xy_chart.set_legend1([translate('circ_real_disp_legend'),
+        xy_chart = self._create_1xy_chart()
+        xy_chart.set_data(circ_x, [circ_disp, circ_disp_perfect])
+        xy_chart.set_legend([translate('circ_real_disp_legend'),
                               translate('circ_perf_disp_legend')], position='top_right')
-        xy_chart.set_title1(translate('circ_in_x_axe'))
+        xy_chart.set_title(translate('circ_in_x_axe'))
         self.replace_top_left_widget(xy_chart)
         self.top_left.refresh_chart()
 
@@ -241,11 +243,10 @@ class ZygoSimulationController(TemplateController):
         self.ftm, self.ftm_perfect = psf.get_ftm(normalized=False)
         self.ftm = np.ma.masked_where(np.logical_not(mask), self.ftm)
         self.update_pv_rms()
-        self.handle_display_changed(self.mode_display)
         self.strehl = psf.get_strehl_ratio()
         self.top_right.set_strehl_ratio(self.strehl)
         self.circled, self.circled_perfect = psf.get_circled_energy()
-        # U^pdate Graph XY !!
+        self.handle_display_changed(self.mode_display)
 
     def replace_top_left_widget(self, new_widget):
         self.parent.main_window.top_left_container.deleteLater()

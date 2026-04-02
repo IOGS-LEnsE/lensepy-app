@@ -7,8 +7,9 @@ from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QTableWidget, QTableWidgetItem,
     QHeaderView, QLineEdit, QHBoxLayout, QLabel, QFormLayout, QGroupBox, QProgressBar
 )
-from lensepy_app.widgets.widget_xy_chart import XYChartWidget
+from lensepy_app.widgets.objects import *
 from lensepy.utils import *
+from lensepy.css import *
 from lensepy_app.widgets import *
 
 BLUE_LITE = '#4FC3F7'
@@ -19,9 +20,6 @@ class QuantumG2DisplayWidget(QWidget):
     Widget to display image opening options.
     """
 
-    rgb_changed = pyqtSignal()
-    nucleo_connected = pyqtSignal(str)
-    log_selected = pyqtSignal(bool)
     max_val_changed = pyqtSignal(int)
     time_changed = pyqtSignal(float)
 
@@ -29,6 +27,7 @@ class QuantumG2DisplayWidget(QWidget):
         super().__init__(None)
         self.parent = parent    # Controller
         layout = QVBoxLayout()
+        self.setLayout(layout)
         # Graphical Elements
         layout.addWidget(make_hline())
         label = QLabel(translate('coincidence_params_title'))
@@ -37,7 +36,7 @@ class QuantumG2DisplayWidget(QWidget):
         layout.addWidget(label)
         layout.addWidget(make_hline())
 
-        label_abc = QLabel(translate('A_B_C_values'))
+        label_abc = QLabel(translate('AB_AC_ABC_values'))
         label_abc.setStyleSheet(styleH3)
         label_abc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label_abc)
@@ -86,7 +85,6 @@ class QuantumG2DisplayWidget(QWidget):
         layout.addWidget(disp_widget)
         layout.addWidget(make_hline())
         layout.addStretch()
-        self.setLayout(layout)
 
         # Signals
         self.max_value_label.choice_selected.connect(self.handle_max_value_changed)
@@ -136,32 +134,73 @@ class TimeChartQuantumG2Widget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         layout = QHBoxLayout()
-        self.chart_a_b_c = XYChartWidget()
         self.chart_ab_ac_abc = XYChartWidget()
-        layout.addWidget(self.chart_a_b_c, 1)
         layout.addWidget(self.chart_ab_ac_abc, 1)
-        self.chart_a_b_c.set_colors([ORANGE_IOGS, BLUE_LITE, GREEN_LITE])
         self.chart_ab_ac_abc.set_colors([ORANGE_IOGS, BLUE_LITE, GREEN_LITE])
 
         # Setup charts
-        self.chart_a_b_c.set_background('white')
-        self.chart_a_b_c.set_title(translate('a_b_c_time_chart_title'))
         self.chart_ab_ac_abc.set_background('white')
         self.chart_ab_ac_abc.set_title(translate('ab_ac_abc_time_chart_title'))
         self.setLayout(layout)
 
     def set_range(self, min_val, max_val):
         """Set min and max value range of the charts."""
-        self.chart_a_b_c.set_y_range(min_val, max_val)
         self.chart_ab_ac_abc.set_y_range(min_val, max_val)
 
     def set_data(self, x_axis, data):
         """Update charts data."""
         if len(data) == 6:
-            self.chart_a_b_c.set_data(x_axis, data[0:3], y_label=translate('coinc_numbers'))
             self.chart_ab_ac_abc.set_data(x_axis, data[3:6], y_label=translate('coinc_numbers'))
-            self.chart_a_b_c.refresh_chart()
             self.chart_ab_ac_abc.refresh_chart()
+
+
+class G2OptionsView(QWidget):
+
+    acq_started = pyqtSignal()
+    mean_value_changed = pyqtSignal(int)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        # Graphical Elements
+        layout.addWidget(make_hline())
+        label = QLabel(translate('g2_parameters_title'))
+        label.setStyleSheet(styleH2)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(label)
+        layout.addWidget(make_hline())
+
+        values = ['1', '5', '10']
+        self.select_mean_factor = SelectWidget(translate('mean_factor_choice'), values)
+        layout.addWidget(self.select_mean_factor)
+        layout.addWidget(make_hline())
+        layout.addStretch()
+        self.start_acq_button = QPushButton(translate('start_acq_button'))
+        self.start_acq_button.setStyleSheet(unactived_button)
+        self.start_acq_button.setFixedHeight(BUTTON_HEIGHT)
+        layout.addWidget(self.start_acq_button)
+        # Signals
+        self.start_acq_button.clicked.connect(self.handle_start_acq)
+        self.select_mean_factor.choice_selected.connect(self.handle_mean_value_changed)
+
+    def handle_start_acq(self):
+        self.acq_started.emit()
+
+    def handle_mean_value_changed(self, value):
+        mean_val = self.select_mean_factor.get_selected_value()
+        self.mean_value_changed.emit(int(mean_val))
+
+    def set_acquisition(self, value=True):
+        """Set acquisition mode."""
+        print(value)
+        if value:
+            self.start_acq_button.setStyleSheet(actived_button)
+            self.start_acq_button.setText(translate('stop_acq_button'))
+        else:
+            self.start_acq_button.setStyleSheet(unactived_button)
+            self.start_acq_button.setText(translate('start_acq_button'))
 
 
 if __name__ == "__main__":
