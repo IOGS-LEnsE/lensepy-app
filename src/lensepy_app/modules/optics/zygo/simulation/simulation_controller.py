@@ -66,8 +66,10 @@ class ZygoSimulationController(TemplateController):
         self.psf_display, self.psf_display_perfect = psf.get_psf()
         self.psf_display = np.ma.masked_where(np.logical_not(mask), self.psf_display)
         self.ftm, self.ftm_perfect = psf.get_ftm()
+        self.ftm = np.ma.masked_where(np.logical_not(mask), self.ftm)
         self.strehl = psf.get_strehl_ratio()
         self.top_right.set_strehl_ratio(self.strehl)
+        self.circled, self.circled_perfect = psf.get_circled_energy()
         super().init_view()
 
     def _create_2D_display(self):
@@ -124,7 +126,13 @@ class ZygoSimulationController(TemplateController):
             elif 'slice' in value:
                 self.process_ftm_slice()
             elif '3D' in value:
-                self.process_psf_3D()
+                self.process_ftm_3D()
+
+        elif 'circled' in value:
+            self.bot_right.show()
+            self.bot_right.reset_z_range()
+            self.bot_right.set_array(surface)
+            self.process_circled_slice()
         self.update_view()
 
     def process_psf_slice(self):
@@ -189,6 +197,36 @@ class ZygoSimulationController(TemplateController):
         self.replace_top_left_widget(xy_chart)
         self.top_left.refresh_chart()
 
+    def process_ftm_3D(self):
+        disp_3D = self._create_3D_display()
+        self.replace_top_left_widget(disp_3D)
+        N = self.psf_display.shape[0]
+        k = 0.3
+        min_N = int(k * N)
+        max_N = int((1 - k) * N)
+        psf_disp = self.circled / np.max(self.circled)  # Normalization
+        disp_small = psf_disp[min_N:max_N, min_N:max_N]
+        x, y, w_s = self.top_left.prepare_data_for_mesh(disp_small, undersampling=1)
+        self.top_left.create_mesh_surface(x, y, w_s)
+        self.top_left.showMaximized()
+        self.top_left.raise_()
+
+    def process_circled_slice(self):
+        surface, N = self.simulated_phase.get_surface()
+        self.bot_right.show()
+        self.bot_right.reset_z_range()
+        self.bot_right.set_array(surface)
+        circ_disp = self.circled # / np.max(self.psf_display)  # Normalization
+        circ_disp_perfect = self.circled_perfect # / np.max(self.psf_display_perfect)  # Normalization
+        circ_x = np.arange(1, N // 2 + 1, 1)
+        xy_chart = self._create_xy_chart()
+        xy_chart.set_data1(circ_x, [circ_disp, circ_disp_perfect])
+        xy_chart.set_legend1([translate('circ_real_disp_legend'),
+                              translate('circ_perf_disp_legend')], position='top_right')
+        xy_chart.set_title1(translate('circ_in_x_axe'))
+        self.replace_top_left_widget(xy_chart)
+        self.top_left.refresh_chart()
+
     def handle_coeffs_changed(self, index, value):
         coeffs = self.bot_left.get_coeffs()
         # Process new surface
@@ -201,11 +239,13 @@ class ZygoSimulationController(TemplateController):
         self.psf_display, self.psf_display_perfect = psf.get_psf(normalized=False)
         self.psf_display = np.ma.masked_where(np.logical_not(mask), self.psf_display)
         self.ftm, self.ftm_perfect = psf.get_ftm(normalized=False)
-        self.ftm = np.ma.masked_where(np.logical_not(self.mask), self.ftm)
+        self.ftm = np.ma.masked_where(np.logical_not(mask), self.ftm)
         self.update_pv_rms()
         self.handle_display_changed(self.mode_display)
         self.strehl = psf.get_strehl_ratio()
         self.top_right.set_strehl_ratio(self.strehl)
+        self.circled, self.circled_perfect = psf.get_circled_energy()
+        # U^pdate Graph XY !!
 
     def replace_top_left_widget(self, new_widget):
         self.parent.main_window.top_left_container.deleteLater()

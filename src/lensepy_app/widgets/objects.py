@@ -450,9 +450,10 @@ class LineEditWidget(QWidget):
     def handle_input_changed(self):
         """Triggered when user edits the numeric value."""
         try:
-            self.value = val
+            val = float(self.line_edit.text())
         except ValueError:
             return
+        self.value = self.line_edit.text()
         self.edit_changed.emit(self.value)
 
     def handle_input_changed_finish(self):
@@ -461,7 +462,7 @@ class LineEditWidget(QWidget):
             val = float(self.line_edit.text())
         except ValueError:
             return
-        self.value = val
+        self.value = self.line_edit.text()
         self.edit_changed.emit(self.value)
         self.update_block()
 
