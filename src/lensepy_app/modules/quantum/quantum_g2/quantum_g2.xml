@@ -2,8 +2,9 @@
 <appli>
     <name>quantum_g2</name>
     <requirements>coincidence_board</requirements>
-    <req_var>nucleo_wrapper,nucleo_connected</req_var>
-    <display>MODE3</display>
+    <re>nucleo_wrapper,nucleo_connected</re>
+    <req_var></req_var>
+    <display>MODE1</display>
     <controller>QuantumG2Controller</controller>
     <location>quantum_g2_controller</location>
 </appli>

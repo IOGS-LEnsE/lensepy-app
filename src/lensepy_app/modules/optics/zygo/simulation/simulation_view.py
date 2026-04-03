@@ -125,15 +125,21 @@ class SimulationChoiceView(QWidget):
 
         ## BUTTONS
         self.dict_buttons = {}
-        self.list_display = ['psf', 'ftm', 'circled']
+        self.list_display = ['psf', 'ftm']
         self.type_display = ['2D', 'slice', '3D']
         for k, disp in enumerate(self.list_display):
             choice = ChoiceItem(select_layout, k, translate(disp), self.update_action)
             buttons = choice.get_list()
             self.dict_buttons[disp] = buttons
 
+        # Circled
+        self.circled_button = QPushButton(translate('circled_energy_display'))
+        self.circled_button.setStyleSheet(unactived_button)
+        self.circled_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+
         self.layout.addWidget(self.angle_button)
         self.layout.addWidget(select_widget)
+        self.layout.addWidget(self.circled_button)
         self.layout.addWidget(make_hline())
         self.layout.addStretch()
 
@@ -147,6 +153,7 @@ class SimulationChoiceView(QWidget):
         self.cir_view = CircledEnergyView(self)
         '''
         self.angle_button.clicked.connect(self.update_action)
+        self.circled_button.clicked.connect(self.update_action)
         self.wavelength_label.edit_changed.connect(lambda:
                                                    self.wavelength_changed.emit(self.wavelength_label.get_value()))
 
@@ -154,6 +161,7 @@ class SimulationChoiceView(QWidget):
 
     def inactivate_buttons(self):
         self.angle_button.setStyleSheet(unactived_button)
+        self.circled_button.setStyleSheet(unactived_button)
         for k, disp in enumerate(self.list_display):
             for j in range(3):
                 self.dict_buttons[disp][j].setStyleSheet(unactived_button)
@@ -170,6 +178,8 @@ class SimulationChoiceView(QWidget):
         sender.setStyleSheet(actived_button)
         if sender == self.angle_button:
             self.display_changed.emit('surface')
+        elif sender == self.circled_button:
+            self.display_changed.emit('circled')
         else:
             for k, disp in enumerate(self.list_display):
                 for j in range(3):
