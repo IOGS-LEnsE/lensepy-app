@@ -119,6 +119,8 @@ class CameraIDS2:
     Installation file is in the directory :file:`INSTALLED_PATH_OF_IDS_PEAK\generic_sdk\ipl\binding\python\wheel\x86_[32|64]`.
 
     Then run this command in a shell (depending on your python version and computer architecture):
+    
+    Only Python < 3.11
 
     .. code-block:: bash
 
