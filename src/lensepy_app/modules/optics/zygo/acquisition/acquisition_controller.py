@@ -25,7 +25,6 @@ class ZygoAcquisitionController(TemplateController):
 
         """
         super().__init__(parent)
-        self.name = 'ZygoAcquisitionController'
         self.data_set = DataSet()
         self.acquiring = False
         self.camera_connected = False
@@ -34,6 +33,10 @@ class ZygoAcquisitionController(TemplateController):
         self.volt_list = []
         self.images = []
         self.nb_images = 0
+
+        # Thread / Worker
+        self.thread = None
+        self.worker = None
 
         # Graphical layout
         self.top_left = ImageDisplayWidget()
@@ -55,7 +58,7 @@ class ZygoAcquisitionController(TemplateController):
         self.volt_list = [0.80, 1.62, 2.43, 3.24, 4.05]
         if self.get_variables("camera") is None or self.get_variables('piezo') is None:
             print('NO PIEZO OR CAM')
-            # return
+            return
         self.stop_live()
         self.start_acquisition()
 
@@ -80,7 +83,6 @@ class ZygoAcquisitionController(TemplateController):
         if CameraIDS.is_connected():
             # Check if camera is connected
             self.init_camera()
-            '''
             # Test if piezo connected ?
             if NIDaqPiezo.is_piezo_here():
                 piezo = NIDaqPiezo()
@@ -91,9 +93,8 @@ class ZygoAcquisitionController(TemplateController):
                     self.set_variables('piezo', piezo)
             self.top_right.set_acq_enabled()
             self.init_piezo()   # only if piezo (to move - tab)
-            '''
             super().init_view()
-            self.start_live()
+            #self.start_live()
         else:
             self.top_left = QLabel('No Camera is connected. \n'
                                    'Connect a camera first.\n'
@@ -111,6 +112,7 @@ class ZygoAcquisitionController(TemplateController):
         camera = self.parent.variables["camera"]
         # Check if a camera is already connected
         if camera is None:
+            print('No Camera YET')
             # Init Camera
             self.parent.variables["camera"] = CameraIDS()
             self.camera_connected = self.parent.variables["camera"].find_first_camera()
@@ -119,7 +121,6 @@ class ZygoAcquisitionController(TemplateController):
             else:
                 # Initial parameters
                 camera_ini_file = self.parent.parent.config.get('camera_ini')
-
             '''
                 if os.path.isfile(camera_ini_file):
                     camera.init_camera_parameters(camera_ini_file)
@@ -127,6 +128,7 @@ class ZygoAcquisitionController(TemplateController):
             '''
         else:
             self.camera_connected = True
+        print(f'Connected ? {self.camera_connected}')
 
     def init_piezo(self):
         """Initialization of the piezo wrapper."""
