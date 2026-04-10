@@ -23,6 +23,8 @@
 
 import time
 from ids_peak import ids_peak
+from ids_peak_icv.pipeline import DefaultPipeline
+from ids_peak_common import PixelFormat
 
 VERSION = "1.0.1"
 
@@ -141,6 +143,97 @@ def main():
             datastream.QueueBuffer(buffer)
 
         ## Start Aquisition and display !!
+
+        # Get the maximum frame rate possible, limit it to the configured
+        # FPS_LIMIT. If the limit can't be reached, set
+        # acquisition interval to the maximum possible frame rate.
+        target_fps = 10
+        FPS_LIMIT = 30
+        try:
+            max_fps = nodemap_remote_device.FindNode("AcquisitionFrameRate").Maximum()
+            target_fps = min(max_fps, FPS_LIMIT)
+            nodemap_remote_device.FindNode("AcquisitionFrameRate").SetValue(target_fps)
+        except ids_peak.Exception:
+            # `AcquisitionFrameRate` is not available. Unable to limit fps.
+            # Print warning and continue.
+            print("Unable to limit fps")
+
+        try:
+            # Lock writable nodes, which could influence the payload size or
+            # similar information during acquisition.
+            nodemap_remote_device.FindNode("TLParamsLocked").SetValue(1)
+
+            # Start acquisition both locally and on device.
+            datastream.StartAcquisition()
+            nodemap_remote_device.FindNode("AcquisitionStart").Execute()
+            nodemap_remote_device.FindNode("AcquisitionStart").WaitUntilDone()
+        except Exception as e:
+            print("Exception: " + str(e))
+            return False
+
+
+        ## STOP Acq
+        nodemap_remote_device.FindNode("AcquisitionStop").Execute()
+        datastream.KillWait()
+        datastream.StopAcquisition(ids_peak.AcquisitionStopMode_Default)
+        # Discard all buffers from the acquisition engine.
+        # They remain in the announced buffer pool.
+        datastream.Flush(ids_peak.DataStreamFlushMode_DiscardAll)
+
+
+        # Unlock parameters after acquisition stop
+        if nodemap_remote_device is not None:
+            try:
+                nodemap_remote_device.FindNode("TLParamsLocked").SetValue(0)
+            except Exception as e:
+                print(f"Exception {e}")
+
+
+        ## GET IMAGES
+
+        image_pipeline = DefaultPipeline()
+        image_pipeline.output_pixel_format = PixelFormat.MONO_8
+
+        try:
+            # Get buffer from device's datastream
+            buffer = datastream.WaitForFinishedBuffer(50000)
+
+            # Convert the acquired buffer to an image view.
+            # The ImageView defines a standard way to access image properties and raw pixel data,
+            # enabling interoperability with different image processing libraries or backends.
+            # Note: This object does not own the image memory.
+            image_view = buffer.ToImageView()
+
+            # Pass the ImageView through the image pipeline which runs all processing steps
+            # in sequence. The resulting image is guaranteed to be a copy.
+            converted_image = image_pipeline.process(image_view)
+
+            # Queue buffer so that it can be used again.
+            datastream.QueueBuffer(buffer)
+
+            # Get raw image data from converted image and construct a QImage from it.
+            data = converted_image.to_numpy_array().copy()
+            print(data.shape)
+
+            '''
+            image = QImage(data, converted_image.width, converted_image.height, QImage.Format.Format_RGB32)
+
+            # Make an explicit copy of the QImage to ensure the underlying
+            # image data is owned by Qt.
+            # Without this, the QImage may reference memory managed by the
+            # image library, which could be released or overwritten later.
+            image_cpy = image.copy()
+
+            # Emit signal that the image is ready to be displayed
+            self.__display.on_image_received(image_cpy)
+            self.__display.update()
+
+            # Increase frame counter
+            self.__frame_counter += 1
+            '''
+        except ids_peak.Exception as e:
+            print("Exception: " + str(e))
+
 
 
         ## Close device
