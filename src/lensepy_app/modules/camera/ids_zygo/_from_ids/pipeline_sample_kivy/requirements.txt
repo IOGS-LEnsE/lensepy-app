@@ -1,0 +1,8 @@
+kivy>=2.3
+kivymd2>=2.0
+plyer
+ids_peak_common>=1.1.0
+ids_peak_ipl>=1.17.1
+ids_peak_icv>=1.0.0
+ids_peak>=1.13.0
+ids_peak_afl>=2.0.0

@@ -1,0 +1,10 @@
+line-length = 100
+target-version = "py310"
+exclude = ["build/", "dist/", ".venv/"]
+
+# Enable common error/warning categories; ruff docs explain codes.
+[lint]
+select = ["E", "F", "W", "C", "Q", "B"]
+ignore = [
+    "E203",  # whitespace before :, conflicts with black
+]
