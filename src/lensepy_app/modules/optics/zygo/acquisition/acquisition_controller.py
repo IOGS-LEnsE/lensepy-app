@@ -7,12 +7,12 @@ from PyQt6.QtWidgets import QWidget, QDialog, QLabel
 from lensepy import translate
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget
-from lensepy_app.modules.optics.zygo.acquisition.ids_camera import *
 from lensepy_app.modules.optics.zygo.acquisition.nidaq_piezo import *
 from lensepy_app.modules.optics.zygo.acquisition.acquisition_view import *
 from lensepy.optics.zygo.dataset import DataSet
 from lensepy.optics.zygo.utils import generate_images_grid
 from lensepy.css import *
+from lensepy.drivers.ids_camera.ids_camera import CameraIDS
 
 
 class ZygoAcquisitionController(TemplateController):
@@ -94,7 +94,7 @@ class ZygoAcquisitionController(TemplateController):
             self.top_right.set_acq_enabled()
             self.init_piezo()   # only if piezo (to move - tab)
             super().init_view()
-            #self.start_live()
+            self.start_live()
         else:
             self.top_left = QLabel('No Camera is connected. \n'
                                    'Connect a camera first.\n'
@@ -119,6 +119,7 @@ class ZygoAcquisitionController(TemplateController):
             if self.camera_connected is False:
                 self.parent.variables["camera"] = None
             else:
+                self.parent.variables["camera"].init_camera()
                 # Initial parameters
                 camera_ini_file = self.parent.parent.config.get('camera_ini')
             '''
@@ -148,7 +149,9 @@ class ZygoAcquisitionController(TemplateController):
         """
         Start live acquisition from camera.
         """
+        camera = self.parent.variables["camera"]
         if self.camera_connected:
+            camera.start_acquisition()
             self.acquiring = True
             self.thread = QThread()
             self.worker = ImageLive(self)
@@ -226,7 +229,7 @@ class ZygoAcquisitionController(TemplateController):
             self.stop_live()
             # Read available formats
             camera.set_exposure(value)
-            time.sleep(0.1)
+            time.sleep(0.2)
             # Restart live
             self.start_live()
 
@@ -248,7 +251,7 @@ class ZygoAcquisitionController(TemplateController):
         time.sleep(0.1)
         camera = self.parent.variables["camera"]
         if camera is not None:
-            camera.close()
+            camera.disconnect()
             camera.camera_acquiring = False
         self.worker = None
         self.thread = None

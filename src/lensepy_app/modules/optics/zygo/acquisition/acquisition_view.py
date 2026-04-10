@@ -8,7 +8,6 @@ Creation : march/2026
 import sys, os, time
 from lensepy import load_dictionary, translate, dictionary, is_float
 from lensepy.css import *
-from networkx.algorithms.distance_measures import radius
 
 from lensepy_app.widgets.objects import *
 from PyQt6.QtWidgets import (
