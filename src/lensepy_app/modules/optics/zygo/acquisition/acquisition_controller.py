@@ -1,10 +1,12 @@
 __all__ = ["ZygoAcquisitionController"]
 
 import numpy as np
+from lensepy import translate
+from lensepy.drivers.ids_camera import *
+
+from PyQt6.QtWidgets import QWidget, QDialog, QLabel
 from PyQt6.QtCore import QThread, QObject
 from PyQt6 import sip
-from PyQt6.QtWidgets import QWidget, QDialog, QLabel
-from lensepy import translate
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget
 from lensepy_app.modules.optics.zygo.acquisition.nidaq_piezo import *
@@ -12,7 +14,6 @@ from lensepy_app.modules.optics.zygo.acquisition.acquisition_view import *
 from lensepy.optics.zygo.dataset import DataSet
 from lensepy.optics.zygo.utils import generate_images_grid
 from lensepy.css import *
-from lensepy.drivers.ids_camera.ids_camera import CameraIDS
 
 
 class ZygoAcquisitionController(TemplateController):
@@ -224,14 +225,13 @@ class ZygoAcquisitionController(TemplateController):
         Action performed when the exposure time changed.
         """
         camera = self.parent.variables["camera"]
-        if camera is not None:
-            # Stop live safely
-            self.stop_live()
-            # Read available formats
-            camera.set_exposure(value)
-            time.sleep(0.2)
-            # Restart live
-            self.start_live()
+        try:
+            if camera is not None:
+                # Read available formats
+                camera.set_exposure(value)
+                time.sleep(0.01)
+        except Exception as e:
+            print(f'camera_expo {e}')
 
     def handle_voltage_changed(self, value):
         print(f'Voltage = {value} V')

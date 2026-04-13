@@ -158,7 +158,7 @@ class SliderBloc(QWidget):
         line = QHBoxLayout()
         self.label_name = self._styled_label(f"{name}:", styleH2)
         self.lineedit_value = QLineEdit(str(self.value))
-        self.lineedit_value.textEdited.connect(self.handle_input_changed)
+        #self.lineedit_value.textEdited.connect(self.handle_input_changed)
         self.lineedit_value.editingFinished.connect(self.handle_input_changed_finish)
         self.label_unit = self._styled_label(self.unit, styleH3)
 
@@ -219,6 +219,10 @@ class SliderBloc(QWidget):
         except ValueError:
             val = self.value
             return
+        self.slider.blockSignals(True)
+        self.slider.setValue(int(self.value * self.ratio))
+        self.slider.blockSignals(False)
+        self.slider_changed.emit(self.value)
         self.value = self._clamp(val, self.min_value, self.max_value)
         self.update_block()
 
