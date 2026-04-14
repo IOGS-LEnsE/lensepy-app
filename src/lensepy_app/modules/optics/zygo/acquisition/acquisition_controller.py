@@ -123,14 +123,18 @@ class ZygoAcquisitionController(TemplateController):
                 self.parent.variables["camera"].init_camera()
                 # Initial parameters
                 camera_ini_file = self.parent.parent.config.get('camera_ini')
-            '''
+                '''
                 if os.path.isfile(camera_ini_file):
                     camera.init_camera_parameters(camera_ini_file)
                     print(f'Camera ini file {camera_ini_file} successfully initialized.')
-            '''
+                '''
+                self.parent.variables["camera"].set_exposure(1000)
         else:
             self.camera_connected = True
         print(f'Connected ? {self.camera_connected}')
+        exposure = self.parent.variables["camera"].get_exposure()
+        print(f'Exp = {exposure}')
+        self.bot_left.set_exposure(exposure)
 
     def init_piezo(self):
         """Initialization of the piezo wrapper."""
