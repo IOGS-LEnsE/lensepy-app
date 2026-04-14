@@ -16,6 +16,7 @@ class ImagesOpeningWidget(QWidget):
 
     image_opened = pyqtSignal(str)
     image_png_saving = pyqtSignal(str)
+    image_mat_saving = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super().__init__(None)
@@ -43,6 +44,14 @@ class ImagesOpeningWidget(QWidget):
         self.save_png_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
         self.save_png_button.clicked.connect(self.handle_saving_png)
         layout.addWidget(self.save_png_button)
+        layout.addStretch()
+
+        self.save_mat_button = QPushButton(translate('image_saving_mat_button'))
+        self.save_mat_button.setStyleSheet(disabled_button)
+        self.save_mat_button.setEnabled(False)
+        self.save_mat_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.save_mat_button.clicked.connect(self.handle_saving_mat)
+        layout.addWidget(self.save_mat_button)
 
         layout.addStretch()
         self.setLayout(layout)
@@ -67,6 +76,26 @@ class ImagesOpeningWidget(QWidget):
             button = dlg.exec()
             return
 
+    def handle_saving_mat(self):
+        file_dialog = QFileDialog()
+        # default dir ?
+        default_dir = self.parent.get_config('img_dir') or None
+        # dialog box
+        file_path, _ = file_dialog.getSaveFileName(self, translate('dialog_save_png_image'),
+                                                   default_dir, "MAT File (*.mat)")
+        if file_path != '':
+            self.image_mat_saving.emit(file_path)
+        else:
+            dlg = QMessageBox(self)
+            dlg.setWindowTitle("Warning - No File Saved")
+            dlg.setText("No MAT File was saved...")
+            dlg.setStandardButtons(
+                QMessageBox.StandardButton.Ok
+            )
+            dlg.setIcon(QMessageBox.Icon.Warning)
+            button = dlg.exec()
+            return
+
     def handle_opening(self):
         sender = self.sender()
         if sender == self.open_button:
@@ -79,6 +108,8 @@ class ImagesOpeningWidget(QWidget):
                 self.open_button.setStyleSheet(unactived_button)
                 self.save_png_button.setEnabled(True)
                 self.save_png_button.setStyleSheet(unactived_button)
+                self.save_mat_button.setEnabled(True)
+                self.save_mat_button.setStyleSheet(unactived_button)
 
     def open_image(self, default_dir: str = '') -> str:
         """
@@ -100,6 +131,16 @@ class ImagesOpeningWidget(QWidget):
             dlg.setIcon(QMessageBox.Icon.Warning)
             button = dlg.exec()
             return None
+
+    def set_enabled(self, value = True):
+        if value:
+            self.save_mat_button.setStyleSheet(unactived_button)
+            self.save_png_button.setStyleSheet(unactived_button)
+        else:
+            self.save_mat_button.setStyleSheet(disabled_button)
+            self.save_png_button.setStyleSheet(disabled_button)
+        self.save_mat_button.setEnabled(value)
+        self.save_png_button.setEnabled(value)
 
 
 class ImagesChoiceView(QWidget):

@@ -40,12 +40,14 @@ class ZygoImagesController(TemplateController):
             if not self.data_set.is_empty():
                 self.update_images()
                 self.data_set.reset_processes()
+                self.bot_right.set_enabled()
         else:
             self.data_set = DataSet()
             self.set_variables('dataset', self.data_set)
         # Signals
         self.bot_right.image_opened.connect(self.handle_image_opened)
         self.bot_right.image_png_saving.connect(self.handle_saving_png)
+        self.bot_right.image_mat_saving.connect(self.handle_saving_mat)
         self.bot_left.images_changed.connect(self.handle_image_changed)
         self.bot_left.masks_changed.connect(self.handle_mask_changed)
 
@@ -67,6 +69,11 @@ class ZygoImagesController(TemplateController):
         images_grid = generate_images_grid(self.data_set.get_images_sets(1)).astype(np.uint8)
         filepath_grid = f'{os.path.splitext(filepath)[0]}_grid.png'
         cv2.imwrite(filepath_grid, images_grid)
+
+    def handle_saving_mat(self, filepath):
+        """Save data to a MAT file."""
+        print('SAVE MAT - TO DO')
+        self.data_set.save_file(filepath)
 
     def handle_image_opened(self, filepath):
         im_ok = self.data_set.load_images_set_from_file(filepath)
