@@ -1,0 +1,24 @@
+Dans la version HOM de l'expérience, sont affichées les signaux A, B et AB, qui sont le nombre de coups comptés pendant la durée de la fenêtre choisie (0,1s, 1s...à choisir dans le menu déroulant).
+
+En plus de la jauge AB, il faudrait afficher une jauge AB corrigée : le but "st de soustraire aux coincidences mesurées la moyenne du taux de coincidence accidentelle (qui n'a pas de signification physique pour l'expérience). Avec AB corrigé, on peut vraiment voir si l'alignement et correct et que l'on mesure bien des correlations entre photons jumeaux, et pas simplement des coincidences générées au hasard.
+
+Le nombre de coincidences accidentelles est [taux de coups sur la voie A par seconde * taux de coups sur la voie B par seconde * fenêtre de coïncidence)
+
+Si tau_int est la valeur de temps d'intégration (choisie dans le menu déroulant) et si tau_coinc est la taille de la fenêtre de coincidence (quelques ns en théorie) ,alors la valeur à afficher est :
+
+AB corrigé = AB - [ (A/tau_int) * B/tau_int) * tau_coinc * tau_int) = AB -(A*B*tau_coinc/tau_int)
+
+Mais à ce stade, la valeur tay_coinc de la fenêtre de coïncidences n'est pas connue exactement, mais elle peut se calibrer. Par exemple en utilisant la lumière ambiante : on allume les lumières de la poèce, les détecteurs délivrent des coups et parfois des coïncidences accidentelles. L'idée serait alors d'ajuster "à la main" la valeur numérique de la fenêtre de coïncidence pour que la valeur AB corrigée affichée soit proche de zéro pour la lumière ambiante. En utilisant une source de photons jumeaux, si on obtient une valeur AB corrigée vraiment supérieure à zéro, c'est le signe de paires vraiment corrélées.
+
+Le top du top serait donc une jauge AB corrigée affichant la valeur corrigée avec une valeur par défaut de tau_coinc (par exemple 10 ns) ; et un slider, ou un champ dans lequel il est possible de remplir à la main une valeur en ns pour actualiser l'affichage de la valeur AB corrigée avec la valeur de tau_coinc rentrée à la main.
+
+--------------
+
+Pour la version à 3 détecteurs, l'idée serait la même chose mais avec une correction
+
+ABC corrigé = ABC - (AB/tau_int * C/tau_int + AC/tau_int * B/tau_int ) * tau_coinc *tau_int
+
+=ABC - (AB* C+ AC* B ) * tau_coinc /tau_int
+
+C'est le même principe de correction : on corrige les triple coincidences des coincidences 2+1 accidentelles...
+Et donc même idée, il faudrait pouvoir corriger à la main la valeur de la fenêtre de coincidences à l'aide d'un champ ou d'un silder.

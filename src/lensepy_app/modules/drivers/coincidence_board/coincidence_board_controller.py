@@ -139,9 +139,13 @@ class CoincidenceBoardController(TemplateController):
         """Action performed when data are ready to display."""
         if data is not None:
             if len(data) == 6:
+                a_cnt, b_cnt, c_cnt, ab_cnt, ac_cnt, abc_cnt = data
                 # Display in gauge
                 self.top_left.set_a_b_c(int(data[0]), int(data[1]), int(data[2]))
                 self.top_left.set_ab_ac_abc(int(data[3]), int(data[4]), int(data[5]))
+                self.top_left.set_ab_corr(int(data[3]), int(data[0]), int(data[1]))
+                self.top_left.set_ac_corr(int(data[4]), int(data[0]), int(data[2]))
+                self.top_left.set_abc_corr(int(data[5]), int(data[3]), int(data[4]), int(data[1]), int(data[2]))
 
                 # Display data in XY chart
                 self._shift_data(data)

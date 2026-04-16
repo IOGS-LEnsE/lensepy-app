@@ -156,11 +156,29 @@ class CoincidenceDisplayWidget(QWidget):
         abc_layout.addWidget(self.ac_value)
         self.ac_value.set_colors(BLUE_IOGS, BLUE_LITE)
         abc_layout.addWidget(make_vline())
+
+        ## AB_corr counter
+        self.ab_corr_value = VerticalGauge(title='AB\'', min_value=0, max_value=self.max_value)
+        abc_layout.addWidget(self.ab_corr_value)
+        self.ab_corr_value.set_colors(BLUE_IOGS, ORANGE_IOGS)
+        ## AC counter
+        self.ac_corr_value = VerticalGauge(title='AC\'', min_value=0, max_value=self.max_value)
+        abc_layout.addWidget(self.ac_corr_value)
+        self.ac_corr_value.set_colors(BLUE_IOGS, BLUE_LITE)
+        abc_layout.addWidget(make_vline())
+
         ## ABC counter
         self.abc_value = VerticalGauge(title='ABC', min_value=0, max_value=self.max_value)
         abc_layout.addWidget(self.abc_value)
         self.abc_value.set_colors(BLUE_IOGS, GREEN_LITE)
         layout.addWidget(abc_widget)
+
+        ## ABC counter
+        self.abc_corr_value = VerticalGauge(title='ABC\'', min_value=0, max_value=self.max_value)
+        abc_layout.addWidget(self.abc_corr_value)
+        self.abc_corr_value.set_colors(BLUE_IOGS, GREEN_LITE)
+        abc_layout.addWidget(make_vline())
+
         # Charts range choice
         disp_widget = QWidget()
         disp_layout = QHBoxLayout()
@@ -179,6 +197,12 @@ class CoincidenceDisplayWidget(QWidget):
 
         layout.addWidget(make_hline())
         layout.addWidget(disp_widget)
+        layout.addWidget(make_hline())
+
+        # Coincidence window time
+        self.tau_coinc = SliderBloc(translate('tau_coinc_ns'), unit='ns', min_value=5, max_value=20, integer=True)
+        self.tau_coinc.set_value(10)
+        layout.addWidget(self.tau_coinc)
         layout.addWidget(make_hline())
         layout.addStretch()
         self.setLayout(layout)
@@ -200,6 +224,28 @@ class CoincidenceDisplayWidget(QWidget):
         self.ac_value.set_value(int(ac_cnt))
         self.abc_value.set_value(int(abc_cnt))
         self.repaint()
+
+    def set_ab_corr(self, ab_cnt, a_cnt, b_cnt):
+        tau_int_ind = self.time_value_label.get_selected_index()
+        tau_int = float(self.time_values[tau_int_ind])
+        tau_coinc = int(self.tau_coinc.get_value())*1e-9    # ns
+        value =  ab_cnt - (a_cnt*b_cnt*tau_coinc/tau_int)
+        self.ab_corr_value.set_value(value)
+
+    def set_ac_corr(self, ac_cnt, a_cnt, c_cnt):
+        tau_int_ind = self.time_value_label.get_selected_index()
+        tau_int = float(self.time_values[tau_int_ind])
+        tau_coinc = int(self.tau_coinc.get_value())*1e-9    # ns
+        value = ac_cnt - (a_cnt*c_cnt*tau_coinc/tau_int)
+        self.ac_corr_value.set_value(value)
+
+    def set_abc_corr(self, abc_cnt, ab_cnt, ac_cnt, b_cnt, c_cnt):
+        tau_int_ind = self.time_value_label.get_selected_index()
+        tau_int = float(self.time_values[tau_int_ind])
+        tau_coinc = int(self.tau_coinc.get_value())*1e-9    # ns
+        value = ab_cnt - (ab_cnt * c_cnt + ac_cnt * b_cnt) * tau_coinc / tau_int
+        self.abc_corr_value.set_value(value)
+
 
     def set_max_values(self, value=100000):
         """Set maximum value of the gauges."""
@@ -228,6 +274,7 @@ class CoincidenceDisplayWidget(QWidget):
     def set_acquisition(self, value=True):
         """Set acquisition mode."""
         self.time_value_label.set_enabled(not value)
+        self.tau_coinc.set_enabled(not value)
 
     def get_time_value(self):
         """Return current time value."""
