@@ -206,7 +206,7 @@ class ZygoSimulationController(TemplateController):
         k = 0.3
         min_N = int(k * N)
         max_N = int((1 - k) * N)
-        psf_disp = self.circled / np.max(self.circled)  # Normalization
+        psf_disp = self.ftm / np.max(self.ftm)  # Normalization
         disp_small = psf_disp[min_N:max_N, min_N:max_N]
         x, y, w_s = self.top_left.prepare_data_for_mesh(disp_small, undersampling=1)
         self.top_left.create_mesh_surface(x, y, w_s)
