@@ -70,6 +70,8 @@ class My_Application(QApplication):
             self.config['organization'] = xml_data.get_parameter_xml('organization') or None
             self.config['year'] = xml_data.get_parameter_xml('year') or None
             self.config['img_dir'] = xml_data.get_parameter_xml('img_dir') or None
+            # Init Camera if exists
+            self.config['camera_ini'] = xml_data.get_sub_parameter('camera', 'init_file')
             if isinstance(self.manager.controller, DefaultController):
                 self.manager.controller.display()
             return True

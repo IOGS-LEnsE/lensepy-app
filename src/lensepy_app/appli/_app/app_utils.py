@@ -149,7 +149,12 @@ class XMLFileConfig:
             tree = ET.parse(self.xml_file)
             xml_root = tree.getroot()
             module = xml_root.find(parameter)
-            return module.find(sub_parameter).text
+            if module is not None:
+                t = module.find(sub_parameter).text
+                print(t)
+                return module.find(sub_parameter).text
+            else:
+                return None
         return None
 
     def get_xml_file(self):

@@ -7,6 +7,7 @@ from lensepy import translate
 from lensepy_app.modules.camera.basler import BaslerController, BaslerCamera
 from lensepy_app.widgets import *
 from lensepy_app.widgets.objects import *
+from lensepy_app.widgets.histogram_widget import HistogramSimpleWidget
 import numpy as np
 
 
@@ -177,9 +178,9 @@ class CameraParamsDisplayWidget(QWidget):
         self.layout.addWidget(label)
         self.layout.addWidget(make_hline())
         # Graphical objects
-        self.exposure_time = LabelWidget(translate('exposure_time'), '0', units='us')
-        self.black_level = LabelWidget(translate('black_level'), '0', units='ADU')
-        self.frame_rate = LabelWidget(translate('frame_rate'), '0', units='Hz')
+        self.exposure_time = LabelWidget(translate('exposure_time'), '0', unit='us')
+        self.black_level = LabelWidget(translate('black_level'), '0', unit='ADU')
+        self.frame_rate = LabelWidget(translate('frame_rate'), '0', unit='Hz')
         self.layout.addWidget(self.exposure_time)
         self.layout.addWidget(self.black_level)
         self.layout.addWidget(self.frame_rate)

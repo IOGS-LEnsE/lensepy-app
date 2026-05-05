@@ -9,8 +9,7 @@ from lensepy_app.modules.camera.basler import BaslerController, BaslerCamera
 from lensepy_app.widgets import *
 from lensepy.utils.images import process_hist_from_array, save_hist, save_slice
 from lensepy_app.widgets import CameraParamsWidget, HistogramWidget
-from lensepy_app.widgets.objects import LabelWidget, SliderBloc
-
+from lensepy_app.widgets.objects import *
 
 
 class HistoSaveWidget(CameraParamsWidget):

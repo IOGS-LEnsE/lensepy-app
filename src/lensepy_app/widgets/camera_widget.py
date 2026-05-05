@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
 
 from lensepy import translate
 from lensepy.css import *
-from lensepy_app.widgets.objects import make_hline
+from lensepy_app.widgets.objects import make_hline, LabelWidget, SliderBloc
 
 
 class CameraParamsWidget(QWidget):
@@ -30,7 +30,6 @@ class CameraParamsWidget(QWidget):
 
         # Test if camera is connected to the computer
         if self.camera is not None:
-
             self.label_fps = LabelWidget(translate('basler_params_fps'), '')
             layout.addWidget(self.label_fps)
             self.slider_expo = SliderBloc(translate('basler_params_slider_expo'), unit='us',

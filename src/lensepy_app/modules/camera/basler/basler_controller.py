@@ -26,6 +26,8 @@ class BaslerController(TemplateController):
         self.colormode = []
         self.colormode_bits_depth = []
         self.camera_range = [0, 0, 0, 0]
+        # Check if camera is connected
+        self.init_camera()
         # Widgets
         self.top_left = RectangleDisplayWidget()
         self.bot_left = HistogramWidget()
@@ -39,8 +41,7 @@ class BaslerController(TemplateController):
         self.top_right.roi_centered.connect(self.handle_roi_centered)
         self.top_right.roi_reset.connect(self.handle_roi_reset)
         self.top_right.roi_activated.connect(self.handle_roi_activated)
-        # Check if camera is connected
-        self.init_camera()
+        # Setup Camera
         x0, y0, x1, y1 = self.camera_range
         self.top_right.set_roi([x0, y0, x1, y1])
         # Camera infos
@@ -111,9 +112,9 @@ class BaslerController(TemplateController):
                 self.parent.variables["first_connexion"] = 'Yes'
                 # Initial parameters
                 camera_ini_file = self.parent.parent.config.get('camera_ini')
-                if os.path.isfile(camera_ini_file):
-                    camera.init_camera_parameters(camera_ini_file)
-                    print(f'Camera ini file {camera_ini_file} successfully initialized.')
+                if camera_ini_file is not None:
+                    if os.path.isfile(camera_ini_file):
+                        camera.init_camera_parameters(camera_ini_file)
 
                 # ROI management
                 x0, y0, x1, y1 = self._get_max_coords()

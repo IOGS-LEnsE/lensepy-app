@@ -222,8 +222,8 @@ class SliderBloc(QWidget):
         self.slider.blockSignals(True)
         self.slider.setValue(int(self.value * self.ratio))
         self.slider.blockSignals(False)
-        self.slider_changed.emit(self.value)
         self.value = self._clamp(val, self.min_value, self.max_value)
+        self.slider_changed.emit(self.value)
         self.update_block()
 
     # ----------------------------
@@ -641,12 +641,23 @@ class LabelWidget(QWidget):
 
 
 if __name__ == "__main__":
+    def handle_slider_change(event):
+        print(event)
+
     import sys
     from PyQt6.QtWidgets import QApplication
     app = QApplication(sys.argv)
+    '''
     w = VerticalGauge(min_value=0, max_value=100)
     #w = VerticalGauge(title='Test', min_value=0, max_value=100)
     w.set_value(76)
     w.resize(400, 400)
     w.show()
+    '''
+
+    slider = SliderBloc('Test', 'ms', 0, 100)
+    slider.slider_changed.connect(handle_slider_change)
+    slider.set_value(15)
+    slider.resize(400, 400)
+    slider.show()
     sys.exit(app.exec())

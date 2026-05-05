@@ -1,0 +1,4 @@
+# value;translation
+# MAIN MENU
+baslerlite_menu;Camera Basler
+fyzo_analysis_menu;Analyses Fizeau

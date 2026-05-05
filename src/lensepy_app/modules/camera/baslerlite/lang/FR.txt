@@ -1,0 +1,4 @@
+# value;translation
+# Basler - module - FRANCAIS
+baslerlite_menu;Camera Basler
+basler_infos_title;Paramètres du capteur

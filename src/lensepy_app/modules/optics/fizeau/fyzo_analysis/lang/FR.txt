@@ -1,0 +1,3 @@
+# value;translation
+# Fizeau Analysis - module - FRANCAIS
+fyzo_analysis_menu;Analyses Fizeau
