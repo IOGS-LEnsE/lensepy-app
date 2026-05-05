@@ -2,6 +2,7 @@ import os
 import time
 from pathlib import Path
 
+import cv2
 import numpy as np
 from PyQt6.QtCore import QThread
 from PyQt6.QtWidgets import QWidget
@@ -24,6 +25,8 @@ class FyzoAnalysisController(TemplateController):
         self.img_dir = self._get_image_dir(self.parent.parent.config['img_dir'])
         self.thread = None
         self.worker = None
+
+        self.new_image = cv2.imread('D:/tools/git_repo/LEnsE/lensepy-app/src/lensepy_app/applis_dir/fizo_gui/_test/interference.png', cv2.IMREAD_GRAYSCALE)
 
         # Widgets
         self.top_left = ImageDisplayWidget()
@@ -81,13 +84,10 @@ class FyzoAnalysisController(TemplateController):
         # Store new image.
         self.parent.variables['image'] = image_raw
         # Process and display FFT
-        fft_raw = self._process_fft(image_8bits)
+        fft_raw = self._process_fft(image_raw)
         fft_disp = self._disp_fft(fft_raw)
         self.top_left.set_image_from_array(fft_disp)
-        '''
-        fft_disp = fft_disp // np.max(fft_disp
- * 255        time.sleep(0.1)
-        '''
+        time.sleep(0.01)
 
     def cleanup(self):
         """
@@ -107,7 +107,11 @@ class FyzoAnalysisController(TemplateController):
         return fft
 
     def _disp_fft(self, fft):
-        fft_disp = np.log(np.abs(fft) + 0.001)
+        fft_disp = np.log(np.abs(fft) + 1)
+        '''
+        max_disp = np.max(fft_disp)
+        fft_disp = ((fft_disp / max_disp) * 255).astype(np.uint8)
+        '''
         return fft_disp
 
     def _get_image_dir(self, filepath):
