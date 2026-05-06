@@ -1,11 +1,12 @@
 import time
 from PyQt6.QtCore import QObject, QThread
 from PyQt6.QtWidgets import QDialog
+from pathlib import Path
+import lensepy_app
 
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.modules.camera.baslerlite.baslerlite_views import *
 from lensepy_app.modules.camera.basler.basler_models import *
-#from lensepy_app.widgets.camera_widget import *
 from lensepy_app.widgets.image_display_widget import *
 from lensepy_app.widgets.histogram_widget import *
 from lensepy import translate
@@ -111,11 +112,21 @@ class BaslerController(TemplateController):
                 # Initial parameters
                 camera_ini_file = self.parent.parent.config.get('camera_ini')
                 if camera_ini_file is not None:
-                    if os.path.isfile(camera_ini_file):
-                        camera.init_camera_parameters(camera_ini_file)
+                    if camera_ini_file.startswith('.'):
+                        base_path = Path(lensepy_app.__file__).parent
+                        file_path = f'{base_path}/{camera_ini_file}'
+                    else:
+                        file_path = camera_ini_file
+                    if os.path.isfile(file_path):
+                        camera.init_camera_parameters(file_path)
+                default_fps = camera.get_parameter("BslResultingAcquisitionFrameRate")
+                self.parent.variables["disp_fps"] = default_fps
         else:
             self.camera_connected = True
             self.parent.variables["first_connexion"] = 'No'
+            default_fps = self.parent.variables["disp_fps"]
+            camera.set_parameter("AcquisitionFrameRate", default_fps)
+
 
     def set_color_mode(self):
         # Get color mode list

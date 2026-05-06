@@ -12,6 +12,7 @@ from lensepy.css import *
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets import ImageDisplayWidget
 
+FPS_FFT = 2.5
 
 class FyzoAnalysisController(TemplateController):
     """Controller for camera acquisition."""
@@ -26,8 +27,6 @@ class FyzoAnalysisController(TemplateController):
         self.thread = None
         self.worker = None
 
-        self.new_image = cv2.imread('D:/tools/git_repo/LEnsE/lensepy-app/src/lensepy_app/applis_dir/fizo_gui/_test/interference.png', cv2.IMREAD_GRAYSCALE)
-
         # Widgets
         self.top_left = ImageDisplayWidget()
         self.bot_left = QWidget()
@@ -37,6 +36,8 @@ class FyzoAnalysisController(TemplateController):
         initial_image = self.parent.variables.get('image')
         if initial_image is not None:
             self.bot_right.set_image_from_array(initial_image)
+        camera = self.parent.variables["camera"]
+        camera.set_parameter("AcquisitionFrameRate", FPS_FFT)
         # Signals
         # Start live acquisition
         self.start_live()
@@ -87,7 +88,6 @@ class FyzoAnalysisController(TemplateController):
         fft_raw = self._process_fft(image_raw)
         fft_disp = self._disp_fft(fft_raw)
         self.top_left.set_image_from_array(fft_disp)
-        time.sleep(0.01)
 
     def cleanup(self):
         """
@@ -108,10 +108,8 @@ class FyzoAnalysisController(TemplateController):
 
     def _disp_fft(self, fft):
         fft_disp = np.log(np.abs(fft) + 1)
-        '''
         max_disp = np.max(fft_disp)
         fft_disp = ((fft_disp / max_disp) * 255).astype(np.uint8)
-        '''
         return fft_disp
 
     def _get_image_dir(self, filepath):

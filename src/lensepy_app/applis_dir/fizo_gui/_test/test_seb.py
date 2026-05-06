@@ -30,7 +30,7 @@ def cercle_par_3_points(p1, p2, p3):
 
 # -------- Chargement et affichage interférogramme 
 
-img = img_as_float(io.imread("interference3.png", as_gray=True))
+img = img_as_float(io.imread("interference.png", as_gray=True))
 
 N, M = img.shape 
 

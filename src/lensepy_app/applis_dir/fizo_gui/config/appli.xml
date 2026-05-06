@@ -29,6 +29,7 @@
     <variable name="bits_depth"/>
     <variable name="camera"/>
     <variable name="mask"/>
+    <variable name="disp_fps"/>
     <camera>
         <name>Basler</name>
         <colormode>Mono12:12,Mono10:10,Mono8:8</colormode>
@@ -36,6 +37,6 @@
         <maxwidth>1920</maxwidth>
         <maxheight>1200</maxheight>
         <offset>8</offset>
-        <init_file>./config/camera_small.ini</init_file>
+        <init_file>./applis_dir/fizo_gui/config/camera_small.ini</init_file>
     </camera>
 </appli>

@@ -125,6 +125,7 @@ class BaslerCamera:
         :param filepath:    Name of a txt file containing the parameters to setup.
         """
         self.open()
+        print('INIT CAM - file')
         self.initial_params = {}
         if os.path.exists(filepath):
             # Read the CSV file, ignoring lines starting with '//'
