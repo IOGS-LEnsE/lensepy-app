@@ -1,3 +1,4 @@
 # value;translation
 # Fizeau Analysis - module - ENGLISH
 fyzo_analysis_menu;Fizeau Analysis
+fyzo_analysis_parameter_label;FFT Parameters

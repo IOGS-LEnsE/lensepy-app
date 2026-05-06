@@ -9,8 +9,11 @@ from PyQt6.QtWidgets import QWidget
 
 from lensepy import translate
 from lensepy.css import *
+from lensepy.images.masks import *
+from lensepy.images.conversion import *
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets import ImageDisplayWidget
+from lensepy_app.modules.optics.fizeau.fyzo_analysis.fyzo_analysis_views import *
 
 FPS_FFT = 2.5
 
@@ -24,6 +27,7 @@ class FyzoAnalysisController(TemplateController):
         self.y_cross = None
         self.contrast_enabled = False       # Enhance contrast
         self.img_dir = self._get_image_dir(self.parent.parent.config['img_dir'])
+        self.disp_mode = 'phase'
         self.thread = None
         self.worker = None
 
@@ -31,7 +35,7 @@ class FyzoAnalysisController(TemplateController):
         self.top_left = ImageDisplayWidget()
         self.bot_left = QWidget()
         self.bot_right = ImageDisplayWidget()
-        self.top_right = QWidget()
+        self.top_right = FyzoAnalysisOptionsView()
         # Initial Image
         initial_image = self.parent.variables.get('image')
         if initial_image is not None:
@@ -39,6 +43,13 @@ class FyzoAnalysisController(TemplateController):
         camera = self.parent.variables["camera"]
         camera.set_parameter("AcquisitionFrameRate", FPS_FFT)
         # Signals
+        # Crop size / mask
+        mask = self.parent.variables['mask']
+        top_left, bottom_right = find_mask_limits(mask)
+        self.img_height, self.img_width = bottom_right[1] - top_left[1], bottom_right[0] - top_left[0]
+        self.img_pos_x, self.img_pos_y = top_left[1], top_left[0]
+        self.mask = crop_images([mask], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
+
         # Start live acquisition
         self.start_live()
 
@@ -71,6 +82,9 @@ class FyzoAnalysisController(TemplateController):
         :param image:   Numpy array containing new image.
         """
         image_raw = image.copy()
+        # Crop image
+        image_raw = crop_images([image_raw], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
+        # Post Image
         bits_depth = self.parent.variables["bits_depth"]
         pow = bits_depth - 8
         if pow > 0:
@@ -79,15 +93,33 @@ class FyzoAnalysisController(TemplateController):
             image_8bits = image_raw
 
         if self.parent.variables["mask"] is not None:
-            mask = self.parent.variables["mask"]
-            image_disp = np.ma.masked_where(np.logical_not(mask), image_8bits)
+            # mask = self.parent.variables["mask"]
+            image_disp = np.ma.masked_where(np.logical_not(self.mask), image_8bits)
         self.bot_right.set_image_from_array(image_disp)
         # Store new image.
         self.parent.variables['image'] = image_raw
-        # Process and display FFT
+        # 3 modes
         fft_raw = self._process_fft(image_raw)
-        fft_disp = self._disp_fft(fft_raw)
+        self.top_right.display_small_fft(value=False)
+        if self.disp_mode == 'fft':
+            # Process and display FFT
+            fft_disp = self._disp_fft(fft_raw)
+        elif self.disp_mode == 'fft_masked':
+            fft_raw = self._process_fft(image_raw)
+            fft_mask = self._get_masked_fft(fft_raw)
+            fft_disp = self._disp_fft(fft_mask)
+        else:
+            fft_raw = self._process_fft(image_raw)
+            fft_mask = self._get_masked_fft(fft_raw)
+            fft_disp = self._disp_fft(fft_mask)
+            self.top_right.display_small_fft(value=True, image=fft_disp)
+            # Create image (unwrap and fft-1)
+
         self.top_left.set_image_from_array(fft_disp)
+
+    def set_disp_mode(self, value):
+        # Value = {'fft', 'fft_masked', 'phase'}
+        self.disp_mode = value
 
     def cleanup(self):
         """
@@ -111,6 +143,14 @@ class FyzoAnalysisController(TemplateController):
         max_disp = np.max(fft_disp)
         fft_disp = ((fft_disp / max_disp) * 255).astype(np.uint8)
         return fft_disp
+
+    def _get_masked_fft(self, fft):
+        central_radius = 80  # rayon zone centrale
+        excent_radius = 50  # largeur pic latéral
+        central_mask = circular_mask(central_radius, fft, inverted=True)
+        imx, jmx = np.unravel_index(np.argmax(np.abs(central_mask)), fft.shape)
+        excent_mask = circular_mask(excent_radius, fft, center=(imx, jmx))
+        return excent_mask
 
     def _get_image_dir(self, filepath):
         if filepath is None:
