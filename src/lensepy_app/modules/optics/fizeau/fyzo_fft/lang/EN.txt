@@ -1,0 +1,4 @@
+# value;translation
+# Fizeau FFT - module - ENGLISH
+fyzo_fft_menu;FFT Display
+fyzo_analysis_parameter_label;FFT Parameters

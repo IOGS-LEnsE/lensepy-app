@@ -1,10 +1,10 @@
 # value;translation
-# Fizeau Analysis - module - FRANCAIS
-fyzo_analysis_menu;Analyses Fizeau
+# Fizeau FFT - module - FRANCAIS
+fyzo_fft_menu;Affichage FFT
 fyzo_analysis_parameter_label;Paramètres de la FFT
 interfer_display_button;Interféromètre
 fft_display_button;FFT de l'interféromètre
 fft_masked_display_button;Masque sur la FFT
 fft_centered_display_button;FFT recentrée
-phase_display_button;Phase déroulée
+phase_display_button;Phase enroulée
 surface_display_button;Surface corrigée

@@ -1,4 +1,5 @@
 # value;translation
 # MAIN MENU
 baslerlite_menu;Camera Basler
+fyzo_fft_menu;Affichage Fourier
 fyzo_analysis_menu;Analyses Fizeau

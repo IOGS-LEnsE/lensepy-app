@@ -14,12 +14,16 @@
         </contributor>
         <contributor type="sciexp">
             <name>Sébastien de ROSSI</name>
-            <organization>LCF / IOGS</organization>
+            <organization>IOGS</organization>
         </contributor>
     </contributors>
 	<module>
 		<name>baslerlite</name>
 		<location>lensepy_app.modules.camera</location>
+	</module>
+	<module>
+		<name>fyzo_fft</name>
+		<location>lensepy_app.modules.optics.fizeau</location>
 	</module>
 	<module>
 		<name>fyzo_analysis</name>
@@ -30,11 +34,10 @@
     <variable name="camera"/>
     <variable name="mask"/>
     <variable name="disp_fps"/>
-    <variable name="disp_analysis"/>
     <camera>
         <name>Basler</name>
         <colormode>Mono12:12,Mono10:10,Mono8:8</colormode>
-        <exposuretime>200000</exposuretime>
+        <exposuretime>2000</exposuretime>
         <maxwidth>1920</maxwidth>
         <maxheight>1200</maxheight>
         <offset>8</offset>

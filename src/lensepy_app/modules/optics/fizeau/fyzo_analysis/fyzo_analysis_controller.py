@@ -13,9 +13,12 @@ from lensepy.images.masks import *
 from lensepy.images.conversion import *
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets import ImageDisplayWidget
-from lensepy_app.modules.optics.fizeau.fyzo_analysis.fyzo_analysis_views import *
+from lensepy_app.modules.optics.fizeau.fyzo_analysis.fyzo_analysis_views import FyzoAnalysisOptionsView
+from lensepy_app.widgets.double_3d_view import Surface3DView
+from lensepy_app.widgets.surface_2D_view import Surface2DView
+from skimage.restoration import unwrap_phase
 
-FPS_FFT = 2.5
+FPS_FFT = 3
 
 class FyzoAnalysisController(TemplateController):
     """Controller for camera acquisition."""
@@ -27,13 +30,13 @@ class FyzoAnalysisController(TemplateController):
         self.y_cross = None
         self.contrast_enabled = False       # Enhance contrast
         self.img_dir = self._get_image_dir(self.parent.parent.config['img_dir'])
-        if self.parent.variables['disp_analysis'] is None:
-            self.disp_mode = 'surface'
-            self.parent.variables['disp_analysis'] = self.disp_mode
-        else:
-            self.disp_mode = self.parent.variables['disp_analysis']
-        self.thread = None
-        self.worker = None
+        self.disp_mode = 'surface'
+        self.image_disp = None
+        self.fft_raw = None
+        self.fft_masked = None
+        self.fft_center = None
+        self.unwrapped_phase = None
+        self.surface = None
 
         # Widgets
         self.top_left = ImageDisplayWidget()
@@ -41,54 +44,26 @@ class FyzoAnalysisController(TemplateController):
         self.bot_right = ImageDisplayWidget()
         self.top_right = FyzoAnalysisOptionsView()
         # Set Up widgets
-        self.top_right.activate_button(self.disp_mode)
-        # Initial Image
-        initial_image = self.parent.variables.get('image')
-        if initial_image is not None:
-            self.bot_right.set_image_from_array(initial_image)
-        camera = self.parent.variables["camera"]
-        camera.set_parameter("AcquisitionFrameRate", FPS_FFT)
+        self.top_right.activate_mode(self.disp_mode)
         # Signals
         self.top_right.display_changed.connect(self.handle_display_changed)
+        self.top_right.view_saved.connect(self.handle_png_saved)
         # Crop size / mask
         mask = self.parent.variables['mask']
         top_left, bottom_right = find_mask_limits(mask)
         self.img_height, self.img_width = bottom_right[1] - top_left[1], bottom_right[0] - top_left[0]
         self.img_pos_x, self.img_pos_y = top_left[1], top_left[0]
         self.mask = crop_images([mask], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
+        # Initial Image
+        self.initial_image = self.parent.variables.get('image')
+        if self.initial_image is not None:
+            self.bot_right.set_image_from_array(self.initial_image)
+            self.update_view()
+            self.process_data()
+            self.image_ready()
 
-        # Start live acquisition
-        self.start_live()
-
-    def start_live(self):
-        """Start live acquisition with camera."""
-        self.thread = QThread()
-        self.worker = ImageLive(self)
-        self.worker.moveToThread(self.thread)
-
-        self.thread.started.connect(self.worker.run)
-        self.worker.image_ready.connect(self.handle_image_ready)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.worker.finished.connect(self.thread.deleteLater)
-        self.thread.start()
-
-    def stop_live(self):
-        """Stop live acquisition."""
-        if self.worker:
-            self.worker.stop()
-            if self.thread:
-                self.thread.quit()
-                self.thread.wait()
-            self.worker = None
-            self.thread = None
-
-    def handle_image_ready(self, image: np.ndarray):
-        """
-        Thread-safe GUI updates
-        :param image:   Numpy array containing new image.
-        """
-        image_raw = image.copy()
+    def process_data(self):
+        image_raw = self.initial_image
         # Crop image
         image_raw = crop_images([image_raw], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
         # Post Image
@@ -101,37 +76,100 @@ class FyzoAnalysisController(TemplateController):
 
         if self.parent.variables["mask"] is not None:
             # mask = self.parent.variables["mask"]
-            image_disp = np.ma.masked_where(np.logical_not(self.mask), image_8bits)
-        self.bot_right.set_image_from_array(image_disp)
+            self.image_disp = np.ma.masked_where(np.logical_not(self.mask), image_8bits)
+        else:
+            self.image_disp = image_8bits
+        self.bot_right.set_image_from_array(self.image_disp)
         # Store new image.
         self.parent.variables['image'] = image_raw
         # 3 modes
-        fft_raw = self._process_fft(image_raw)
-        fft_mask, idx_X, idx_Y = self._get_masked_fft(fft_raw)
-        fft_disp = self._disp_fft(fft_mask)
-        fft_center = self._get_centered_fft(fft_mask, idx_X, idx_Y)
-        self.top_right.display_small_fft(value=False)
+        self.fft_raw = self._process_fft(image_raw)
+        self.fft_masked, idx_X, idx_Y = self._get_masked_fft(self.fft_raw)
+        self.fft_center = self._get_centered_fft(self.fft_masked, idx_X, idx_Y)
+
+        # Phase / Surface
+        champ = np.fft.ifft2(np.fft.ifftshift(self.fft_center))
+        champ[~self.mask] = 0
+
+        wrapped_phase = np.angle(champ)
+        self.unwrapped_phase = unwrap_phase(wrapped_phase)
+        self.unwrapped_phase[~self.mask] = np.nan
+
+        # Surface
+        '''
+        Masq = self.mask  # & ~np.isnan(phase_deroulee)
+
+        xx = (np.arange(-M // 2, M // 2) / M) * 2
+
+        yy = (np.arange(-N // 2, N // 2) / N) * 2
+
+        Xg, Yg = np.meshgrid(xx, yy)
+
+        A = np.column_stack((np.ones(np.sum(Masq)), Xg[Masq], Yg[Masq]))
+
+        Z = phase_deroulee[Masq]
+
+        coeffs, *_ = np.linalg.lstsq(A, Z, rcond=None)
+
+        phase_corr = np.full_like(phase_deroulee, np.nan)
+
+        phase_corr[Masq] = Z - A @ coeffs
+
+        # -------- Défaut Surface
+
+        lambdam = 0.670  # longueur d’onde (micron)
+
+        surface = phase_corr / (4 * np.pi) * lambdam  # d éfaut en réflexion
+
+        surface[~masque_img] = np.nan
+
+        surface_val = surface[masque_img & ~np.isnan(surface)]
+
+        PV_micron = np.max(surface_val) - np.min(surface_val)
+
+        RMS_micron = np.sqrt(np.mean((surface_val - np.mean(surface_val)) ** 2))
+        '''
+
+
+    def image_ready(self):
+        """
+        Thread-safe GUI updates
+        :param image:   Numpy array containing new image.
+        """
+        # default display
+        widget = ImageDisplayWidget()
+        self.replace_top_left_widget(widget)
+        # Display mode
         if self.disp_mode == 'interfer':
-            main_disp = image_disp
+            self.top_left.set_image_from_array(self.image_disp)
         elif self.disp_mode == 'fft':
             # Process and display FFT
-            main_disp = self._disp_fft(fft_raw)
+            self.top_left.set_image_from_array(self._disp_fft(self.fft_raw))
         elif self.disp_mode == 'fft_masked':
-            main_disp = fft_disp
+            self.top_left.set_image_from_array(self._disp_fft(self.fft_masked))
         elif self.disp_mode == 'fft_centered':
-            main_disp = self._disp_fft(fft_center)
+            self.top_left.set_image_from_array(self._disp_fft(self.fft_center))
         elif self.disp_mode == 'phase':
-            main_disp = image_disp  # TO CHANGE
+            view_2D = Surface2DView()
+            view_2D.set_array(self.unwrapped_phase)
+            # TO UPDATE
+            self.replace_top_left_widget(view_2D)
         elif self.disp_mode == 'surface':
-            main_disp = image_disp  # TO CHANGE
+            view_2D = Surface2DView()
+            self.replace_top_left_widget(view_2D)
+            # TO UPDATE
+        elif self.disp_mode == 'surface_3D':
+            view_3D = Surface3DView()
+            x, y, w_s = view_3D.prepare_data_for_mesh(self.image_disp, undersampling=1) # TO CHANGE
+            view_3D.create_mesh_surface(x, y, w_s)
+            self.replace_top_left_widget(view_3D)
         else:
-            main_disp = image_disp
+            self.top_left.set_image_from_array(self.image_disp)
 
-        self.top_right.display_small_fft(value=True, image=fft_disp)
-        self.top_left.set_image_from_array(main_disp)
 
     def handle_display_changed(self, value):
         self.disp_mode = value
+        self.image_ready()
 
     def set_disp_mode(self, value):
         # Value = {'interfer', 'fft', 'fft_masked', 'fft_centered', 'phase', 'surface'}
@@ -141,14 +179,11 @@ class FyzoAnalysisController(TemplateController):
         """
         Stop the camera cleanly and release resources.
         """
-        self.stop_live()
         camera = self.parent.variables["camera"]
         if camera is not None:
             if getattr(camera, "is_open", False):
                 camera.close()
             camera.camera_acquiring = False
-        self.worker = None
-        self.thread = None
 
     ### FFT and display
     def _process_fft(self, image):
@@ -186,3 +221,26 @@ class FyzoAnalysisController(TemplateController):
                 return new_filepath
             else:
                 return filepath
+
+    def replace_top_left_widget(self, new_widget):
+        self.top_left = new_widget
+        self.parent.main_window.top_left_container = self.top_left
+        self.update_view()
+
+    def handle_png_saved(self, filepath):
+        if filepath is not None:
+            # Display mode
+            if self.disp_mode == 'interfer':
+                cv2.imwrite("image.png", self.image_disp)
+            elif self.disp_mode == 'fft':
+                pass
+            elif self.disp_mode == 'fft_masked':
+                pass
+            elif self.disp_mode == 'fft_centered':
+                pass
+            elif self.disp_mode == 'phase':
+                pass
+            elif self.disp_mode == 'surface':
+                pass
+            elif self.disp_mode == 'surface_3D':
+                pass
