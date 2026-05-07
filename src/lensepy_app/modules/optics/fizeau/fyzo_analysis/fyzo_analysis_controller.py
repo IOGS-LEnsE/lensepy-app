@@ -19,6 +19,7 @@ from lensepy_app.widgets.surface_2D_view import Surface2DView
 from skimage.restoration import unwrap_phase
 
 FPS_FFT = 3
+LAMBDA_LASER = 0.670 #micron
 
 class FyzoAnalysisController(TemplateController):
     """Controller for camera acquisition."""
@@ -37,6 +38,9 @@ class FyzoAnalysisController(TemplateController):
         self.fft_center = None
         self.unwrapped_phase = None
         self.surface = None
+
+        self.view_2D = None
+        self.view_3D = None
 
         # Widgets
         self.top_left = ImageDisplayWidget()
@@ -96,40 +100,25 @@ class FyzoAnalysisController(TemplateController):
         self.unwrapped_phase[~self.mask] = np.nan
 
         # Surface
-        '''
-        Masq = self.mask  # & ~np.isnan(phase_deroulee)
-
-        xx = (np.arange(-M // 2, M // 2) / M) * 2
-
-        yy = (np.arange(-N // 2, N // 2) / N) * 2
-
+        Masq = self.mask
+        xx = (np.arange(-self.img_width // 2, self.img_width // 2) / self.img_width) * 2
+        yy = (np.arange(-self.img_height // 2, self.img_height // 2) / self.img_height) * 2
         Xg, Yg = np.meshgrid(xx, yy)
-
-        A = np.column_stack((np.ones(np.sum(Masq)), Xg[Masq], Yg[Masq]))
-
-        Z = phase_deroulee[Masq]
-
+        A = np.column_stack((np.ones(np.sum(self.mask)), Xg[self.mask], Yg[self.mask]))
+        Z = self.unwrapped_phase[self.mask]
         coeffs, *_ = np.linalg.lstsq(A, Z, rcond=None)
+        phase_corr = np.full_like(self.unwrapped_phase, np.nan)
+        phase_corr[self.mask] = Z - A @ coeffs
+        # Process surface
+        self.surface = phase_corr / (4 * np.pi) * LAMBDA_LASER  # d éfaut en réflexion
+        self.surface[~self.mask] = np.nan
+        self.surface = np.ma.masked_where(np.logical_not(self.mask), self.surface)
 
-        phase_corr = np.full_like(phase_deroulee, np.nan)
-
-        phase_corr[Masq] = Z - A @ coeffs
-
-        # -------- Défaut Surface
-
-        lambdam = 0.670  # longueur d’onde (micron)
-
-        surface = phase_corr / (4 * np.pi) * lambdam  # d éfaut en réflexion
-
-        surface[~masque_img] = np.nan
-
-        surface_val = surface[masque_img & ~np.isnan(surface)]
-
+    def process_stats(self):
+        surface_val = self.surface[self.mask & ~np.isnan(self.surface)]
         PV_micron = np.max(surface_val) - np.min(surface_val)
-
         RMS_micron = np.sqrt(np.mean((surface_val - np.mean(surface_val)) ** 2))
-        '''
-
+        print(f'PV = {PV_micron:.2f} um | RMS = {RMS_micron:.2f} um')
 
     def image_ready(self):
         """
@@ -151,18 +140,21 @@ class FyzoAnalysisController(TemplateController):
             self.top_left.set_image_from_array(self._disp_fft(self.fft_center))
         elif self.disp_mode == 'phase':
             view_2D = Surface2DView()
-            view_2D.set_array(self.unwrapped_phase)
+            view_2D.set_array2(self.unwrapped_phase)
+            view_2D.update()
             # TO UPDATE
             self.replace_top_left_widget(view_2D)
         elif self.disp_mode == 'surface':
-            view_2D = Surface2DView()
-            self.replace_top_left_widget(view_2D)
+            print('Init OK')
+            self.view_2D = Surface2DView()
+            self.view_2D.set_array2(self.surface)
+            self.replace_top_left_widget(self.view_2D)
             # TO UPDATE
         elif self.disp_mode == 'surface_3D':
-            view_3D = Surface3DView()
-            x, y, w_s = view_3D.prepare_data_for_mesh(self.image_disp, undersampling=1) # TO CHANGE
-            view_3D.create_mesh_surface(x, y, w_s)
-            self.replace_top_left_widget(view_3D)
+            self.view_3D = Surface3DView()
+            x, y, w_s = self.view_3D.prepare_data_for_mesh(self.surface, undersampling=1) # TO CHANGE
+            self.view_3D.create_mesh_surface(x, y, w_s)
+            self.replace_top_left_widget(self.view_3D)
         else:
             self.top_left.set_image_from_array(self.image_disp)
 
@@ -231,16 +223,16 @@ class FyzoAnalysisController(TemplateController):
         if filepath is not None:
             # Display mode
             if self.disp_mode == 'interfer':
-                cv2.imwrite("image.png", self.image_disp)
+                cv2.imwrite(filepath, self.image_disp)
             elif self.disp_mode == 'fft':
-                pass
+                cv2.imwrite(filepath, self._disp_fft(self.fft_raw))
             elif self.disp_mode == 'fft_masked':
-                pass
+                cv2.imwrite(filepath, self._disp_fft(self.fft_masked))
             elif self.disp_mode == 'fft_centered':
-                pass
+                cv2.imwrite(filepath, self._disp_fft(self.fft_center))
             elif self.disp_mode == 'phase':
-                pass
+                self.view_2D.save_image(filepath)
             elif self.disp_mode == 'surface':
-                pass
+                self.view_2D.save_image(filepath)
             elif self.disp_mode == 'surface_3D':
-                pass
+                self.view_3D.save_image(filepath)
