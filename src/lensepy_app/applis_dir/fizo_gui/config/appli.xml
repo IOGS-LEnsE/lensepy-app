@@ -30,6 +30,7 @@
     <variable name="camera"/>
     <variable name="mask"/>
     <variable name="disp_fps"/>
+    <variable name="disp_analysis"/>
     <camera>
         <name>Basler</name>
         <colormode>Mono12:12,Mono10:10,Mono8:8</colormode>

@@ -27,7 +27,11 @@ class FyzoAnalysisController(TemplateController):
         self.y_cross = None
         self.contrast_enabled = False       # Enhance contrast
         self.img_dir = self._get_image_dir(self.parent.parent.config['img_dir'])
-        self.disp_mode = 'phase'
+        if self.parent.variables['disp_analysis'] is None:
+            self.disp_mode = 'surface'
+            self.parent.variables['disp_analysis'] = self.disp_mode
+        else:
+            self.disp_mode = self.parent.variables['disp_analysis']
         self.thread = None
         self.worker = None
 
@@ -36,6 +40,8 @@ class FyzoAnalysisController(TemplateController):
         self.bot_left = QWidget()
         self.bot_right = ImageDisplayWidget()
         self.top_right = FyzoAnalysisOptionsView()
+        # Set Up widgets
+        self.top_right.activate_button(self.disp_mode)
         # Initial Image
         initial_image = self.parent.variables.get('image')
         if initial_image is not None:
@@ -43,6 +49,7 @@ class FyzoAnalysisController(TemplateController):
         camera = self.parent.variables["camera"]
         camera.set_parameter("AcquisitionFrameRate", FPS_FFT)
         # Signals
+        self.top_right.display_changed.connect(self.handle_display_changed)
         # Crop size / mask
         mask = self.parent.variables['mask']
         top_left, bottom_right = find_mask_limits(mask)
@@ -100,25 +107,34 @@ class FyzoAnalysisController(TemplateController):
         self.parent.variables['image'] = image_raw
         # 3 modes
         fft_raw = self._process_fft(image_raw)
+        fft_mask, idx_X, idx_Y = self._get_masked_fft(fft_raw)
+        fft_disp = self._disp_fft(fft_mask)
+        fft_center = self._get_centered_fft(fft_mask, idx_X, idx_Y)
         self.top_right.display_small_fft(value=False)
-        if self.disp_mode == 'fft':
+        if self.disp_mode == 'interfer':
+            main_disp = image_disp
+        elif self.disp_mode == 'fft':
             # Process and display FFT
-            fft_disp = self._disp_fft(fft_raw)
+            main_disp = self._disp_fft(fft_raw)
         elif self.disp_mode == 'fft_masked':
-            fft_raw = self._process_fft(image_raw)
-            fft_mask = self._get_masked_fft(fft_raw)
-            fft_disp = self._disp_fft(fft_mask)
+            main_disp = fft_disp
+        elif self.disp_mode == 'fft_centered':
+            main_disp = self._disp_fft(fft_center)
+        elif self.disp_mode == 'phase':
+            main_disp = image_disp  # TO CHANGE
+        elif self.disp_mode == 'surface':
+            main_disp = image_disp  # TO CHANGE
         else:
-            fft_raw = self._process_fft(image_raw)
-            fft_mask = self._get_masked_fft(fft_raw)
-            fft_disp = self._disp_fft(fft_mask)
-            self.top_right.display_small_fft(value=True, image=fft_disp)
-            # Create image (unwrap and fft-1)
+            main_disp = image_disp
 
-        self.top_left.set_image_from_array(fft_disp)
+        self.top_right.display_small_fft(value=True, image=fft_disp)
+        self.top_left.set_image_from_array(main_disp)
+
+    def handle_display_changed(self, value):
+        self.disp_mode = value
 
     def set_disp_mode(self, value):
-        # Value = {'fft', 'fft_masked', 'phase'}
+        # Value = {'interfer', 'fft', 'fft_masked', 'fft_centered', 'phase', 'surface'}
         self.disp_mode = value
 
     def cleanup(self):
@@ -134,6 +150,7 @@ class FyzoAnalysisController(TemplateController):
         self.worker = None
         self.thread = None
 
+    ### FFT and display
     def _process_fft(self, image):
         fft = np.fft.fftshift(np.fft.fft2(image))
         return fft
@@ -150,7 +167,13 @@ class FyzoAnalysisController(TemplateController):
         central_mask = circular_mask(central_radius, fft, inverted=True)
         imx, jmx = np.unravel_index(np.argmax(np.abs(central_mask)), fft.shape)
         excent_mask = circular_mask(excent_radius, fft, center=(imx, jmx))
-        return excent_mask
+        return excent_mask, imx, jmx
+
+    def _get_centered_fft(self, fft, imx, jmx):
+        Itf_filtr = np.zeros_like(fft)
+        fft_center_Y, fft_center_X = fft.shape
+        centered_fft = np.roll(fft, shift=(fft_center_X - imx, fft_center_Y - jmx), axis=(0, 1))  # démodulation
+        return np.fft.fftshift(centered_fft)
 
     def _get_image_dir(self, filepath):
         if filepath is None:
