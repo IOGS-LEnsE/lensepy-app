@@ -1,0 +1,205 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%		Institut d'Optique Graduate School
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%	Interface de pilotage - Aberration 	
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Created by:
+%	Julien VILLEMEJANE - 18/june/2025
+%	
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Professional Newsletter Template
+% LaTeX Template
+% Version 1.0 (09/03/14)
+%
+% Created by:
+% Bob Kerstetter (https://www.tug.org/texshowcase/) and extensively modified by:
+% Vel (vel@latextemplates.com)
+% 
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/li censes/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[a4paper,11pt,twoside]{book} % The default font size is 10pt; 11pt and 12pt are alternatives
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{tp_villemejane}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+
+
+% Page de garde
+\begin{titlepage}
+
+\begin{center}
+	\begin{minipage}{2.5cm}
+	\begin{center}
+		\includegraphics[width=8cm]{images/Logo-LEnsE.png}
+	\end{center}
+\end{minipage}\hfill
+\begin{minipage}{10cm}
+	\begin{center}
+	\textbf{Institut d'Optique Graduate School }\\[0.1cm]
+    \textbf{Interface Aberrations / Zygo}
+
+
+	\end{center}
+\end{minipage}\hfill
+
+
+\vspace{5cm}
+
+
+{\huge \bfseries \textsc{Interféromètre de ZYGO}} \\[0.5cm]
+{\large \bfseries Contrôles interforémétriques / Aberrations} \\[0.2cm]
+
+\vspace{2cm}
+% Title
+\rule{\linewidth}{0.3mm} \\[0.4cm]
+{ \huge \bfseries\color{violet_iogs} Notice d'utilisation \\[0.4cm] }
+\rule{\linewidth}{0.3mm} \\[1cm]
+
+\vfill
+
+% Bottom of the page
+%{\textbf{\large {Année universitaire} 2024-2025}}
+
+\textit{Ce document est disponible au format électronique sur le site du LEnsE - https://lense.institutoptique.fr/ dans la rubrique ???.}
+
+\end{center}
+\end{titlepage}
+
+% ----- DEUXIÈME PAGE (sans numérotation) -----
+\clearpage
+\thispagestyle{empty}
+\mbox{} % page vide ou mettre du texte si souhaité
+
+% ----- TROISIÈME PAGE (début de la numérotation à 1) -----
+\clearpage
+\setcounter{page}{1} % on commence la numérotation ici
+\pagenumbering{arabic} % pour utiliser les chiffres arabes
+\pagestyle{plain} % ou autre style si souhaité
+
+\begin{minipage}[c]{.25\linewidth}
+	\includegraphics[width=5cm]{images/Logo-LEnsE.png}
+\end{minipage} \hfill
+\begin{minipage}[c]{.4\linewidth}
+
+\begin{center}
+\vspace{0.3cm}
+{\Large \textsc{Interféromètre de ZYGO}}
+
+\medskip
+
+\textbf{\Large Notice d'utilisation}
+
+\end{center}
+\end{minipage}\hfill
+
+L'\textbf{interférométrie} est couramment utilisée pour \textbf{caractériser la qualité de composants optiques}
+usuels (lames à faces parallèles, miroirs plans, miroirs de télescope, systèmes optiques...).
+
+La qualité d'un système optique est caractérisée par l'écart entre sa surface d'onde réelle dans la pupille de sortie du système et la surface d'onde souhaitée. Il est également possible d'en analyser ses aberrations géométriques (coma, astigmatisme, aberration sphérique...).
+
+
+\section{Interféromètre de Zygo}
+
+Le \textbf{ZYGO} est un \textbf{interféromètre laser} de type Fizeau (par division d'amplitude) équipé d'un système de décalage de phase. Il permet des mesures de surfaces d'onde aberrantes de l'ordre de $\lambda/10$ (PV). L'analyse du front d'ondes se fait par décalage de phase.
+
+Les \textbf{interféromètres de ZYGO} (ou Zygoto) utilisent un Laser \textit{Helium Néon} (HeNe) de longueur d'onde de $632.8\operatorname{nm}$, monomode, de très grande longueur de cohérence. Un système d'épuration laser suivi d'un système de lentille permet d'obtenir un faisceau uniforme et parfaitement collimaté de $100\operatorname{mm}$ de diamètre à la sortie de l'instrument.
+
+\begin{center}
+	\includegraphics[width=\textwidth]{images/zygo_principe.png}
+\end{center}
+
+L'ensemble est piloté par une \textbf{interface de contrôle} présentée dans la suite de ce document.
+
+\clearpage
+\section{Précautions}
+
+\begin{tcolorbox}[myboxstyle]
+\begin{large}
+\begin{center}
+Le \textbf{plan de référence} du ZYGO est excellent (quelques $\lambda/100$ RMS), mais évidemment \textbf{très fragile} et \textbf{très onéreux}. C'est la seule pièce très délicate du ZYGO. Prenez-en le plus grand soin ! Ne le touchez jamais ! Placez le support de l'optique à tester loin du plan étalon par sécurité.
+\end{center}
+\end{large}
+\end{tcolorbox}
+
+\medskip
+
+\begin{center}
+{\Large \textbf{Replacez TOUJOURS le cache après utilisation.} }
+\end{center}
+
+\bigskip
+
+
+\section{Alignement du système - Miroir plan}
+
+Avant toute utilisation du système, il faudra aligner la partie optique en plaçant le miroir plan parallèle au plan étalon du système de mesure Zygo. Le réglage se fait par \textbf{autocollimation}.
+
+\bigskip
+
+La procédure d'alignement du système est la suivante :
+
+\begin{enumerate}
+	\item Placer le \textbf{miroir plan} sur son support, puis en face du \textbf{plan étalon} (sortie du ZYGO) à une distance de quelques dizaine de centimètres.
+	\item Positionner le système optique sur la voie de réglage \mbox{\fbox{\textsc{Align}}}.
+	\item \textbf{Lancer l'interface du Zygo} : \textsl{\textbf{Start\_Zygo.bat}} sur le bureau de l'ordinateur.
+	\item Dans la section \mbox{\fbox{\textsc{Acquisition}}}, cliquer sur \mbox{\fbox{\textsc{Camera}}} puis sur \mbox{\fbox{\textsc{Zoom}}} pour avoir une visualisation en grand écran.
+	\item A l'aide des vis de réglage du support du miroir plan, aligner les deux faisceaux lumineux au centre de l'image (au centre de la mire).
+\end{enumerate}
+
+Une fois ce réglage effectué, mettre le système optique sur la voie de visualisation \mbox{\fbox{\textsc{View}}}. Vous devriez visualiser des franges d'interférence. 
+
+\begin{center}
+	\includegraphics[width=0.3\textwidth]{images/zygo_franges.png}
+\end{center}
+
+En modifiant légèrement le réglage précédent du miroir plan, vous devez essayer d'obtenir une teinte la plus plate possible...
+
+
+
+% Parties
+\cleardoublepage
+\ifodd\value{page}\else
+  \hbox{}\newpage
+\fi
+
+\input{parts_/ZYGO_interface_principe.tex}
+
+\cleardoublepage
+\ifodd\value{page}\else
+  \hbox{}\newpage
+\fi
+
+\input{parts_/ZYGO_ihm.tex}
+
+\cleardoublepage
+\ifodd\value{page}\else
+  \hbox{}\newpage
+\fi
+
+\input{parts_/ZYGO_acquisition.tex}
+
+\cleardoublepage
+\ifodd\value{page}\else
+  \hbox{}\newpage
+\fi
+
+\input{parts_/ZYGO_masques.tex}
+
+\end{document}
+
+
