@@ -269,11 +269,10 @@ class CoefficientsView(QWidget):
 
     def init_view(self):
         for k in range(self.number):
-            slider = SliderBlocVertical(f'C{k+1}', '',self.range[0],self.range[1])
+            gauge = VerticalGauge(title=f'C{k+1}', min_value=self.range[0], max_value=self.range[1], min_width=5)
             color = coeff_colors[coeff_order[k]//2]
-            slider.set_background_color(color)
-            slider.slider_changed.connect(self.handle_slider_changed)
-            self.sliders.append(slider)
+            gauge.set_colors(BLUE_IOGS, color)
+            self.sliders.append(gauge)
             self.sliders[k].set_value(0)
             self.slider_layout.addWidget(self.sliders[k])
         self.update()
@@ -283,12 +282,10 @@ class CoefficientsView(QWidget):
         for slider in self.sliders:
             slider.set_range(min, max)
 
-    def handle_slider_changed(self):
-        sender = self.sender()
-        for k, slider in enumerate(self.sliders):
-            if sender == self.sliders[k]:
-                value = self.sliders[k].get_value()
-                self.sliders_changed.emit(k, value)
+    def set_coeffs(self, values):
+        """Set the values of the coefficients."""
+        for i, value in enumerate(values):
+            self.sliders[i].set_value(value)
 
     def get_coeffs(self):
         coeffs = []

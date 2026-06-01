@@ -49,7 +49,7 @@ class ZygoAberrationsController(TemplateController):
 
         # Graphical layout
         self.top_left = Surface2DView('', self.colormap_2D)
-        self.bot_left = CoefficientsView(self, number=8)
+        self.bot_left = CoefficientsView(self, number=36)
         self.bot_right = Surface2DView('', self.colormap_2D)
         self.top_right = SimulationChoiceView()
         
@@ -65,12 +65,13 @@ class ZygoAberrationsController(TemplateController):
         if self.new_surface is not None:
             print('new surface ??')
             # Down sampling
-            #self.top_left.set_array(self.new_surface)
-            #self.top_left.reset_z_range()
+            self.top_left.set_array(self.new_surface)
+            self.top_left.reset_z_range()
             self.top_left.set_title(translate('unwrapped_notilt_surface'))
             self.update_pv_rms()
             psf = PSFModel(wavefront=self.new_surface, mask=self.new_mask)
             self.psf_display, self.psf_display_perfect = psf.get_psf()
+            self.bot_left.set_coeffs([1, 2, 4, -2])
         super().init_view()
 
     def _create_2D_display(self):

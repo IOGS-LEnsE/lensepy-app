@@ -490,7 +490,7 @@ class LineEditWidget(QWidget):
 
 class VerticalGauge(QWidget):
 
-    def __init__(self, parent=None, title="", min_value=0, max_value=100):
+    def __init__(self, parent=None, title="", min_value=0, max_value=100, min_width=100):
         """Create a vertical gauge.
         :param title: Title of the gauge.
         :param min_value: Minimum value of the gauge.
@@ -519,7 +519,7 @@ class VerticalGauge(QWidget):
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Expanding
         )
-        self.progress.setMinimumWidth(100)
+        self.progress.setMinimumWidth(min_width)
 
         layout.addWidget(self.progress, alignment=Qt.AlignmentFlag.AlignHCenter)
 
