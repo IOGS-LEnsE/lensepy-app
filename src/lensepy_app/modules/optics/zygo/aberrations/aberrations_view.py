@@ -318,15 +318,15 @@ class CoefficientsView(QWidget):
         self.update()
 
     def _update_checked(self):
+        self.coeffs_correction = []
         # Update check boxes
         for k in range(self.number+1):
             self.coeffs_correction_bool[k] = False
             if not self.sliders[k].is_checked():
                 self.coeffs_correction_bool[k] = True
-                self.coeffs_correction[k] = self.coeffs[k]
+                self.coeffs_correction.append(k)
             else:
                 self.coeffs_correction_bool[k] = False
-                self.coeffs_correction[k] = 0
         self.auto_set_range()
         # Update bar values
         for k in range(self.number+1):
@@ -334,8 +334,6 @@ class CoefficientsView(QWidget):
                 self.sliders[k].set_value(0)
             else:
                 self.sliders[k].set_value(self.coeffs[k])
-
-
         self.update()
 
     def handle_tilt_changed(self):
