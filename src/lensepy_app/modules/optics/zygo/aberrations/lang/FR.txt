@@ -2,3 +2,12 @@
 # ZYGO Aberrations - module - FRANCAIS
 zygo;Zygo
 surface_choice_interfer;Surface à afficher
+label_zernike_coefficients;Coefficients de Zernike (RMS)
+label_aberrations_options;Données à afficher
+wavelength_label;Longueur d'onde
+label_PV;Pic-Vallée
+label_RMS;RMS
+tilt_button;Corriger le tilt (C1 et C2)
+focus_button;Corriger le focus (C3)
+coeffs_button;Afficher les coefficients
+parameters_button;Paramètres

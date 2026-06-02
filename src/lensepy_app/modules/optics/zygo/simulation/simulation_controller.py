@@ -38,7 +38,7 @@ class ZygoSimulationController(TemplateController):
 
         # Graphical layout
         self.top_left = Surface2DView('', self.colormap_2D)
-        self.bot_left = CoefficientsView(self, number=8)
+        self.bot_left = CoefficientsView(self, number=15)
         self.bot_right = Surface2DView('', self.colormap_2D)
         self.top_right = SimulationChoiceView()
         

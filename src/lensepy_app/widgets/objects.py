@@ -4,7 +4,8 @@ __all__ = ['message_box', 'make_hline', 'make_vline',
            'SliderBlocVertical', 'ImageDisplayWithCrosshair',
            'ImageDisplayWidget', 'HistogramWidget', 'XYChartWidget',
            'XYMultiChartWidget', 'CircleWidget',
-           'ProgressBarView', 'QProgressBar', 'SwitchWidget', 'LabelWidget']
+           'ProgressBarView', 'QProgressBar', 'SwitchWidget', 'LabelWidget',
+           'VerticalCenteredGauge']
 
 from PyQt6.QtGui import QColor, QBrush, QPainter
 from lensepy_app.widgets.switch import SwitchWidget
@@ -13,12 +14,14 @@ from lensepy_app.widgets.image_display_widget import ImageDisplayWidget, ImageDi
 from lensepy_app.widgets.histogram_widget import HistogramWidget
 from lensepy_app.widgets.xy_multi_chart_widget import XYMultiChartWidget
 from lensepy_app.widgets.widget_xy_chart import XYChartWidget
-from PyQt6.QtCore import Qt, pyqtSignal, QRectF
+from PyQt6.QtCore import Qt, pyqtSignal, QRectF, QRect
+from PyQt6.QtGui import QPainter, QColor, QPen
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QComboBox,
     QVBoxLayout, QLineEdit, QSlider, QProgressBar,
     QSizePolicy, QFrame, QMessageBox)
 from lensepy.css import *
+
 
 def message_box(warning="Warning - No File Loaded", text=""):
     """Open a warning dialog box."""
@@ -264,16 +267,6 @@ class SliderBloc(QWidget):
         return max(vmin, min(vmax, val))
 
 
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QSlider, QLineEdit
-)
-
-# Styles
-styleH2 = "font-weight: bold; font-size: 14px;"
-styleH3 = "font-size: 12px; color: gray;"
-
-
 class SliderBlocVertical(QWidget):
     """
     Slider block combining a numeric input and a vertical slider.
@@ -490,7 +483,7 @@ class LineEditWidget(QWidget):
 
 class VerticalGauge(QWidget):
 
-    def __init__(self, parent=None, title="", min_value=0, max_value=100, min_width=100):
+    def __init__(self, parent=None, title="", min_value=0, max_value=100, min_width=100, min_height=500):
         """Create a vertical gauge.
         :param title: Title of the gauge.
         :param min_value: Minimum value of the gauge.
@@ -520,6 +513,7 @@ class VerticalGauge(QWidget):
             QSizePolicy.Policy.Expanding
         )
         self.progress.setMinimumWidth(min_width)
+        self.progress.setMinimumHeight(min_height)
 
         layout.addWidget(self.progress, alignment=Qt.AlignmentFlag.AlignHCenter)
 
@@ -564,6 +558,105 @@ class VerticalGauge(QWidget):
         :param text: title
         """
         self.label.setText(text)
+
+
+class VerticalCenteredGauge(QWidget):
+
+    def __init__(self, parent=None, min_value=0, max_value=100, min_width=10, min_height=50):
+        super().__init__(parent)
+
+        self.minimum = min_value
+        self.maximum = max_value
+        self.value = 0
+
+        self.bg_color = QColor("#E0E0E0")
+        self.fg_color = QColor("#F44336")
+
+        self.setMouseTracking(True)
+        self.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Expanding
+        )
+        self.setMinimumWidth(min_width)
+        self.setMinimumHeight(min_height)
+
+    def set_colors(self, bg_color, fg_color):
+        """Set colors of the gauge."""
+        self.bg_color = QColor(bg_color)
+        self.fg_color = QColor(fg_color)
+        self.update()
+
+    def set_range(self, min_value, max_value):
+        """
+        Set min and max values.
+        :param min_value: min value
+        :param max_value: max value
+        """
+        self.minimum = min_value
+        self.maximum = max_value
+        self.update()
+
+    def set_value(self, value):
+        self.value = max(self.minimum,
+                         min(self.maximum, value))
+        self.update()
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        w = self.width()
+        h = self.height()
+        margin = 1
+
+        bar_rect = QRect(
+            0,
+            margin,
+            w,
+            h - 2 * margin
+        )
+
+        # fond uniforme
+        painter.fillRect(bar_rect, self.bg_color)
+
+        center_y = bar_rect.center().y()
+
+        painter.setPen(QPen(Qt.GlobalColor.black, 2))
+        painter.drawLine(
+            bar_rect.left(),
+            center_y,
+            bar_rect.right(),
+            center_y
+        )
+
+        amplitude = max(
+            abs(self.minimum),
+            abs(self.maximum)
+        )
+
+        ratio = abs(self.value) / amplitude
+
+        if self.value > 0:
+            filled_height = int(
+                (bar_rect.height() / 2) * ratio
+            )
+            rect = QRect(
+                bar_rect.left(),
+                center_y - filled_height,
+                bar_rect.width(),
+                filled_height
+            )
+            painter.fillRect(rect, self.fg_color)
+
+        elif self.value < 0:
+            filled_height = int(
+                (bar_rect.height() / 2) * ratio
+            )
+            rect = QRect(
+                bar_rect.left(),
+                center_y,
+                bar_rect.width(),
+                filled_height
+            )
+            painter.fillRect(rect, self.fg_color)
 
 
 class CircleWidget(QWidget):
@@ -659,5 +752,12 @@ if __name__ == "__main__":
     slider.slider_changed.connect(handle_slider_change)
     slider.set_value(15)
     slider.resize(400, 400)
-    slider.show()
+    #slider.show()
+
+    gauge = VerticalCenteredGauge(None, min_value=-20, max_value=20, min_width=1)
+    gauge.resize(40, 400)
+    gauge.set_colors('#FF00FF', 'black')
+    gauge.set_value(-15)
+    gauge.show()
+
     sys.exit(app.exec())

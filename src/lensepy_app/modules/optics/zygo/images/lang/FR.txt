@@ -9,3 +9,5 @@ no_mask_loaded;Pas de masque chargé
 image_displayed;Image à afficher
 mask_displayed;Masque à appliquer
 mask_s_title;Masque(s)
+image_saving_png_button;Sauvegarde PNG
+image_saving_mat_button;Sauvegarde MAT

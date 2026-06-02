@@ -2,3 +2,14 @@
 # ZYGO Interferometric Control - module - FRANCAIS
 zygo;Zygo
 surface_choice_interfer;Surface à afficher
+2D_unwrap_button;Surface 2D
+3D_unwrap_button;Surface 3D
+tilt_check_box;Correction tilt
+2D_wrap_button;Phase enroulée 2D
+3D_wrap_button;Phase enroulée 3D
+save_current_view;Sauvegarde Vue (PNG)
+label_wedge_value;Wegde Factor
+label_pv_rms_uncorrected;Statistiques surface non corrigée
+label_pv_rms_corrected;Statistiques surface corrigée
+label_PV;Pic-Vallée
+label_RMS;RMS

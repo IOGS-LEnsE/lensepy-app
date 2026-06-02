@@ -1,6 +1,9 @@
 # value;translation
 # ZYGO App - MAIN MENU - FRENCH
 zygo_app;Zygo
+acquisition_menu;Acquisition
 images_menu;Gestion Images
 masks_menu;Gestion Masques
 interfer_control_menu;Analyses / Figures
+aberrations_menu;Aberrations (Zernike)
+simulation_menu;Simulation (Zernike)
