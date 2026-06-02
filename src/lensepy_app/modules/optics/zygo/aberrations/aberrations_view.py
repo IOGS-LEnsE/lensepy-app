@@ -242,6 +242,8 @@ coeff_colors = ['orange', 'lightblue', 'red', 'green', 'purple', 'magenta', 'bla
 class CoefficientsView(QWidget):
 
     correction_changed = pyqtSignal(list)
+    tilt_changed = pyqtSignal(bool)
+    focus_changed = pyqtSignal(bool)
 
     def __init__(self, parent = None, number=36):
         super().__init__()
@@ -348,6 +350,7 @@ class CoefficientsView(QWidget):
             self.sliders[2].set_checked(True)
             self.sliders[1].setEnabled(True)
             self.sliders[2].setEnabled(True)
+        self.tilt_changed.emit(self.tilt_button.isChecked())
 
     def handle_focus_changed(self):
         # Specific correction for tilt and focus
@@ -357,6 +360,7 @@ class CoefficientsView(QWidget):
         else:
             self.sliders[3].set_checked(True)
             self.sliders[3].setEnabled(True)
+        self.focus_changed.emit(self.focus_button.isChecked())
 
     def handle_correction_changed(self):
         # Action performed when a coefficient is clicked for correction.
@@ -457,14 +461,32 @@ class ZernikeCoeffBar(QWidget):
         self.checkbox.setChecked(checked)
 
 
-class AberattionsView(QWidget):
-    def __init__(self, parent=None):
+class AberrationsView(QWidget):
+    def __init__(self, parent=None, colormap='plasma'):
         super().__init__(parent)
-
         layout = QHBoxLayout()
+        self.setLayout(layout)
 
-        self.unwrapped_surface = Surface2DView(translate('unwrapped_surface_no_correction'))
+        self.unwrapped_surface = Surface2DView(translate('unwrapped_surface_no_correction'), colormap)
         layout.addWidget(self.unwrapped_surface)
+        self.unwrapped_surface_corr = Surface2DView(translate('unwrapped_surface_correction'), colormap)
+        layout.addWidget(self.unwrapped_surface_corr)
+
+    def set_array_uncorrect(self, image):
+        self.unwrapped_surface.set_array(image)
+
+    def set_array_correct(self, image):
+        self.unwrapped_surface_corr.set_array(image)
+
+    def reset_z_range(self):
+        self.unwrapped_surface.reset_z_range()
+        self.unwrapped_surface_corr.reset_z_range()
+
+    def set_title_uncorrect(self, title):
+        self.unwrapped_surface.set_title(title)
+
+    def set_title_correct(self, title):
+        self.unwrapped_surface_corr.set_title(title)
 
 
 class ParametersView(QWidget):
