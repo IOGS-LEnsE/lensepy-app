@@ -2,3 +2,15 @@
 # Basler - module - FRANCAIS
 baslerlite_menu;Camera Basler
 basler_infos_title;Paramètres du capteur
+baslerlite_mask_button;Ajouter un masque
+baslerlite_mask_apply;Afficher le masque
+basler_params_title;Paramètres de la caméra
+basler_params_fps;Taux de rafraîchissement (FPS)
+basler_params_slider_expo;Temps d'exposition
+basler_params_slider_black;Niveau de noir (black level)
+histo_xlabel;Nuance de gris
+histo_ylabel;Quantité de pixels
+basler_infos_name;Nom de la caméra
+basler_infos_serial;Numéro de série
+basler_infos_size;Taille du capteur
+basler_infos_color_mode;Mode de couleur
