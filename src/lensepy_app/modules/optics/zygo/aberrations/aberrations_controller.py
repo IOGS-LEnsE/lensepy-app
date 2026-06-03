@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QWidget, QDialog
 from lensepy import translate, is_float
 from lensepy.optics.zygo.phase import process_statistics_surface
 from lensepy_app.appli._app.template_controller import TemplateController
-from lensepy_app.modules.optics.zygo._old.models.psf import PSFModel
+from lensepy.optics.zygo.psf import PSFModel
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_view import *
 from lensepy.optics.zygo import *
 from lensepy.images.conversion import downsample_and_upscale
@@ -39,8 +39,8 @@ class ZygoAberrationsController(TemplateController):
         # TO DO  - default colormap in default_parameters
         self.unwrapped_phase = self.phase.get_unwrapped_phase()
 
-        self.new_surface, _ = downsample_and_upscale(self.unwrapped_phase, 2)
-        new_mask, _ = downsample_and_upscale(self.phase.get_mask().astype(np.uint8), 2)
+        self.new_surface, _ = downsample_and_upscale(self.unwrapped_phase, 1)
+        new_mask, _ = downsample_and_upscale(self.phase.get_mask().astype(np.uint8), 1)
         self.new_mask = (new_mask > 0.5)
         #self.new_surface = np.ma.masked_where(np.logical_not(self.new_mask), new_surface)
         self.colormap_2D = 'cividis'
@@ -112,6 +112,11 @@ class ZygoAberrationsController(TemplateController):
             self.top_left.set_array_correct(corrected_phase)
         else:
             self.top_left.set_array_correct(unwrapped_phase)
+
+        psf_uncorr = PSFModel(wavefront=unwrapped_phase, mask=self.new_mask)
+        psf_uncorr_display, psf_uncorr_display_perfect = psf_uncorr.get_psf()
+
+        self.top_left.set_psf_uncorrect(psf_uncorr_display)
 
 
     def handle_correction_changed(self, coeffs):

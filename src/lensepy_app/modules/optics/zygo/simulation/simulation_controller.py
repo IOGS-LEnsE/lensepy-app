@@ -5,7 +5,6 @@ from PyQt6.QtWidgets import QWidget, QDialog
 from lensepy import translate, is_float
 from lensepy.optics.zygo.phase import process_statistics_surface
 from lensepy_app.appli._app.template_controller import TemplateController
-from lensepy_app.modules.optics.zygo._old.models.psf import PSFModel
 from lensepy_app.modules.optics.zygo.simulation.simulation_view import *
 from lensepy.optics.zygo import *
 from lensepy_app import *

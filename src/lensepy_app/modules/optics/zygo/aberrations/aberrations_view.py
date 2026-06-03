@@ -462,19 +462,35 @@ class ZernikeCoeffBar(QWidget):
 class AberrationsView(QWidget):
     def __init__(self, parent=None, colormap='plasma'):
         super().__init__(parent)
-        layout = QHBoxLayout()
-        self.setLayout(layout)
+        m_layout = QVBoxLayout()
+        widget1 = QWidget()
+        layout1 = QHBoxLayout()
+        widget1.setLayout(layout1)
+        widget2 = QWidget()
+        layout2 = QHBoxLayout()
+        widget2.setLayout(layout2)
+        m_layout.addWidget(widget1)
+        m_layout.addWidget(widget2)
+        self.setLayout(m_layout)
 
         self.unwrapped_surface = Surface2DView(translate('unwrapped_surface_no_correction'), colormap)
-        layout.addWidget(self.unwrapped_surface)
+        layout1.addWidget(self.unwrapped_surface)
         self.unwrapped_surface_corr = Surface2DView(translate('unwrapped_surface_correction'), colormap)
-        layout.addWidget(self.unwrapped_surface_corr)
+        layout1.addWidget(self.unwrapped_surface_corr)
+
+        self.psf_unwrapped = Surface2DView(translate('psf_unwrapped_surface'), colormap)
+        layout2.addWidget(self.psf_unwrapped)
+        self.psf_corrected = Surface2DView(translate('psf_corrected_surface'), colormap)
+        layout2.addWidget(self.psf_corrected)
 
     def set_array_uncorrect(self, image):
         self.unwrapped_surface.set_array(image)
 
     def set_array_correct(self, image):
         self.unwrapped_surface_corr.set_array(image)
+
+    def set_psf_uncorrect(self, surface):
+        self.psf_unwrapped.set_array(surface)
 
     def reset_z_range(self):
         self.unwrapped_surface.reset_z_range()
