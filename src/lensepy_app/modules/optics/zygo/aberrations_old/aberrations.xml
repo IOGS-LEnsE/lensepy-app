@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>aberrations</name>
+    <requirements>images</requirements>
+    <req_var>dataset,dataset_loaded,mask_loaded,phase_calculated</req_var>
+    <display>MODE2</display>
+    <controller>ZygoAberrationsController</controller>
+    <location>aberrations_controller</location>
+</appli>

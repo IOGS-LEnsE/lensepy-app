@@ -1,0 +1,4 @@
+# value;translation
+# ZYGO Aberrations - module - ENGLISH
+zygo;Zygo
+surface_choice_interfer;Surface to display

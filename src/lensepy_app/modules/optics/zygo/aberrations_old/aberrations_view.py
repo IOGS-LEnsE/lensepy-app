@@ -385,6 +385,7 @@ class CoefficientsView(QWidget):
             slider.set_range(min, max)
 
     def auto_set_range(self):
+        print(self.coeffs)
         coeffs_abs = np.abs(np.array(self.coeffs))
         coeffs_abs[0] = 0
         for k, coeff in enumerate(self.coeffs_correction_bool):
