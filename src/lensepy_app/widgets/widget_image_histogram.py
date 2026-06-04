@@ -18,7 +18,7 @@ import sys
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel
 from PyQt6.QtCore import Qt
 from pyqtgraph import PlotWidget, BarGraphItem
-from lensepy_app.pyqt6.widget_histogram import HistogramWidget
+from lensepy_app.widgets.widget_histogram import HistogramWidget
 from lensepy.css import *
 from lensepy.images.conversion import resize_image_ratio
 
