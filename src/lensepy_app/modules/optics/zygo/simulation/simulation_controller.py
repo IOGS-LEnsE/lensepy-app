@@ -5,7 +5,6 @@ from PyQt6.QtWidgets import QWidget, QDialog
 from lensepy import translate, is_float
 from lensepy.optics.zygo.phase import process_statistics_surface
 from lensepy_app.appli._app.template_controller import TemplateController
-from lensepy_app.modules.optics.zygo._old.models.psf import PSFModel
 from lensepy_app.modules.optics.zygo.simulation.simulation_view import *
 from lensepy.optics.zygo import *
 from lensepy_app import *
@@ -38,7 +37,7 @@ class ZygoSimulationController(TemplateController):
 
         # Graphical layout
         self.top_left = Surface2DView('', self.colormap_2D)
-        self.bot_left = CoefficientsView(self, number=8)
+        self.bot_left = CoefficientsView(self, number=15)
         self.bot_right = Surface2DView('', self.colormap_2D)
         self.top_right = SimulationChoiceView()
         
@@ -206,7 +205,7 @@ class ZygoSimulationController(TemplateController):
         k = 0.3
         min_N = int(k * N)
         max_N = int((1 - k) * N)
-        psf_disp = self.circled / np.max(self.circled)  # Normalization
+        psf_disp = self.ftm / np.max(self.ftm)  # Normalization
         disp_small = psf_disp[min_N:max_N, min_N:max_N]
         x, y, w_s = self.top_left.prepare_data_for_mesh(disp_small, undersampling=1)
         self.top_left.create_mesh_surface(x, y, w_s)

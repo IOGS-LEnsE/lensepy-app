@@ -115,7 +115,7 @@ class Surface2DView(QWidget):
         else:
             self.array_2D = array
 
-        # 🔥 update image uniquement
+        # update image uniquement
         self.imv.setImage(self.array_2D)
         self.plot.setAspectLocked(True)
 

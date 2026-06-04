@@ -170,7 +170,8 @@ class SimulationChoiceView(QWidget):
         self.wavelength_label.set_value(str(value))
 
     def set_strehl_ratio(self, value):
-        self.strehl_label.set_value(str(value))
+        new_value = np.round(value, 3)
+        self.strehl_label.set_value(str(new_value))
 
     def update_action(self):
         sender = self.sender()

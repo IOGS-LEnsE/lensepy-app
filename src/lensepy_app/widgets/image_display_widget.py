@@ -127,6 +127,8 @@ class ImageDisplayWidget(QWidget):
     # ------------------------------------------------------------------
     def _convert_array_to_qimage(self, pixels: np.ndarray) -> QImage | None:
         """Convertit un tableau numpy en QImage compatible avec PyQt."""
+        if isinstance(pixels, np.ma.MaskedArray):
+            pixels = pixels.filled(0)
         pixels = np.ascontiguousarray(pixels)
         if pixels.ndim == 2:
             # Grayscale

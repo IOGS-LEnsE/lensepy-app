@@ -234,8 +234,10 @@ class HistogramWidget(QWidget):
                     vmax = max_val+1
                 hist_range = (vmin, vmax)
                 nbins = int(vmax - vmin + 1)
-
-                hist, bins = np.histogram(image, bins=nbins, range=hist_range)
+                if isinstance(image, np.ma.MaskedArray):
+                    hist, bins = np.histogram(image.compressed(), bins=nbins, range=hist_range)
+                else:
+                    hist, bins = np.histogram(image, bins=nbins, range=hist_range)
                 self.bar_l.setOpts(x=bins[:-1], height=hist, width=1)
                 self.plot.addItem(self.bar_l)
 

@@ -16,3 +16,4 @@ masks_list_type; Type
 masks_list_select; Select.
 masks_list_invert; Inv.
 masks_list_delete; Supp.
+circular_mask_add;Ajouter un masque circulaire

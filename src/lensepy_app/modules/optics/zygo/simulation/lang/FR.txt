@@ -2,3 +2,5 @@
 # ZYGO Aberrations - module - FRANCAIS
 zygo;Zygo
 surface_choice_interfer;Surface à afficher
+label_PV;Pic-Vallée
+label_RMS;RMS
