@@ -25,7 +25,7 @@ def cercle_par_3_points(p1, p2, p3):
     return xc, yc, R
 
 # -------- Chargement et affichage interférogramme 
-img = img_as_float(io.imread("interference.png", as_gray=True))
+img = img_as_float(io.imread("interfero.png", as_gray=True))
 N, M = img.shape
 iC, jC = N // 2, M // 2
 Yf, Xf = np.indices((N, M)) # grille fréquentielle

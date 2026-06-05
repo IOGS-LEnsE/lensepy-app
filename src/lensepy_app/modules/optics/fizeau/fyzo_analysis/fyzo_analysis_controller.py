@@ -11,6 +11,8 @@ from lensepy import translate
 from lensepy.css import *
 from lensepy.images.masks import *
 from lensepy.images.conversion import *
+from lensepy.optics.zygo import process_statistics_surface
+
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets import ImageDisplayWidget
 from lensepy_app.modules.optics.fizeau.fyzo_analysis.fyzo_analysis_views import FyzoAnalysisOptionsView
@@ -114,6 +116,9 @@ class FyzoAnalysisController(TemplateController):
         self.surface[~self.mask] = np.nan
         self.surface = np.ma.masked_where(np.logical_not(self.mask), self.surface)
 
+        pv,rms = process_statistics_surface(self.surface)
+        self.top_right.set_pv_rms(pv, rms)
+
     def process_stats(self):
         surface_val = self.surface[self.mask & ~np.isnan(self.surface)]
         PV_micron = np.max(surface_val) - np.min(surface_val)
@@ -188,9 +193,10 @@ class FyzoAnalysisController(TemplateController):
         fft_disp = ((fft_disp / max_disp) * 255).astype(np.uint8)
         return fft_disp
 
-    def _get_masked_fft(self, fft):
-        central_radius = 80  # rayon zone centrale
-        excent_radius = 50  # largeur pic latéral
+    def _get_masked_fft(self, fft, percent_excent=0.15):
+        width = fft.shape[0]
+        central_radius = width // 6  # rayon zone centrale
+        excent_radius = int(width * percent_excent)  # largeur pic latéral
         central_mask = circular_mask(central_radius, fft, inverted=True)
         imx, jmx = np.unravel_index(np.argmax(np.abs(central_mask)), fft.shape)
         excent_mask = circular_mask(excent_radius, fft, center=(imx, jmx))

@@ -37,7 +37,7 @@
     <camera>
         <name>Basler</name>
         <colormode>Mono12:12,Mono10:10,Mono8:8</colormode>
-        <exposuretime>2000</exposuretime>
+        <exposuretime>4000</exposuretime>
         <maxwidth>1920</maxwidth>
         <maxheight>1200</maxheight>
         <offset>8</offset>

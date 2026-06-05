@@ -10,3 +10,5 @@ phase_display_button;Phase déroulée
 surface_display_button;Surface corrigée
 surface_3D_display_button;Surface corrigée (vue 3D)
 saving_png_button;Sauvegarde de la vue (PNG)
+label_PV;Pic-Vallée
+label_RMS;RMS

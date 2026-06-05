@@ -6,6 +6,7 @@ from lensepy.css import *
 from lensepy_app.widgets.objects import *
 from lensepy_app.widgets import ImageDisplayWidget
 from lensepy_app.widgets.double_3d_view import Surface3DView
+from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
 
 
 class FyzoAnalysisOptionsView(QWidget):
@@ -76,7 +77,15 @@ class FyzoAnalysisOptionsView(QWidget):
         self.saving_button.clicked.connect(self.handle_saving_png)
         layout.addWidget(self.saving_button)
         layout.addStretch()
+        self.pv_rms = PVRMSView()
+        layout.addWidget(self.pv_rms)
+        layout.addStretch()
+
         self.setLayout(layout)
+
+    def set_pv_rms(self, pv, rms):
+        self.pv_rms.set_pv(pv)
+        self.pv_rms.set_rms(rms)
 
     def activate_mode(self, value):
         if value == 'surface':
