@@ -483,7 +483,7 @@ class LineEditWidget(QWidget):
 
 class VerticalGauge(QWidget):
 
-    def __init__(self, parent=None, title="", min_value=0, max_value=100, min_width=100, min_height=500):
+    def __init__(self, parent=None, title="", min_value=0, max_value=100, min_width=80, min_height=400):
         """Create a vertical gauge.
         :param title: Title of the gauge.
         :param min_value: Minimum value of the gauge.
