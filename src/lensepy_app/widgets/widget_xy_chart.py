@@ -68,7 +68,7 @@ class XYChartWidget(QWidget):
         style = "background-color: darkgray;"
         style += "font-weight:bold;"
         style += "color:white;"
-        style += "font-size:20px;"
+        style += "font-size:16px;"
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.title_label.setStyleSheet(style)
 

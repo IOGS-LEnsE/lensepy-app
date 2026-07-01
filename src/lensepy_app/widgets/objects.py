@@ -483,7 +483,7 @@ class LineEditWidget(QWidget):
 
 class VerticalGauge(QWidget):
 
-    def __init__(self, parent=None, title="", min_value=0, max_value=100, min_width=80, min_height=400):
+    def __init__(self, parent=None, title="", min_value=0, max_value=100, min_width=50, min_height=500):
         """Create a vertical gauge.
         :param title: Title of the gauge.
         :param min_value: Minimum value of the gauge.
@@ -523,7 +523,7 @@ class VerticalGauge(QWidget):
 
         self.value_label = QLabel(' ')
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.value_label.setStyleSheet(f"font-size:20px; padding:0px; color:{BLUE_IOGS};font-weight:bold;")
+        self.value_label.setStyleSheet(f"font-size:16px; padding:0px; color:{BLUE_IOGS};font-weight:bold;")
         layout.addWidget(self.value_label)
 
         self.setLayout(layout)
@@ -540,8 +540,8 @@ class VerticalGauge(QWidget):
         Update the value of the gauge.
         :param value: value to set
         """
-        self.progress.setValue(value)
-        self.value_label.setText(str(value))
+        self.progress.setValue(int(value))
+        self.value_label.setText(str(int(value)))
         self.repaint()
 
     def set_min_max_values(self, min_value, max_value):

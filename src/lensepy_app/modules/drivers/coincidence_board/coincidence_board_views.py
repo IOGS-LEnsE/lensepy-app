@@ -130,51 +130,64 @@ class CoincidenceDisplayWidget(QWidget):
         abc_widget = QWidget()
         abc_layout = QHBoxLayout()
         abc_widget.setLayout(abc_layout)
+        min_height = 300
         self.max_value = 1
         # Screen size
         screen_resolution = QGuiApplication.primaryScreen().geometry()
         ## A counter
-        self.a_value = VerticalGauge(title='A', min_value=0, max_value=self.max_value)
-        #self.a_value.setMinimumHeight(screen_resolution.height()//3)
+        self.a_value = VerticalGauge(title='A', min_value=0, max_value=self.max_value,
+                                     min_height=min_height)
         self.a_value.set_colors(BLUE_IOGS, ORANGE_IOGS)
         abc_layout.addWidget(self.a_value)
         ## B counter
-        self.b_value = VerticalGauge(title='B', min_value=0, max_value=self.max_value)
+        self.b_value = VerticalGauge(title='B', min_value=0, max_value=self.max_value,
+                                     min_height=min_height)
         abc_layout.addWidget(self.b_value)
         self.b_value.set_colors(BLUE_IOGS, BLUE_LITE)
         ## C counter
-        self.c_value = VerticalGauge(title='C', min_value=0, max_value=self.max_value)
+        self.c_value = VerticalGauge(title='C', min_value=0, max_value=self.max_value,
+                                     min_height=min_height)
         abc_layout.addWidget(self.c_value)
         self.c_value.set_colors(BLUE_IOGS, GREEN_LITE)
         abc_layout.addWidget(make_vline())
         ## AB counter
-        self.ab_value = VerticalGauge(title='AB', min_value=0, max_value=self.max_value)
+        self.ab_value = VerticalGauge(title='AB', min_value=0, max_value=self.max_value,
+                                     min_height=min_height)
         abc_layout.addWidget(self.ab_value)
         self.ab_value.set_colors(BLUE_IOGS, ORANGE_IOGS)
         ## AC counter
-        self.ac_value = VerticalGauge(title='AC', min_value=0, max_value=self.max_value)
+        self.ac_value = VerticalGauge(title='AC', min_value=0, max_value=self.max_value,
+                                     min_height=min_height)
         abc_layout.addWidget(self.ac_value)
         self.ac_value.set_colors(BLUE_IOGS, BLUE_LITE)
         abc_layout.addWidget(make_vline())
 
         ## AB_corr counter
-        self.ab_corr_value = VerticalGauge(title='AB\'', min_value=0, max_value=self.max_value)
+        self.ab_corr_value = VerticalGauge(title='AB\'', min_value=0,
+                                           max_value=self.max_value,
+                                           min_height=min_height)
         abc_layout.addWidget(self.ab_corr_value)
         self.ab_corr_value.set_colors(BLUE_IOGS, ORANGE_IOGS)
         ## AC counter
-        self.ac_corr_value = VerticalGauge(title='AC\'', min_value=0, max_value=self.max_value)
+        self.ac_corr_value = VerticalGauge(title='AC\'', min_value=0,
+                                           max_value=self.max_value,
+                                           min_height=min_height)
         abc_layout.addWidget(self.ac_corr_value)
         self.ac_corr_value.set_colors(BLUE_IOGS, BLUE_LITE)
         abc_layout.addWidget(make_vline())
 
         ## ABC counter
-        self.abc_value = VerticalGauge(title='ABC', min_value=0, max_value=self.max_value)
+        self.abc_value = VerticalGauge(title='ABC', min_value=0,
+                                       max_value=self.max_value,
+                                       min_height=min_height)
         abc_layout.addWidget(self.abc_value)
         self.abc_value.set_colors(BLUE_IOGS, GREEN_LITE)
         layout.addWidget(abc_widget)
 
         ## ABC counter
-        self.abc_corr_value = VerticalGauge(title='ABC\'', min_value=0, max_value=self.max_value)
+        self.abc_corr_value = VerticalGauge(title='ABC\'', min_value=0,
+                                            max_value=self.max_value,
+                                            min_height=min_height)
         abc_layout.addWidget(self.abc_corr_value)
         self.abc_corr_value.set_colors(BLUE_IOGS, GREEN_LITE)
         abc_layout.addWidget(make_vline())
@@ -188,7 +201,6 @@ class CoincidenceDisplayWidget(QWidget):
         self.max_value_label = SelectWidget(translate('coincidence_max_value'), values=self.max_values)
         disp_layout.addWidget(self.max_value_label)
         layout.addWidget(make_hline())
-        layout.addWidget(disp_widget)
 
         # Exposure time choice
         self.time_values = ['0.1', '0.2', '0.5', '1.0', '2.0']
@@ -230,32 +242,39 @@ class CoincidenceDisplayWidget(QWidget):
         tau_int = float(self.time_values[tau_int_ind])
         tau_coinc = int(self.tau_coinc.get_value())*1e-9    # ns
         value =  ab_cnt - (a_cnt*b_cnt*tau_coinc/tau_int)
-        self.ab_corr_value.set_value(value)
+        self.ab_corr_value.set_value(int(value))
+        self.repaint()
 
     def set_ac_corr(self, ac_cnt, a_cnt, c_cnt):
         tau_int_ind = self.time_value_label.get_selected_index()
         tau_int = float(self.time_values[tau_int_ind])
         tau_coinc = int(self.tau_coinc.get_value())*1e-9    # ns
         value = ac_cnt - (a_cnt*c_cnt*tau_coinc/tau_int)
-        self.ac_corr_value.set_value(value)
+        self.ac_corr_value.set_value(int(value))
+        self.repaint()
 
     def set_abc_corr(self, abc_cnt, ab_cnt, ac_cnt, b_cnt, c_cnt):
         tau_int_ind = self.time_value_label.get_selected_index()
         tau_int = float(self.time_values[tau_int_ind])
         tau_coinc = int(self.tau_coinc.get_value())*1e-9    # ns
-        value = ab_cnt - (ab_cnt * c_cnt + ac_cnt * b_cnt) * tau_coinc / tau_int
+        value = abc_cnt - (ab_cnt * c_cnt + ac_cnt * b_cnt) * tau_coinc / tau_int
         self.abc_corr_value.set_value(value)
 
 
     def set_max_values(self, value=100000):
         """Set maximum value of the gauges."""
         self.max_value = value
+        coeff_ab = 40
+        coeff_abc = 400
         self.a_value.set_min_max_values(0, self.max_value)
         self.b_value.set_min_max_values(0, self.max_value)
         self.c_value.set_min_max_values(0, self.max_value)
-        self.ab_value.set_min_max_values(0, self.max_value//10)
-        self.ac_value.set_min_max_values(0, self.max_value//10)
-        self.abc_value.set_min_max_values(0, self.max_value//100)
+        self.ab_value.set_min_max_values(0, self.max_value//coeff_ab)
+        self.ab_corr_value.set_min_max_values(0, self.max_value//coeff_ab)
+        self.ac_value.set_min_max_values(0, self.max_value//coeff_ab)
+        self.ac_corr_value.set_min_max_values(0, self.max_value//coeff_ab)
+        self.abc_value.set_min_max_values(0, self.max_value//coeff_abc)
+        self.abc_corr_value.set_min_max_values(0, self.max_value//coeff_abc)
 
     def init_max_value(self):
         """Return maximum value of the gauges."""
@@ -289,7 +308,9 @@ class TimeChartCoincidenceWidget(QWidget):
         super().__init__(parent)
         layout = QHBoxLayout()
         self.chart_a_b_c = XYChartWidget()
+        self.chart_a_b_c.setMinimumHeight(250)
         self.chart_ab_ac_abc = XYChartWidget()
+        self.chart_ab_ac_abc.setMinimumHeight(250)
         layout.addWidget(self.chart_a_b_c, 1)
         layout.addWidget(self.chart_ab_ac_abc, 1)
         self.chart_a_b_c.set_colors([ORANGE_IOGS, BLUE_LITE, GREEN_LITE])
@@ -304,8 +325,9 @@ class TimeChartCoincidenceWidget(QWidget):
 
     def set_range(self, min_val, max_val):
         """Set min and max value range of the charts."""
+        coeff_ab = 40
         self.chart_a_b_c.set_y_range(min_val, max_val)
-        self.chart_ab_ac_abc.set_y_range(min_val, max_val/10)
+        self.chart_ab_ac_abc.set_y_range(min_val, max_val//coeff_ab)
 
     def set_data(self, x_axis, data):
         """Update charts data."""
