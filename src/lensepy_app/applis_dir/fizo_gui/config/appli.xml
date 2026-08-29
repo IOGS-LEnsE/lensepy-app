@@ -22,6 +22,10 @@
 		<location>lensepy_app.modules.camera</location>
 	</module>
 	<module>
+		<name>maskslite</name>
+		<location>lensepy_app.modules.optics.fizeau</location>
+	</module>
+	<module>
 		<name>fyzo_fft</name>
 		<location>lensepy_app.modules.optics.fizeau</location>
 	</module>

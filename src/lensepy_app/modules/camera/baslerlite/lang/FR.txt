@@ -2,7 +2,7 @@
 # Basler - module - FRANCAIS
 baslerlite_menu;Camera Basler
 basler_infos_title;Paramètres du capteur
-baslerlite_mask_button;Ajouter un masque
+baslerlite_mask_button;Ajouter un masque (circulaire)
 baslerlite_mask_apply;Afficher le masque
 basler_params_title;Paramètres de la caméra
 basler_params_fps;Taux de rafraîchissement (FPS)

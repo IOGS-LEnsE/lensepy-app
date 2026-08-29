@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>zygo_masks</name>
+    <requirements>baslerlite</requirements>
+    <req_var2>mask</req_var2>
+    <display>MODE2</display>
+    <controller>ZygoMasksController</controller>
+    <location>masks_controller</location>
+</appli>
