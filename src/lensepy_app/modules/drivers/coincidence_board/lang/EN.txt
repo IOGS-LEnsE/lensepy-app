@@ -2,3 +2,10 @@
 # Coincidence Board - module - ENGLISH
 coincidence_params_title;Coincidences per channel
 coincidence_max_value;Maximum value
+coincidence_exposure_time;Integration time
+tau_coinc_ns;Coincidence window
+a_b_c_time_chart_title;Photons number on A B C
+ab_ac_abc_time_chart_title;Coincidence on AB AC ABC
+A_B_C_values;Photons number / Coincidences (  ' = correction)
+photon_numbers;Photons number
+coinc_numbers;Coincidence number

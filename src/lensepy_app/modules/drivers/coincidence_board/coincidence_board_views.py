@@ -204,7 +204,7 @@ class CoincidenceDisplayWidget(QWidget):
 
         # Exposure time choice
         self.time_values = ['0.1', '0.2', '0.5', '1.0', '2.0']
-        self.time_value_label = SelectWidget(translate('coincidence_exposure_time'), values=self.time_values)
+        self.time_value_label = SelectWidget(translate('coincidence_exposure_time'), values=self.time_values, units='ns')
         disp_layout.addWidget(self.time_value_label)
 
         layout.addWidget(make_hline())
@@ -212,7 +212,7 @@ class CoincidenceDisplayWidget(QWidget):
         layout.addWidget(make_hline())
 
         # Coincidence window time
-        self.tau_coinc = SliderBloc(translate('tau_coinc_ns'), unit='ns', min_value=5, max_value=20, integer=True)
+        self.tau_coinc = SliderBloc(translate('tau_coinc_ns'), unit='ns', min_value=5, max_value=100, ratio=10)
         self.tau_coinc.set_value(10)
         layout.addWidget(self.tau_coinc)
         layout.addWidget(make_hline())
@@ -332,7 +332,7 @@ class TimeChartCoincidenceWidget(QWidget):
     def set_data(self, x_axis, data):
         """Update charts data."""
         if len(data) == 6:
-            self.chart_a_b_c.set_data(x_axis, data[0:3], y_label=translate('coinc_numbers'))
+            self.chart_a_b_c.set_data(x_axis, data[0:3], y_label=translate('photon_numbers'))
             self.chart_ab_ac_abc.set_data(x_axis, data[3:6], y_label=translate('coinc_numbers'))
             self.chart_a_b_c.refresh_chart()
             self.chart_ab_ac_abc.refresh_chart()

@@ -127,14 +127,14 @@ class SliderBloc(QWidget):
     slider_changed = pyqtSignal(float)
 
     def __init__(self, name: str, unit: str, min_value: float, max_value: float,
-                 integer: bool = False) -> None:
+                 integer: bool = False, ratio:int = 100) -> None:
         super().__init__()
 
         self.integer = integer
         self.unit = unit
         self.min_value = min_value
         self.max_value = max_value
-        self.ratio = 1 if integer else 100
+        self.ratio = 1 if integer else ratio
         self.value = 0 #round(min_value + (max_value - min_value) / 3, 2)
 
         self.layout = QVBoxLayout(self)

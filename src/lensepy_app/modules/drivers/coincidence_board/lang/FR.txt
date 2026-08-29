@@ -2,3 +2,10 @@
 # Coincidence Board - module - FRANCAIS
 coincidence_params_title;Affichage des coïncidences par voie
 coincidence_max_value;Valeur maximale à afficher
+coincidence_exposure_time;Temps d'intégration
+tau_coinc_ns;Fenêtre des coïncidences
+a_b_c_time_chart_title;Nombre de coups sur A B C
+ab_ac_abc_time_chart_title;Coïncidences sur AB AC ABC
+A_B_C_values;Nombre de coups / Coïncidences (  ' = corrigées)
+photon_numbers;Nombre de coups
+coinc_numbers;Coïncidences
