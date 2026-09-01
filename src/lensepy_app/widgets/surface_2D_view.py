@@ -62,6 +62,7 @@ class Surface2DView(QWidget):
         self.setLayout(layout)
         self.plot = pg.PlotWidget()
         self.plot.setBackground('lightgray')
+        self.plot.invertY(True)
         self.color_bar = None
         layout.addWidget(self.plot)
         self.plot.setTitle(self.title, color="b", size=f"{self.adapt_size}pt")
@@ -100,7 +101,6 @@ class Surface2DView(QWidget):
         self.plot.setMouseEnabled(x=False, y=False)
         self.plot.hideButtons()
         self.plot.showAxes(True)
-        self.plot.invertY(True)
         font = QFont("Arial", self.adapt_size)
         for ax in ["left", "bottom"]:
             self.plot.getAxis(ax).setTickFont(font)
