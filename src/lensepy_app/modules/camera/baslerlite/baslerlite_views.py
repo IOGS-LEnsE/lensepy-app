@@ -53,18 +53,7 @@ class CameraInfosWidget(QWidget):
         layout.addWidget(self.label_color_mode)
         layout.addWidget(make_hline())
         layout.addStretch()
-        # Mask
-        self.mask_button = QPushButton(translate('baslerlite_mask_button'))
-        self.mask_button.setStyleSheet(unactived_button)
-        self.mask_button.setFixedHeight(BUTTON_HEIGHT)
-        self.mask_button.clicked.connect(self.handle_mask)
-        layout.addWidget(self.mask_button)
-        self.mask_apply_button = QCheckBox(translate('baslerlite_mask_apply'))
-        self.mask_apply_button.setStyleSheet(styleCheckbox)
-        self.mask_apply_button.stateChanged.connect(self.handle_apply_mask)
-        layout.addWidget(self.mask_apply_button)
         # End
-        self.activate_mask_check(False)
         layout.addStretch()
         self.setLayout(layout)
         self.update_infos()
@@ -92,20 +81,3 @@ class CameraInfosWidget(QWidget):
             self.label_name.set_value(translate('no_camera'))
             self.label_serial.set_value(translate('no_camera'))
             self.label_size.set_value('')
-
-    def handle_mask(self):
-        self.mask_button.setStyleSheet(actived_button)
-        self.mask_updated.emit()
-
-    def activate_mask_button(self, value=False):
-        if not value:
-            self.mask_button.setStyleSheet(unactived_button)
-        else:
-            self.mask_button.setStyleSheet(actived_button)
-
-    def handle_apply_mask(self):
-        value = self.mask_apply_button.isChecked()
-        self.mask_applied.emit(value)
-
-    def activate_mask_check(self, value=True):
-        self.mask_apply_button.setEnabled(value)

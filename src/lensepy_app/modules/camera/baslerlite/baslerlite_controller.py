@@ -48,13 +48,6 @@ class BaslerController(TemplateController):
             fps_init = camera.get_parameter('BslResultingAcquisitionFrameRate')
             fps = np.round(fps_init, 2)
             self.bot_right.label_fps.set_value(str(fps))
-        # Signals
-        self.top_right.mask_updated.connect(self.handle_mask)
-        self.top_right.mask_applied.connect(self.handle_mask_applied)
-        # Widgets setup
-        mask = self.parent.variables["mask"]
-        if mask is not None:
-            self.top_right.activate_mask_check(True)
 
     def init_view(self):
         """

@@ -40,7 +40,7 @@ class MasksOptionsView(QWidget):
         """
         super().__init__()
         self.controller = parent
-        self.data_set = None # self.controller.get_variables('dataset')
+        self.masks = self.controller.get_variables('masks')
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget

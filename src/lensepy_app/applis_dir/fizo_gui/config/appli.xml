@@ -37,6 +37,7 @@
     <variable name="bits_depth"/>
     <variable name="camera"/>
     <variable name="mask"/>
+    <variable name="masks"/>
     <variable name="disp_fps"/>
     <camera>
         <name>Basler</name>
