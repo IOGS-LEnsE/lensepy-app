@@ -210,7 +210,7 @@ class MasksTableList(QTableWidget):
                 if i == 0:
                     self.data_set.masks_sets.invert_global_mask(sender.isChecked())
                 else:
-                    self.data_set.masks_sets.invert_mask(i-1, sender.isChecked())
+                    self.data_set.masks_sets.invert_mask(i, sender.isChecked())
                 self.masks_changed.emit()
 
     def delete_mask(self, event):
@@ -740,17 +740,25 @@ class AddMaskView(QWidget):
         self.button_circ.setStyleSheet(unactived_button)
         layout.addWidget(self.button_circ)
 
+        self.button_polygon = QPushButton(translate('polygon_mask_add'))
+        self.button_polygon.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.button_polygon.setStyleSheet(unactived_button)
+        layout.addWidget(self.button_polygon)
+
         layout.addStretch()
         self.setLayout(layout)
 
         # Signals
         self.button_circ.clicked.connect(self.handle_new_mask)
+        self.button_polygon.clicked.connect(self.handle_new_mask)
 
     def handle_new_mask(self):
         """Action performed when a add mask button is clicked."""
         sender = self.sender()
         if sender == self.button_circ:
             self.mask_added.emit('circular_masks')
+        if sender == self.button_polygon:
+            self.mask_added.emit('polygon_masks')
         else:
             return
 

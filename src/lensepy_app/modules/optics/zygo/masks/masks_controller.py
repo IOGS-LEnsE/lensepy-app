@@ -52,7 +52,7 @@ class ZygoMasksController(TemplateController):
                 type = 'polygon'
                 help = ('Select N different points, the last one must be at the same place'
                         ' as the first one and then Click Enter')
-                type_m = 'poly'
+                type_m = 'polygon'
             dialog = MasksView(self.first_image, type, help)
             result = dialog.exec()
             if result == QDialog.DialogCode.Rejected:
