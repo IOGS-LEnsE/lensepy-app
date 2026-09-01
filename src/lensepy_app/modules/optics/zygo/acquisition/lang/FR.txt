@@ -2,3 +2,12 @@
 # ZYGO Acquisition - module - FRANCAIS
 zygo;Zygo
 surface_choice_interfer;Surface à afficher
+label_alignment;Alignement
+zoom_button;Zoom sur image
+label_acquisition;Acquisition des données
+start_acq_button;Lancer l'acquisition
+label_progress_acq_bar;Progression de l'acquisition
+label_piezo_control;Système piézoélectrique
+slider_piezo;Tension appliquée
+label_camera_params;Paramètre(s) de la caméra
+slider_exposure;Temps d'exposition
