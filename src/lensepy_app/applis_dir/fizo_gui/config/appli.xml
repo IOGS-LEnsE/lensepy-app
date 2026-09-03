@@ -16,6 +16,10 @@
             <name>Sébastien de ROSSI</name>
             <organization>IOGS</organization>
         </contributor>
+        <contributor type="sciexp">
+            <name>Thierry AVIGNON</name>
+            <organization>LEnsE / IOGS</organization>
+        </contributor>
     </contributors>
 	<module>
 		<name>baslerlite</name>

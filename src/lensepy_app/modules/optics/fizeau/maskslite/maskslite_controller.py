@@ -46,7 +46,9 @@ class ZygoMasksController(TemplateController):
         self.top_right.masks_changed.connect(self.handle_mask_changed)
 
     def handle_mask_added(self, event):
-        if '_masks' in event:
+        if 'update' in event:
+            self.handle_mask_changed()
+        elif '_masks' in event:
             if 'circular' in event:
                 type = 'circular'
                 help = 'Select 3 different points and then Click Enter'
@@ -65,6 +67,9 @@ class ZygoMasksController(TemplateController):
                 image = self.first_image // 16
             else:
                 image = self.first_image
+            if self.bot_left.is_mask_displayed():
+                mask = self.masks.get_global_mask()
+                image = image * mask
             dialog = MasksView(image, type, help)
             result = dialog.exec()
             if result == QDialog.DialogCode.Rejected:
@@ -78,11 +83,12 @@ class ZygoMasksController(TemplateController):
 
                 # Refresh list
                 self.top_right.masks_list.update_display()
-
+            self.handle_mask_changed()
 
     def handle_mask_changed(self):
+        mask_disp = self.bot_left.is_mask_displayed()
         mask = self.masks.get_global_mask()
-        if mask is not None:
+        if mask is not None and mask_disp:
             image_disp = self.first_image * mask
         else:
             self.parent.variables['mask_loaded'] = None

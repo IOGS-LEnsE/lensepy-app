@@ -729,6 +729,10 @@ class AddMaskView(QWidget):
         layout.addWidget(label)
         layout.addWidget(make_hline())
 
+        self.check_display_mask = QCheckBox(translate('check_display_mask'))
+        self.check_display_mask.setChecked(False)
+        layout.addWidget(self.check_display_mask)
+
         self.button_circ = QPushButton(translate('circular_mask_add'))
         self.button_circ.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
         self.button_circ.setStyleSheet(unactived_button)
@@ -743,8 +747,15 @@ class AddMaskView(QWidget):
         self.setLayout(layout)
 
         # Signals
+        self.check_display_mask.stateChanged.connect(self.handle_check_display)
         self.button_circ.clicked.connect(self.handle_new_mask)
         self.button_polygon.clicked.connect(self.handle_new_mask)
+
+    def handle_check_display(self):
+        self.mask_added.emit('update_masks')
+
+    def is_mask_displayed(self):
+        return self.check_display_mask.isChecked()
 
     def handle_new_mask(self):
         """Action performed when a add mask button is clicked."""

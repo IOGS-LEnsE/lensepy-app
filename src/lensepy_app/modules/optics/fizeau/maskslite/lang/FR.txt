@@ -18,3 +18,4 @@ masks_list_invert; Inv.
 masks_list_delete; Supp.
 circular_mask_add;Ajouter un masque circulaire
 polygon_mask_add;Ajouter un masque polygonal
+check_display_mask;Afficher le masque
