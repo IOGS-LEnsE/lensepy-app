@@ -482,6 +482,7 @@ class RectangleDisplayWidget(ImageDisplayWidget):
             self.text_item.setDefaultTextColor(Qt.GlobalColor.black)
             self.text_item.setPos(5, pixmap.height() - 25)
             self.scene.addItem(self.text_item)
+        self._update_view_fit() # Update view
 
 
     def set_enabled(self, value=True):
