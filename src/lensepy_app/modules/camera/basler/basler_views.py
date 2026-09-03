@@ -85,6 +85,7 @@ class CameraInfosWidget(QWidget):
         Set new values for ROI.
         :param coords: x0, y0, x1, y1 coordinates of the ROI.
         """
+        print(f'Coords = {coords}')
         self.roi_widget.set_roi(coords)
 
     def handle_color_mode_changed(self, event):
