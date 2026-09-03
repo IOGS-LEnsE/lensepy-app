@@ -91,6 +91,7 @@ class BaslerController(TemplateController):
         """
         Initialize the camera.
         """
+        print('Init CAMERA -- 00')
         camera = self.parent.variables["camera"]
         # Check if a camera is already connected
         if camera is None:
@@ -114,6 +115,11 @@ class BaslerController(TemplateController):
                         camera.init_camera_parameters(file_path)
                 default_fps = camera.get_parameter("BslResultingAcquisitionFrameRate")
                 self.parent.variables["disp_fps"] = default_fps
+                '''
+                init_exposure = camera.get_parameter("ExposureTime")
+                camera.set_parameter("ExposureTime", init_exposure)
+                '''
+                print('Init CAMERA EXPO')
         else:
             self.camera_connected = True
             self.parent.variables["first_connexion"] = 'No'

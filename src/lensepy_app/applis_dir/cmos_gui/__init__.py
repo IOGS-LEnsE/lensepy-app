@@ -1,10 +1,33 @@
+import argparse
 
 def init_app(application):
+    application = application
     xml_data = application.manager.xml_app
+    print(f'XML = {xml_data}')
 
-    '''
-    # TO DO
-    init_file = xml_data.get_sub_parameter('camera', 'init_file')
-    application.config['camera_ini'] = f'{application.appli_root}/{init_file}'
-    application.config['img_dir'] = xml_data.get_parameter_xml('img_dir') or None
-    '''
+    # Check options
+    parse_version_choices = ["1A", "2A", "3A"]
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "app_name",
+        type=str,
+        help="Name of the application"
+    )
+
+    parser.add_argument(
+        "--VI",
+        action="store_true",
+        help="Machine Vision version"
+    )
+    args = parser.parse_args()
+
+    # Check options
+    suffix = "vi" if args.VI else ""
+
+    if suffix != "":
+        application.config_name = f"{application.appli_root}/config/appli_{suffix}.xml"
+    else:
+        application.config_name = f"{application.appli_root}/config/appli.xml"
+
+    print(application.config_name)

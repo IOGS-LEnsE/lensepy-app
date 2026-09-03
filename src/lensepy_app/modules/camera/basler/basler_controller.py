@@ -1,4 +1,6 @@
 import time
+from pathlib import Path
+import lensepy_app
 from PyQt6.QtCore import QObject, QThread
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.modules.camera.basler.basler_views import *
@@ -113,9 +115,19 @@ class BaslerController(TemplateController):
                 # Initial parameters
                 camera_ini_file = self.parent.parent.config.get('camera_ini')
                 if camera_ini_file is not None:
-                    if os.path.isfile(camera_ini_file):
-                        camera.init_camera_parameters(camera_ini_file)
-
+                    if camera_ini_file.startswith('.'):
+                        base_path = Path(lensepy_app.__file__).parent
+                        file_path = f'{base_path}/applis_dir/cmos_gui/{camera_ini_file.lstrip('./')}'
+                    else:
+                        file_path = camera_ini_file
+                    print(f'File Path = {file_path}')
+                    if os.path.isfile(file_path):
+                        camera.init_camera_parameters(file_path)
+                default_fps = camera.get_parameter("BslResultingAcquisitionFrameRate")
+                self.parent.variables["disp_fps"] = default_fps
+                init_exposure = camera.get_parameter("ExposureTime")
+                camera.set_parameter("ExposureTime", init_exposure)
+                print(f'Init CAMERA EXPO - {init_exposure}')
                 # ROI management
                 x0, y0, x1, y1 = self._get_max_coords()
                 self.camera_range = [x0, y0, x1, y1]
@@ -137,6 +149,7 @@ class BaslerController(TemplateController):
 
     def set_max_exposure_time(self):
         exposuretime_get = self.parent.xml_app.get_sub_parameter('camera', 'exposuretime')
+        print(f'Max Expo = {exposuretime_get}')
         self.bot_right.set_max_exposure_time(exposuretime_get)
 
     def update_color_mode(self):

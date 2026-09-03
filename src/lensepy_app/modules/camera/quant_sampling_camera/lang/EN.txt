@@ -1,0 +1,4 @@
+# value;translation
+# Basler - module - ENGLISH
+baslerlite_menu;Basler Sensor
+basler_infos_title;Sensor Parameters
