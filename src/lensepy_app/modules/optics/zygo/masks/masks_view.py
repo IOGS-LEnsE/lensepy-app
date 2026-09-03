@@ -40,7 +40,7 @@ class MasksOptionsView(QWidget):
         """
         super().__init__()
         self.controller = parent
-        self.data_set = self.controller.get_variables('dataset')
+        self.masks = self.controller.get_variables('masks')
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
@@ -81,7 +81,7 @@ class MasksTableList(QTableWidget):
         super().__init__(rows, cols)  # Nombre de lignes et colonnes
         # Data of the class
         self.controller: "MasksController" = controller
-        self.masks = self.controller.masks
+        self.data_set = self.controller.data_set
         self.select_list = []
         self.invert_list = []
         self.delete_list = []
@@ -156,7 +156,9 @@ class MasksTableList(QTableWidget):
         """
         Initialize graphical lines of the table.
         """
-        for mask_index in range(self.masks.get_masks_number()):
+        if self.data_set.masks_sets.get_masks_number() == 0:
+            self.data_set.set_masks_state(False)
+        for mask_index in range(self.data_set.masks_sets.get_masks_number()):
             self.add_new_row(mask_index+1)
             self.setRowHeight(mask_index+1, 40)
 
@@ -177,10 +179,10 @@ class MasksTableList(QTableWidget):
         self.insertRow(row_position)    # Insert a new line
         # Add data
         self._add_text(index, 0, str(index), False)
-        type = self.masks.get_type(index)
+        type = self.data_set.masks_sets.get_type(index)
         self._add_text(index, 1, type, False)
-        self._add_select_checkbox(index, self.masks.is_mask_selected(index))
-        self._add_invert_checkbox(index, self.masks.is_mask_inverted(index))
+        self._add_select_checkbox(index, self.data_set.masks_sets.is_mask_selected(index))
+        self._add_invert_checkbox(index, self.data_set.masks_sets.is_mask_inverted(index))
         self._add_delete_button(index, translate('delete_mask'))
 
     def select_mask(self, event):
@@ -189,14 +191,14 @@ class MasksTableList(QTableWidget):
             if sender == select_check:
                 if i != 0:
                     # Select (or not a mask)
-                    self.masks.select_mask(i, sender.isChecked())
+                    self.data_set.masks_sets.select_mask(i, sender.isChecked())
                     # If the sender is not checked, uncheck global mask
                     if sender.isChecked() is False:
                         self.select_list[0].setChecked(False)
                 else:   # Select all the masks
                     if sender.isChecked():
-                        for k in range(self.masks.get_masks_number()):
-                            self.masks.select_mask(k, True)
+                        for k in range(self.data_set.masks_sets.get_masks_number()):
+                            self.data_set.masks_sets.select_mask(k, True)
                         self.delete_data()
                         self.init_data()
                 self.masks_changed.emit()
@@ -206,9 +208,9 @@ class MasksTableList(QTableWidget):
         for i, select_check in enumerate(self.invert_list):
             if sender == select_check:
                 if i == 0:
-                    self.masks.invert_global_mask(sender.isChecked())
+                    self.data_set.masks_sets.invert_global_mask(sender.isChecked())
                 else:
-                    self.masks.invert_mask(i, sender.isChecked())
+                    self.data_set.masks_sets.invert_mask(i-1, sender.isChecked())
                 self.masks_changed.emit()
 
     def delete_mask(self, event):
@@ -216,12 +218,16 @@ class MasksTableList(QTableWidget):
         for i, delete_button in enumerate(self.delete_list):
             if sender == delete_button:
                 if i != 0:
-                    if self.masks.get_masks_number() >= 1:
-                        self.masks.del_mask(i)
+                    if self.data_set.masks_sets.get_masks_number() >= 1:
+                        self.data_set.masks_sets.del_mask(i)
                         self.delete_data()
+                    self.data_set.set_cropped_state(False)
+                    self.data_set.set_analyzed_state(False)
+                    self.data_set.set_wrapped_state(False)
+                    self.data_set.set_unwrapped_state(False)
 
                 else:
-                    self.masks.reset_masks()
+                    self.data_set.masks_sets.reset_masks()
                     self.delete_data()
                 self.init_data()
                 self.masks_changed.emit()
@@ -729,10 +735,6 @@ class AddMaskView(QWidget):
         layout.addWidget(label)
         layout.addWidget(make_hline())
 
-        self.check_display_mask = QCheckBox(translate('check_display_mask'))
-        self.check_display_mask.setChecked(False)
-        layout.addWidget(self.check_display_mask)
-
         self.button_circ = QPushButton(translate('circular_mask_add'))
         self.button_circ.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
         self.button_circ.setStyleSheet(unactived_button)
@@ -747,22 +749,15 @@ class AddMaskView(QWidget):
         self.setLayout(layout)
 
         # Signals
-        self.check_display_mask.stateChanged.connect(self.handle_check_display)
         self.button_circ.clicked.connect(self.handle_new_mask)
         self.button_polygon.clicked.connect(self.handle_new_mask)
-
-    def handle_check_display(self):
-        self.mask_added.emit('update_masks')
-
-    def is_mask_displayed(self):
-        return self.check_display_mask.isChecked()
 
     def handle_new_mask(self):
         """Action performed when a add mask button is clicked."""
         sender = self.sender()
         if sender == self.button_circ:
             self.mask_added.emit('circular_masks')
-        if sender == self.button_polygon:
+        elif sender == self.button_polygon:
             self.mask_added.emit('polygon_masks')
         else:
             return

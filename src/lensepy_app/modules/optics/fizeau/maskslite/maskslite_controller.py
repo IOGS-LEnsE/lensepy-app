@@ -3,7 +3,7 @@ __all__ = ["ZygoMasksController"]
 from PyQt6.QtWidgets import QWidget, QDialog
 from lensepy_app.appli._app.template_controller import TemplateController
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget
-from lensepy_app.modules.optics.zygo.masks.masks_view import (
+from lensepy_app.modules.optics.fizeau.maskslite.maskslite_view import (
     MasksOptionsView, AddMaskView, MasksView)
 from lensepy.optics.zygo.dataset import MasksSet, DataSet
 from lensepy_app import *
