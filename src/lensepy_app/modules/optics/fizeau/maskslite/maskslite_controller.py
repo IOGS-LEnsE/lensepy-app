@@ -20,12 +20,13 @@ class ZygoMasksController(TemplateController):
         """
         super().__init__(parent)
         if self.parent.variables['masks'] is not None:
-            self.masks : MasksSet = self.parent.variables['masks']
+            self.masks = self.parent.variables['masks']
         else:
             self.masks = MasksSet()
             self.masks.reset_masks()
             self.parent.variables['masks'] = self.masks
         self.first_image = self.parent.variables['image']
+        print(f'First Image = {self.first_image.shape}')
 
         # Graphical layout
         self.top_left = ImageDisplayWidget()
@@ -39,7 +40,7 @@ class ZygoMasksController(TemplateController):
         self.top_left.set_image_from_array(self.first_image)
         if self.masks is not None :
             if self.masks.get_masks_number() != 0:
-                self.parent.variables['mask_loaded'] = True
+                #self.parent.variables['mask_loaded'] = True
                 self.parent.update_menu()
         # Signals
         self.bot_left.mask_added.connect(self.handle_mask_added)
@@ -91,7 +92,7 @@ class ZygoMasksController(TemplateController):
         if mask is not None and mask_disp:
             image_disp = self.first_image * mask
         else:
-            self.parent.variables['mask_loaded'] = None
+            #self.parent.variables['mask_loaded'] = None
             self.parent.update_menu()
             image_disp = self.first_image
         self.top_left.set_image_from_array(image_disp)

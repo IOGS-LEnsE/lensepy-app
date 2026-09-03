@@ -88,7 +88,7 @@ class FyzoAnalysisController(TemplateController):
             self.image_disp = image_8bits
         self.bot_right.set_image_from_array(self.image_disp)
         # Store new image.
-        self.parent.variables['image'] = image_raw
+        self.parent.variables['image_crop'] = image_raw
         # 3 modes
         self.fft_raw = self._process_fft(image_raw)
         self.fft_masked, idx_X, idx_Y = self._get_masked_fft(self.fft_raw)
