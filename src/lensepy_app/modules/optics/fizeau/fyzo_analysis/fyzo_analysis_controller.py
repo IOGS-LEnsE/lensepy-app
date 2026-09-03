@@ -45,7 +45,7 @@ class FyzoAnalysisController(TemplateController):
         self.view_3D = None
 
         # Widgets
-        self.top_left = ImageDisplayWidget()
+        self.top_left = Surface2DView()
         self.bot_left = QWidget()
         self.bot_right = ImageDisplayWidget()
         self.top_right = FyzoAnalysisOptionsView()
@@ -64,9 +64,10 @@ class FyzoAnalysisController(TemplateController):
         self.initial_image = self.parent.variables.get('image')
         if self.initial_image is not None:
             self.bot_right.set_image_from_array(self.initial_image)
-            self.update_view()
             self.process_data()
-            self.image_ready()
+            self.top_left.set_array2(self.surface)
+            self.top_left.update()
+            self.update_view()
 
     def process_data(self):
         image_raw = self.initial_image
@@ -144,22 +145,22 @@ class FyzoAnalysisController(TemplateController):
         elif self.disp_mode == 'fft_centered':
             self.top_left.set_image_from_array(self._disp_fft(self.fft_center))
         elif self.disp_mode == 'phase':
-            view_2D = Surface2DView()
-            view_2D.set_array2(self.unwrapped_phase)
-            view_2D.update()
+            self.view_2D = Surface2DView()
+            self.view_2D.set_array2(self.unwrapped_phase)
+            self.view_2D.update()
             # TO UPDATE
-            self.replace_top_left_widget(view_2D)
+            self.replace_top_left_widget(self.view_2D)
         elif self.disp_mode == 'surface':
-            print('Init OK')
             self.view_2D = Surface2DView()
             self.view_2D.set_array2(self.surface)
+            self.view_2D.update()
             self.replace_top_left_widget(self.view_2D)
             # TO UPDATE
         elif self.disp_mode == 'surface_3D':
             self.view_3D = Surface3DView()
+            self.replace_top_left_widget(self.view_3D)
             x, y, w_s = self.view_3D.prepare_data_for_mesh(self.surface, undersampling=1) # TO CHANGE
             self.view_3D.create_mesh_surface(x, y, w_s)
-            self.replace_top_left_widget(self.view_3D)
         else:
             self.top_left.set_image_from_array(self.image_disp)
 

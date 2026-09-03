@@ -24,6 +24,7 @@ class ZygoMasksController(TemplateController):
         else:
             self.masks = MasksSet()
             self.masks.reset_masks()
+            self.parent.variables['masks'] = self.masks
         self.first_image = self.parent.variables['image']
 
         # Graphical layout
