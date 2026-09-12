@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <appli>
     <name>slice_measurement</name>
-    <requirements>camera</requirements>
-    <req_var>bits_depth,camera</req_var>
+    <requirements>images</requirements>
+    <req_var>image,bits_depth</req_var>
     <display>MODE2</display>
     <controller>SliceMeasurementController</controller>
     <location>slice_measurement_controller</location>
