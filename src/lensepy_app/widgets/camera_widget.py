@@ -27,7 +27,7 @@ class CameraParamsWidget(QWidget):
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
         layout.addWidget(make_hline())
-
+        print(f'Camera = {self.camera}')
         # Test if camera is connected to the computer
         if self.camera is not None:
             self.label_fps = LabelWidget(translate('basler_params_fps'), '')

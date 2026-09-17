@@ -22,7 +22,7 @@
         </contributor>
     </contributors>
 	<module>
-		<name>ids_zygo</name>
+		<name>idslite</name>
 		<location>lensepy_app.modules.camera</location>
 	</module>
 	<module>
