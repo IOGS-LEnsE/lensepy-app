@@ -39,25 +39,23 @@ class IDSController(TemplateController):
         self.bot_left = HistogramWidget()
         self.top_right = CameraInfosWidget(self)
         self.bot_right = CameraParamsWidget(self)
-        '''
-        # Graphical layout
-        self.top_left = ImageDisplayWidget()
-        self.top_right = AcquisitionView(self)
-        self.bot_left = CameraParamsView()
-        self.bot_right = PiezoControlView(self)
-        '''
         
         # Widgets setup and signals
         self.bot_left.set_labels(translate('histo_xlabel'), translate('histo_ylabel'))
-
+        self.bot_left.set_background('white')
         # Camera infos
         camera = self.parent.variables['camera']
+        # Init ?
+        camera.set_exposure(5000)
+        camera.set_frame_rate(2)
+
         if camera is not None:
             expo_init = camera.get_exposure()
-            #self.bot_right.slider_expo.set_value(expo_init)
+            self.bot_right.slider_expo.set_value(expo_init)
             fps_init = camera.get_frame_rate()
             fps = np.round(fps_init, 2)
-            #self.bot_right.label_fps.set_value(str(fps))
+            print(f'FPS: {fps}')
+            self.bot_right.label_fps.set_value(str(fps))
 
     def init_view(self):
         camera = self.parent.variables['camera']
@@ -103,9 +101,11 @@ class IDSController(TemplateController):
         else:
             self.camera_connected = True
         print(f'Connected ? {self.camera_connected}')
+        print(f'Color mode = {self.parent.variables['camera'].get_color_mode()}')
 
 
     def set_color_mode(self):
+        print('Setting color mode')
         # Get color mode list
         colormode_get = self.parent.xml_app.get_sub_parameter('camera','colormode')
         colormode_get = colormode_get.split(',')
@@ -119,6 +119,7 @@ class IDSController(TemplateController):
         self.bot_right.set_max_exposure_time(exposuretime_get)
 
     def update_color_mode(self):
+        print('Updating color mode')
         camera = self.parent.variables["camera"]
         # Update to first mode if first connection
         first_mode_color = self.colormode[0]
@@ -126,7 +127,7 @@ class IDSController(TemplateController):
         camera.initial_params["PixelFormat"] = first_mode_color
         first_bits_depth = self.colormode_bits_depth[0]
         self.parent.variables["bits_depth"] = first_bits_depth
-        pix_format = camera.get_parameter('PixelFormat')
+        pix_format = camera.get_color_mode()
         self.top_right.label_color_mode.set_value(pix_format)
 
     def start_live(self):
@@ -171,6 +172,8 @@ class IDSController(TemplateController):
         Thread-safe GUI updates
         :param image:   Numpy array containing new image.
         """
+        pass
+        '''
         image_disp = image.copy()
         if self.masked and self.parent.variables["mask"] is not None:
             mask = self.parent.variables["mask"]
@@ -181,6 +184,7 @@ class IDSController(TemplateController):
         self.bot_left.set_image(image_disp)
         # Store new image.
         self.parent.variables['image'] = image.copy()
+        '''
         print('LIVE OK')
 
     def handle_exposure_time_changed(self, value):
