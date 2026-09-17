@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <appli name="My_App">
     <name>Fyzo GUI</name>
-    <appname>Fizeau Controller GUI - Basler</appname>
+    <appname>Fizeau Controller GUI - IDS</appname>
     <organization>LEnsE</organization>
     <year>2026</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
@@ -22,7 +22,7 @@
         </contributor>
     </contributors>
 	<module>
-		<name>baslerlite</name>
+		<name>ids_zygo</name>
 		<location>lensepy_app.modules.camera</location>
 	</module>
 	<module>

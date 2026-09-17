@@ -1,10 +1,12 @@
 import time
+import os
 from PyQt6.QtCore import QObject, QThread
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.modules.camera.ids_zygo.ids_zygo_views import *
-from lensepy.drivers.ids_camera import CameraIds
+from lensepy.drivers.ids_camera import CameraIDS
 from lensepy_app.widgets import *
 from lensepy import translate
+import numpy as np
 
 
 class IDSZygoController(TemplateController):
@@ -96,7 +98,7 @@ class IDSZygoController(TemplateController):
         if camera is None:
             print('Camera NONE')
             # Init Camera
-            self.parent.variables["camera"] = IDSZygoCamera()
+            self.parent.variables["camera"] = CameraIDS()
             self.camera_connected = self.parent.variables["camera"].find_first_camera()
             if self.camera_connected is False:
                 self.parent.variables["camera"] = None

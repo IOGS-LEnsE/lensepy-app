@@ -1,6 +1,7 @@
 # value;translation
 # MAIN MENU
 baslerlite_menu;Camera Basler
+ids_lite_menu;Camera IDS
 maskslite_menu;Gestion des masques
 fyzo_fft_menu;Affichage FFT
 fyzo_analysis_menu;Analyses Fizeau
