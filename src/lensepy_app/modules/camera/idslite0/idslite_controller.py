@@ -34,19 +34,14 @@ class IDSController(TemplateController):
         if CameraIDS.is_connected():
             # Check if camera is connected
             self.init_camera()
+
+
         # Widgets
         self.top_left = ImageDisplayWidget()
         self.bot_left = HistogramWidget()
         self.top_right = CameraInfosWidget(self)
         self.bot_right = CameraParamsWidget(self)
-        '''
-        # Graphical layout
-        self.top_left = ImageDisplayWidget()
-        self.top_right = AcquisitionView(self)
-        self.bot_left = CameraParamsView()
-        self.bot_right = PiezoControlView(self)
-        '''
-        
+        #self.init_view()
         # Widgets setup and signals
         self.bot_left.set_labels(translate('histo_xlabel'), translate('histo_ylabel'))
 
@@ -60,12 +55,32 @@ class IDSController(TemplateController):
             #self.bot_right.label_fps.set_value(str(fps))
 
     def init_view(self):
-        camera = self.parent.variables['camera']
-        if camera is not None:
-            exposure = self.parent.variables["camera"].get_exposure()
-            print(f'Exp = {exposure}')
-            self.bot_right.set_exposure_time(exposure)
+        """
+        Update graphical objects of the interface.
+        """
+        # Update view
+        if self.parent.variables['camera'] is not None:
             super().init_view()
+            self.set_color_mode()
+            self.set_max_exposure_time()
+            #self.update_color_mode()
+            camera = self.parent.variables['camera']
+            # Setup widgets
+            self.bot_left.set_background('white')
+            self.top_right.update_infos()
+            # Init widgets
+            if self.parent.variables['bits_depth'] is not None:
+                self.top_left.set_bits_depth(int(self.parent.variables['bits_depth']))
+                self.bot_left.set_bits_depth(int(self.parent.variables['bits_depth']))
+            else:
+                self.bot_left.set_bits_depth(8)
+            if self.parent.variables['image'] is not None:
+                self.top_left.set_image_from_array(self.parent.variables['image'])
+                self.bot_left.set_image(self.parent.variables['image'])
+            self.bot_left.refresh_chart()
+            # Signals
+            self.bot_right.exposure_time_changed.connect(self.handle_exposure_time_changed)
+            self.bot_right.black_level_changed.connect(self.handle_black_level_changed)
             self.start_live()
         else:
             self.top_left = QLabel('No Camera is connected. \n'
@@ -73,8 +88,8 @@ class IDSController(TemplateController):
                                    'Then restart the application.')
             self.top_left.setStyleSheet(styleH2)
             self.bot_left = QWidget()
-            self.bot_right = QWidget()
             self.top_right = QWidget()
+            self.bot_right = QWidget()
             super().init_view()
 
     def init_camera(self):
@@ -89,6 +104,7 @@ class IDSController(TemplateController):
             self.parent.variables["camera"] = CameraIDS()
             self.camera_connected = self.parent.variables["camera"].find_first_camera()
             if self.camera_connected is False:
+                print('No Camera')
                 self.parent.variables["camera"] = None
             else:
                 self.parent.variables["camera"].init_camera()
@@ -103,6 +119,8 @@ class IDSController(TemplateController):
         else:
             self.camera_connected = True
         print(f'Connected ? {self.camera_connected}')
+        if self.camera_connected:
+            self.parent.variables["camera"].open()
 
 
     def set_color_mode(self):
@@ -134,7 +152,6 @@ class IDSController(TemplateController):
         Start live acquisition from camera.
         """
         if self.camera_connected:
-            self.parent.variables["camera"].start_acquisition()
             self.thread = QThread()
             self.worker = ImageLive(self)
             self.worker.moveToThread(self.thread)
@@ -164,7 +181,6 @@ class IDSController(TemplateController):
             # Supprimer les références
             self.worker = None
             self.thread = None
-            self.parent.variables["camera"].stop_acquisition()
 
     def handle_image_ready(self, image: np.ndarray):
         """
@@ -181,7 +197,6 @@ class IDSController(TemplateController):
         self.bot_left.set_image(image_disp)
         # Store new image.
         self.parent.variables['image'] = image.copy()
-        print('LIVE OK')
 
     def handle_exposure_time_changed(self, value):
         """

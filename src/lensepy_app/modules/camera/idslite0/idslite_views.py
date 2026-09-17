@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from lensepy_app.modules.camera.idslite.idslite_controller import IDSController
 
-
 class CameraInfosWidget(QWidget):
     """
     Widget to display image infos.
@@ -73,12 +72,10 @@ class CameraInfosWidget(QWidget):
         self.camera: CameraIDS = self.parent.get_variables()['camera']
         if self.parent.camera_connected:
             self.camera.open()
-            serial_no, camera_name = self.camera.get_cam_info()
-            self.label_name.set_value(camera_name)
-            self.label_serial.set_value(serial_no)
-            width, height = self.camera.get_sensor_size()
-            w = str(width)
-            h = str(height)
+            self.label_name.set_value(self.camera.get_parameter('DeviceModelName'))
+            self.label_serial.set_value(self.camera.get_parameter('DeviceSerialNumber'))
+            w = str(self.camera.get_parameter('SensorWidth'))
+            h = str(self.camera.get_parameter('SensorHeight'))
             self.label_size.set_value(f'WxH = {w} x {h}')
         else:
             self.label_name.set_value(translate('no_camera'))
