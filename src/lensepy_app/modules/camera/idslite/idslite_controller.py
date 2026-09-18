@@ -5,7 +5,7 @@ from pathlib import Path
 import lensepy_app
 
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
-from lensepy_app.modules.camera.idslite.idslite_views import *
+from lensepy_app.modules.camera.idslite.idslite_views import CameraParamsWidget, CameraInfosWidget
 from lensepy.drivers.ids_camera import *
 from lensepy_app.widgets.image_display_widget import *
 from lensepy_app.widgets.histogram_widget import *
@@ -43,11 +43,15 @@ class IDSController(TemplateController):
         # Widgets setup and signals
         self.bot_left.set_labels(translate('histo_xlabel'), translate('histo_ylabel'))
         self.bot_left.set_background('white')
+        self.bot_right.set_max_exposure_time(500)
         # Camera infos
         camera = self.parent.variables['camera']
         # Init ?
-        camera.set_exposure(5000)
+        camera.set_exposure(100)
         camera.set_frame_rate(2)
+        # Signals
+        self.bot_right.exposure_time_changed.connect(self.handle_exposure_time_changed)
+        self.bot_right.black_level_changed.connect(self.handle_black_level_changed)
 
         if camera is not None:
             expo_init = camera.get_exposure()
@@ -172,20 +176,19 @@ class IDSController(TemplateController):
         Thread-safe GUI updates
         :param image:   Numpy array containing new image.
         """
-        pass
-        '''
         image_disp = image.copy()
+        '''
         if self.masked and self.parent.variables["mask"] is not None:
             mask = self.parent.variables["mask"]
             image_disp = np.ma.masked_where(np.logical_not(mask), image_disp)
+
+        '''
         # Update Image
         self.top_left.set_image_from_array(image_disp)
         # Update Histo
         self.bot_left.set_image(image_disp)
         # Store new image.
-        self.parent.variables['image'] = image.copy()
-        '''
-        print('LIVE OK')
+        self.parent.variables['image'] = image_disp
 
     def handle_exposure_time_changed(self, value):
         """
@@ -196,10 +199,11 @@ class IDSController(TemplateController):
             # Stop live safely
             self.stop_live()
             # Read available formats
-            camera.set_parameter('ExposureTime', value)
+            camera.set_exposure(value)
             camera.initial_params['ExposureTime'] = value
+            print(f'Expo Time = {value} ms')
+            time.sleep(0.1)
             self.bot_right.update_infos()
-            print(f'EXPO  TIME CHANGED: {value}')
             self.start_live()
 
     def handle_black_level_changed(self, value):
@@ -211,9 +215,10 @@ class IDSController(TemplateController):
             # Stop live safely
             self.stop_live()
             # Read available formats
-            camera.set_parameter('BlackLevel', value)
+            camera.set_black_level(value)
             camera.initial_params['BlackLevel'] = value
             self.bot_right.update_infos()
+            time.sleep(0.1)
             self.start_live()
 
     def cleanup(self):
