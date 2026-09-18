@@ -53,7 +53,7 @@ class CameraParamsWidget(QWidget):
             layout.addWidget(make_hline())
             self.slider_black_level = SliderBloc(translate('ids_params_slider_black'), unit='ADU',
                                           min_value=0, max_value=255, integer=True)
-            #self.slider_black_level.slider.setEnabled(False)
+            self.slider_black_level.slider.setEnabled(False)
             layout.addWidget(self.slider_black_level)
             layout.addWidget(make_hline())
 
