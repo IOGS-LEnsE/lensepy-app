@@ -222,6 +222,12 @@ class BaslerCamera:
         self.close()
         return False
 
+    def start_acquisition(self):
+        pass
+
+    def stop_acquisition(self):
+        pass
+
 
 if __name__ == "__main__":
     import time

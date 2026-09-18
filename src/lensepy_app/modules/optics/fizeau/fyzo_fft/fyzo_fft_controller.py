@@ -90,6 +90,7 @@ class FyzoAnalysisController(TemplateController):
         self.img_pos_x, self.img_pos_y = top_left[1], top_left[0]
         self.mask = crop_images([mask], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
         self.mask_fft = crop_images([mask], (self.img_height_fft, self.img_width_fft), (self.img_pos_x, self.img_pos_y))[0]
+        camera.start_acquisition()
         # Start live acquisition
         self.start_live()
 
@@ -164,6 +165,7 @@ class FyzoAnalysisController(TemplateController):
         self.stop_live()
         camera = self.parent.variables["camera"]
         if camera is not None:
+            camera.stop_acquisition()
             if getattr(camera, "is_open", False):
                 camera.close()
             camera.camera_acquiring = False

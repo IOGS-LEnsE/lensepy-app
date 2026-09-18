@@ -39,34 +39,26 @@ class IDSController(TemplateController):
         self.bot_left = HistogramWidget()
         self.top_right = CameraInfosWidget(self)
         self.bot_right = CameraParamsWidget(self)
-        
-        # Widgets setup and signals
-        self.bot_left.set_labels(translate('histo_xlabel'), translate('histo_ylabel'))
-        self.bot_left.set_background('white')
-        self.bot_right.set_max_exposure_time(500)
-        # Camera infos
-        camera = self.parent.variables['camera']
-        # Init ?
-        camera.set_exposure(100)
-        camera.set_frame_rate(2)
-        # Signals
-        self.bot_right.exposure_time_changed.connect(self.handle_exposure_time_changed)
-        self.bot_right.black_level_changed.connect(self.handle_black_level_changed)
 
-        if camera is not None:
-            expo_init = camera.get_exposure()
-            self.bot_right.slider_expo.set_value(expo_init)
-            fps_init = camera.get_frame_rate()
-            fps = np.round(fps_init, 2)
-            print(f'FPS: {fps}')
-            self.bot_right.label_fps.set_value(str(fps))
+
 
     def init_view(self):
         camera = self.parent.variables['camera']
         if camera is not None:
             exposure = self.parent.variables["camera"].get_exposure()
-            print(f'Exp = {exposure}')
             self.bot_right.set_exposure_time(exposure)
+            fps_init = camera.get_frame_rate()
+            fps = np.round(fps_init, 2)
+            self.bot_right.label_fps.set_value(str(fps))
+            # Signals
+            self.bot_right.exposure_time_changed.connect(self.handle_exposure_time_changed)
+            self.bot_right.black_level_changed.connect(self.handle_black_level_changed)
+
+            # Widgets setup and signals
+            self.bot_left.set_labels(translate('histo_xlabel'), translate('histo_ylabel'))
+            self.bot_left.set_background('white')
+            self.bot_right.set_max_exposure_time(200)
+
             super().init_view()
             self.start_live()
         else:
@@ -86,7 +78,6 @@ class IDSController(TemplateController):
         camera = self.parent.variables["camera"]
         # Check if a camera is already connected
         if camera is None:
-            print('No Camera YET')
             # Init Camera
             self.parent.variables["camera"] = CameraIDS()
             self.camera_connected = self.parent.variables["camera"].find_first_camera()
@@ -101,15 +92,15 @@ class IDSController(TemplateController):
                     camera.init_camera_parameters(camera_ini_file)
                     print(f'Camera ini file {camera_ini_file} successfully initialized.')
                 '''
-                self.parent.variables["camera"].set_exposure(1000)
+                # Init ?
+                self.parent.variables["camera"].set_exposure(100)
+                self.parent.variables["camera"].set_frame_rate(4)
+                self.parent.variables["bits_depth"] = 8
         else:
             self.camera_connected = True
         print(f'Connected ? {self.camera_connected}')
-        print(f'Color mode = {self.parent.variables['camera'].get_color_mode()}')
-
 
     def set_color_mode(self):
-        print('Setting color mode')
         # Get color mode list
         colormode_get = self.parent.xml_app.get_sub_parameter('camera','colormode')
         colormode_get = colormode_get.split(',')
@@ -117,13 +108,13 @@ class IDSController(TemplateController):
             colormode_v = colormode.split(':')
             self.colormode.append(colormode_v[0])
             self.colormode_bits_depth.append(int(colormode_v[1]))
+        self.update_color_mode()
 
     def set_max_exposure_time(self):
         exposuretime_get = self.parent.xml_app.get_sub_parameter('camera', 'exposuretime')
         self.bot_right.set_max_exposure_time(exposuretime_get)
 
     def update_color_mode(self):
-        print('Updating color mode')
         camera = self.parent.variables["camera"]
         # Update to first mode if first connection
         first_mode_color = self.colormode[0]
@@ -177,18 +168,15 @@ class IDSController(TemplateController):
         :param image:   Numpy array containing new image.
         """
         image_disp = image.copy()
-        '''
-        if self.masked and self.parent.variables["mask"] is not None:
-            mask = self.parent.variables["mask"]
-            image_disp = np.ma.masked_where(np.logical_not(mask), image_disp)
-
-        '''
         # Update Image
         self.top_left.set_image_from_array(image_disp)
+        '''
         # Update Histo
         self.bot_left.set_image(image_disp)
+        '''
         # Store new image.
         self.parent.variables['image'] = image_disp
+        time.sleep(0.001)
 
     def handle_exposure_time_changed(self, value):
         """
@@ -201,8 +189,7 @@ class IDSController(TemplateController):
             # Read available formats
             camera.set_exposure(value)
             camera.initial_params['ExposureTime'] = value
-            print(f'Expo Time = {value} ms')
-            time.sleep(0.1)
+            time.sleep(0.01)
             self.bot_right.update_infos()
             self.start_live()
 
@@ -217,8 +204,8 @@ class IDSController(TemplateController):
             # Read available formats
             camera.set_black_level(value)
             camera.initial_params['BlackLevel'] = value
+            time.sleep(0.01)
             self.bot_right.update_infos()
-            time.sleep(0.1)
             self.start_live()
 
     def cleanup(self):

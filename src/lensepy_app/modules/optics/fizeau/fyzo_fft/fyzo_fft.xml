@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <appli>
-    <name>spatial_camera</name>
+    <name>fyzo_fft</name>
     <requirements>camera</requirements>
     <req_var>bits_depth,camera,mask</req_var>
     <display>MODE2</display>
