@@ -185,13 +185,13 @@ class IDSController(TemplateController):
         camera = self.parent.variables["camera"]
         if camera is not None:
             # Stop live safely
-            self.stop_live()
+            #self.stop_live()
             # Read available formats
             camera.set_exposure(value)
             camera.initial_params['ExposureTime'] = value
             time.sleep(0.01)
             self.bot_right.update_infos()
-            self.start_live()
+            #self.start_live()
 
     def handle_black_level_changed(self, value):
         """
