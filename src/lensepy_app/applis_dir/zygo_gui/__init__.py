@@ -27,11 +27,17 @@ def init_app(application):
         action="store_true",
         help="Image mode only (no camera)"
     )
+    parser.add_argument(
+        "--simu",
+        action="store_true",
+        help="Aberrations only - simulation"
+    )
     args = parser.parse_args()
 
     print("Version choisie :", args.version)
     # Check options
     version = "1A" if args.version == "NO" else args.version
     suffix = "_image" if args.image else ""
+    suffix2 = "_simu" if args.simu else ""
 
-    application.config_name = f"{application.appli_root}/config/appli_{version}{suffix}.xml"
+    application.config_name = f"{application.appli_root}/config/appli_{version}{suffix}{suffix2}.xml"
