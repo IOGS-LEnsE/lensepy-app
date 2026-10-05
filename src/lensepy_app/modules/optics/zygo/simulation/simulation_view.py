@@ -276,7 +276,7 @@ class CoefficientsView(QWidget):
         super().__init__()
         self.parent = parent
         self.number = number
-        self.range = (-5, 5)
+        self.range = (-2, 2)
 
         self.sliders = []
 
@@ -287,7 +287,7 @@ class CoefficientsView(QWidget):
         ## Title of the widget
         layout.addWidget(make_hline())
         self.label_zernike_coefficients = QLabel(translate("label_zernike_coefficients"))
-        self.label_zernike_coefficients.setStyleSheet(styleH1)
+        self.label_zernike_coefficients.setStyleSheet(styleH2)
         self.label_zernike_coefficients.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.label_zernike_coefficients)
         layout.addWidget(make_hline())
@@ -295,18 +295,18 @@ class CoefficientsView(QWidget):
         self.slider_layout = QHBoxLayout()
         self.slider_widget.setLayout(self.slider_layout)
         layout.addWidget(self.slider_widget)
-        layout.addWidget(make_hline())
 
         # Setup
         self.init_view()
 
     def init_view(self):
         for k in range(self.number):
-            slider = SliderBlocVertical(f'C{k+1}', '',self.range[0],self.range[1])
+            gauge = VerticalCenteredGaugeTitle(f'C{k+1}', '',self.range[0],self.range[1],
+                                                min_width=3, min_height=50)
             color = coeff_colors[coeff_order[k]//2]
-            slider.set_background_color(color)
-            slider.slider_changed.connect(self.handle_slider_changed)
-            self.sliders.append(slider)
+            gauge.set_background_color(color)
+            gauge.slider_changed.connect(self.handle_slider_changed)
+            self.sliders.append(gauge)
             self.sliders[k].set_value(0)
             self.slider_layout.addWidget(self.sliders[k])
         self.update()

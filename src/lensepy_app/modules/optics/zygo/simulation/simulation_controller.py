@@ -37,20 +37,20 @@ class ZygoSimulationController(TemplateController):
 
         # Graphical layout
         self.top_left = Surface2DView('', self.colormap_2D)
-        self.bot_left = CoefficientsView(self, number=15)
         self.bot_right = Surface2DView('', self.colormap_2D)
         self.top_right = SimulationChoiceView()
+        self.bot_zernike = CoefficientsView(self, number=36)
         
         # Setup widgets
         self.bot_right.hide()
         self.top_right.set_wavelength(self.wavelength)
         # Signals
-        self.bot_left.sliders_changed.connect(self.handle_coeffs_changed)
+        self.bot_zernike.sliders_changed.connect(self.handle_coeffs_changed)
         self.top_right.display_changed.connect(self.handle_display_changed)
         self.top_right.wavelength_changed.connect(self.handle_wavelength_changed)
 
     def init_view(self):
-        coeffs = self.bot_left.get_coeffs()
+        coeffs = self.bot_zernike.get_coeffs()
         self.simulated_phase.set_coefficients(coeffs)
         self.simulated_phase.process_unwrapped_phase()
         self.new_surface = self.simulated_phase.get_unwrapped_phase()
@@ -62,7 +62,7 @@ class ZygoSimulationController(TemplateController):
         c_pupil, N = self.simulated_phase.get_complex_pupil()
         psf = PSFModel(self.simulated_phase)
         mask = np.ones_like(self.simulated_phase, dtype=bool)
-        self.psf_display, self.psf_display_perfect = psf.get_psf()
+        self.psf_display, self.psf_display_perfect, center, padding = psf.get_psf()
         self.psf_display = np.ma.masked_where(np.logical_not(mask), self.psf_display)
         self.ftm, self.ftm_perfect = psf.get_ftm()
         self.ftm = np.ma.masked_where(np.logical_not(mask), self.ftm)
@@ -229,7 +229,7 @@ class ZygoSimulationController(TemplateController):
         self.top_left.refresh_chart()
 
     def handle_coeffs_changed(self, index, value):
-        coeffs = self.bot_left.get_coeffs()
+        coeffs = self.bot_zernike.get_coeffs()
         # Process new surface
         self.simulated_phase.set_coefficients(coeffs)
         self.simulated_phase.process_unwrapped_phase()
@@ -237,7 +237,8 @@ class ZygoSimulationController(TemplateController):
         # Process PSF
         psf = PSFModel(self.simulated_phase)
         mask = np.ones_like(self.simulated_phase, dtype=bool)
-        self.psf_display, self.psf_display_perfect = psf.get_psf(normalized=False)
+        self.psf_display, self.psf_display_perfect, center, padding = (
+            psf.get_psf(normalized=False))
         self.psf_display = np.ma.masked_where(np.logical_not(mask), self.psf_display)
         self.ftm, self.ftm_perfect = psf.get_ftm(normalized=False)
         self.ftm = np.ma.masked_where(np.logical_not(mask), self.ftm)

@@ -23,6 +23,7 @@ class TemplateController(QObject):
         self.top_right = QWidget()
         self.bot_left = QWidget()
         self.bot_right = QWidget()
+        self.bot_zernike = QWidget()
         self.destroyed.connect(self.on_destroy)
 
     def init_view(self):
@@ -30,11 +31,13 @@ class TemplateController(QObject):
         self.parent.main_window.top_right_container.deleteLater()
         self.parent.main_window.bot_left_container.deleteLater()
         self.parent.main_window.bot_right_container.deleteLater()
+        self.parent.main_window.bot_zernike_container.deleteLater()
         # Update new containers
         self.parent.main_window.top_left_container = self.top_left
         self.parent.main_window.bot_left_container = self.bot_left
         self.parent.main_window.top_right_container = self.top_right
         self.parent.main_window.bot_right_container = self.bot_right
+        self.parent.main_window.bot_zernike_container = self.bot_zernike
         self.update_view()
 
     def update_view(self):
@@ -44,6 +47,8 @@ class TemplateController(QObject):
             self.parent.main_window.set_mode2()
         elif mode == 'MODE1':
             self.parent.main_window.set_mode1()
+        elif mode == 'ZERNIKE':
+            self.parent.main_window.set_mode_zernike()
         else:
             self.parent.main_window.set_mode3()
         # Update display mode

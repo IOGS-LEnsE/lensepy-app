@@ -40,6 +40,7 @@ class MainWindow(QMainWindow):
         self.top_right_container = QWidget()
         self.bot_left_container = QWidget()
         self.bot_right_container = QWidget()
+        self.bot_zernike_container = QWidget()
 
         self.update_containers()
 
@@ -143,6 +144,8 @@ class MainWindow(QMainWindow):
             self.right_layout.addWidget(self.bot_left_container, 1, 0)
         if self.bot_right_container:
             self.right_layout.addWidget(self.bot_right_container, 1, 1)
+        if self.bot_zernike_container:
+            self.right_layout.addWidget(self.bot_zernike_container, 2, 0, 1, 2)
 
     def set_mode1(self):
         """Disposition 2x2 (par défaut)"""
@@ -164,6 +167,16 @@ class MainWindow(QMainWindow):
         self.right_layout.setColumnStretch(1, 1)
         self.right_layout.setRowStretch(0, 1)
         self.right_layout.setRowStretch(1, 0)
+
+
+    def set_mode_zernike(self):
+        """Disposition 1 - 0 sur hauteur et 2/7 - 4/7 sur largeur"""
+        self.right_layout.setColumnStretch(0, 1)
+        self.right_layout.setColumnStretch(1, 1)
+        self.right_layout.setRowStretch(0, 3)
+        self.right_layout.setRowStretch(1, 3)
+        self.right_layout.setRowStretch(2, 1)
+
 
     def closeEvent(self, event):
         if self.parent.controller is not None:

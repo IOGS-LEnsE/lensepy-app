@@ -5,7 +5,7 @@ __all__ = ['message_box', 'make_hline', 'make_vline',
            'ImageDisplayWidget', 'HistogramWidget', 'XYChartWidget',
            'XYMultiChartWidget', 'CircleWidget',
            'ProgressBarView', 'QProgressBar', 'SwitchWidget', 'LabelWidget',
-           'VerticalCenteredGauge']
+           'VerticalCenteredGauge', 'VerticalCenteredGaugeTitle']
 
 from PyQt6.QtGui import QColor, QBrush, QPainter
 from lensepy_app.widgets.switch import SwitchWidget
@@ -601,6 +601,9 @@ class VerticalCenteredGauge(QWidget):
                          min(self.maximum, value))
         self.update()
 
+    def get_value(self):
+        return self.value
+
     def paintEvent(self, event):
         painter = QPainter(self)
         w = self.width()
@@ -657,6 +660,144 @@ class VerticalCenteredGauge(QWidget):
                 filled_height
             )
             painter.fillRect(rect, self.fg_color)
+
+
+class VerticalCenteredGaugeTitle(QWidget):
+    """
+    Slider block combining a numeric input and a vertical slider.
+    Displays title above, slider in the center, and value below.
+    Emits the current value whenever it changes.
+    """
+
+    slider_changed = pyqtSignal(float)
+
+    def __init__(self, name: str, unit: str, min_value: float, max_value: float,
+                 integer: bool = False, min_width = 10, min_height = 100) -> None:
+        super().__init__()
+
+        self.integer = integer
+        self.unit = unit
+        self.min_value = min_value
+        self.max_value = max_value
+        self.min_width = min_width
+        self.min_height = min_height
+        self.ratio = 1 if integer else 100
+        self.value = 0
+        self.background_color = 'white'
+
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Slider title
+        self.label_name = QLabel(name)
+        self.label_name.setStyleSheet(f'{styleH2};background-color: {self.background_color}')
+        self.label_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout.addWidget(self.label_name)
+
+        self._init_value_line()
+        self._init_slider_section()
+
+        self.update_block()
+
+    # ----------------------------
+    # Sous-fonctions d’initialisation
+    # ----------------------------
+
+    def _styled_label(self, text: str, style: str) -> QLabel:
+        label = QLabel(text)
+        label.setStyleSheet(style)
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        return label
+
+    def _init_slider_section(self):
+        slider_layout = QVBoxLayout()
+        slider_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Valeur max en haut
+        self.label_max_value = self._styled_label(f"{self.max_value} {self.unit}", styleH3)
+        slider_layout.addWidget(self.label_max_value)
+
+        # Slider vertical
+        self.gauge = VerticalCenteredGauge(min_width=self.min_width, min_height=self.min_height)
+        self.gauge.set_range(int(self.min_value * self.ratio), int(self.max_value * self.ratio))
+        slider_layout.addWidget(self.gauge)
+
+        # Valeur min en bas
+        self.label_min_value = self._styled_label(f"{self.min_value} {self.unit}", styleH3)
+        slider_layout.addWidget(self.label_min_value)
+
+        self.layout.addLayout(slider_layout)
+
+    def _init_value_line(self):
+        value_layout = QHBoxLayout()
+        value_layout.setContentsMargins(0, 0, 0, 0)
+        value_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.lineedit_value = QLineEdit(str(self.value))
+        #self.lineedit_value.setFixedWidth(60)
+        self.lineedit_value.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lineedit_value.editingFinished.connect(self.input_changed)
+        value_layout.addWidget(self.lineedit_value)
+
+        if self.unit != '':
+            self.label_unit = self._styled_label(self.unit, styleH3)
+            value_layout.addWidget(self.label_unit)
+
+        container = QWidget()
+        container.setLayout(value_layout)
+        self.layout.addWidget(container)
+
+    # ----------------------------
+    # Gestion des événements
+    # ----------------------------
+
+    def input_changed(self):
+        try:
+            val = float(self.lineedit_value.text())
+        except ValueError:
+            val = self.value
+
+        self.value = self._clamp(val, self.min_value, self.max_value)
+        self.update_block()
+        self.slider_changed.emit(self.value)
+
+    # ----------------------------
+    # Méthodes utilitaires
+    # ----------------------------
+
+    def update_block(self):
+        val = int(self.value) if self.integer else self.value
+        self.lineedit_value.setText(str(val))
+        self.gauge.set_value(int(val * self.ratio))
+
+    def get_value(self) -> float:
+        return self.value
+
+    def set_value(self, value: float):
+        self.value = int(value) if self.integer else float(value)
+        self.update_block()
+
+    def set_min_max_slider_values(self, min_value: float, max_value: float, value: float | None = None):
+        self.min_value, self.max_value = min_value, max_value
+        self.slider.setRange(int(min_value * self.ratio), int(max_value * self.ratio))
+        if value is not None:
+            self.set_value(value)
+        self.label_min_value.setText(f"{min_value} {self.unit}")
+        self.label_max_value.setText(f"{max_value} {self.unit}")
+
+    def set_enabled(self, enabled: bool):
+        self.slider.setEnabled(enabled)
+        self.lineedit_value.setEnabled(enabled)
+
+    def set_background_color(self, bg_color):
+        self.background_color = bg_color
+        self.gauge.set_colors('white', bg_color)
+        self.label_name.setStyleSheet(f"{styleH2};background-color: {self.background_color}")
+
+    @staticmethod
+    def _clamp(val, vmin, vmax):
+        return max(vmin, min(vmax, val))
 
 
 class CircleWidget(QWidget):

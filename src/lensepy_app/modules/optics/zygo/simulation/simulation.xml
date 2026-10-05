@@ -3,7 +3,7 @@
     <name>simulation</name>
     <requirements>images</requirements>
     <req_var></req_var>
-    <display>MODE2</display>
+    <display>ZERNIKE</display>
     <controller>ZygoSimulationController</controller>
     <location>simulation_controller</location>
 </appli>
