@@ -11,6 +11,7 @@ from lensepy.optics.zygo import *
 from lensepy.utils import downsample_array
 from lensepy_app import *
 from lensepy_app.widgets.surface_2D_view import Surface2DView
+from .aberrations_models import *
 
 from matplotlib import pyplot as plt
 
@@ -27,15 +28,22 @@ class ZygoAberrationsController(TemplateController):
         self.data_set : DataSet = self.parent.variables['dataset']
         self.number_of_repetition = 1
         if self.parent.variables['phase'] is None:
-            self.phase = PhaseModel(phase=self.data_set)
+            self.phase = PhaseModel(data_set=self.data_set)
             self.parent.variables['phase'] = self.phase
         else:
             self.phase = self.parent.variables['phase']
+        ## PROCESS AUTO-MASK
+        self.mask_center, self.mask_radius = get_auto_mask(dataset=self.data_set)
+
+        ## PROCESS PHASE
+
+        ## PROCESS ZERNIKE
+        '''
         self.zernike_coeffs = Zernike(self.phase)
         self.zernike_coeffs.process_zernike_coefficient(0)
         for k in range(nb_coeff + 1):
             self.zernike_coeffs.process_zernike_coefficient(k)
-
+        '''
         self.colormap_2D = 'plasma'
         self.tilt = False
         self.focus = False
@@ -43,23 +51,26 @@ class ZygoAberrationsController(TemplateController):
         # Graphical layout
         ### TO DO  - default colormap in default_parameters
         self.top_left = AberrationsView(colormap=self.colormap_2D) # Surface2DView('', self.colormap_2D)
-        self.bot_left = CoefficientsView(self, number=nb_coeff)
+        self.bot_left = QWidget()
         self.bot_right = Surface2DView('', self.colormap_2D)
-        self.top_right = SimulationChoiceView()
+        self.top_right = QWidget() # SimulationChoiceView()
+        self.bot_zernike = CoefficientsView(self, number=nb_coeff)
         
         # Setup widgets
 
         # Signals
-        self.top_right.wavelength_changed.connect(self.handle_wavelength_changed)
-        self.bot_left.correction_changed.connect(self.handle_correction_changed)
-        self.bot_left.tilt_changed.connect(self.handle_tilt_changed)
-        self.bot_left.focus_changed.connect(self.handle_focus_changed)
+        #self.top_right.wavelength_changed.connect(self.handle_wavelength_changed)
+        self.bot_zernike.correction_changed.connect(self.handle_correction_changed)
+        self.bot_zernike.tilt_changed.connect(self.handle_tilt_changed)
+        self.bot_zernike.focus_changed.connect(self.handle_focus_changed)
 
     def init_view(self):
+        '''
         # Process zernike coefficients from phase
         self._process_correction_coeff()
         coeffs = self.zernike_coeffs.get_coeffs()
         self.bot_left.set_coeffs(coeffs)
+        '''
         super().init_view()
 
     def handle_tilt_changed(self, value):

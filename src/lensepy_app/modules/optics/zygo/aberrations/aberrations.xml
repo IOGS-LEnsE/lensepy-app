@@ -2,8 +2,8 @@
 <appli>
     <name>aberrations</name>
     <requirements>images</requirements>
-    <req_var>dataset,dataset_loaded,mask_loaded,phase_calculated</req_var>
-    <display>MODE2</display>
+    <req_var>dataset,dataset_loaded</req_var>
+    <display>ZERNIKE</display>
     <controller>ZygoAberrationsController</controller>
     <location>aberrations_controller</location>
 </appli>

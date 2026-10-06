@@ -52,6 +52,7 @@ class My_Application(QApplication):
         if self.config_ok:
             app_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             app_path += '/applis_dir/'
+            self.config['general_mode'] = xml_data.get_parameter_xml('mode')
             self.config['default_lang'] = xml_data.get_parameter_xml('default_langage')
             if self.config['default_lang'] is None:
                 self.config['default_lang'] = DEFAULT_LANG
@@ -74,6 +75,8 @@ class My_Application(QApplication):
             self.config['camera_ini'] = xml_data.get_sub_parameter('camera', 'init_file')
             if isinstance(self.manager.controller, DefaultController):
                 self.manager.controller.display()
+            self.manager.main_window.update_general_display()
+            self.manager.update_menu()
             return True
         else:
             return False
