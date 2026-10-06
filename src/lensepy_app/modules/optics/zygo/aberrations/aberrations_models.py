@@ -9,3 +9,5 @@ def get_auto_mask(dataset: DataSet):
     center = (0, 0)
     radius = 100
     return center, radius
+
+
