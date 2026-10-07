@@ -101,6 +101,12 @@ class TemplateController(QObject):
         else:
             return self.parent.get_variable(index)
 
+    def is_variable(self, var_name):
+        """
+        Check if variable name exists.
+        """
+        return var_name in self.parent.variables
+
     def set_variables(self, var_name, value):
         """Update a variable in the variables' dictionary.
         :param var_name:    Key of the variable.
@@ -111,6 +117,11 @@ class TemplateController(QObject):
     def get_config(self, name=''):
         """Return the config dictionary from the main manager."""
         return self.parent.get_config(name)
+
+    def get_initial_params(self, name=''):
+        """Return the initial value of the parameters from
+        the main manager init_params dictionary."""
+        return self.parent.get_initial_params(name)
 
     def _get_image_dir(self, filepath):
         if filepath is None:

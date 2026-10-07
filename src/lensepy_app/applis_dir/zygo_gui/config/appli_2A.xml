@@ -68,4 +68,8 @@
         <offset>8</offset>
         <init_file>./config/camera_small.ini</init_file>
     </camera>
+    <init_params>
+        <f_number>4</f_number>
+        <wavelenght>632.8</wavelenght>
+    </init_params>
 </appli>

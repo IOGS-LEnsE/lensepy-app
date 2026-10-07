@@ -34,6 +34,7 @@ class ZygoAberrationsController(TemplateController):
         self.colormap_2D = 'plasma'
         self.tilt = False
         self.focus = False
+        self.params_window = ParamsView(self)
         # Threads
         self.thread = QThread()
         self.worker = None
@@ -50,6 +51,7 @@ class ZygoAberrationsController(TemplateController):
 
         # ANALYSIS in PROGRESS
         self.process_surface()
+        #self.process_PSF()
 
     def process_surface(self):
         self.thread = QThread()
@@ -86,10 +88,55 @@ class ZygoAberrationsController(TemplateController):
         self.thread.finished.connect(
             self.thread.deleteLater
         )
+        '''
+        self.thread.finished.connect(
+            self.process_PSF
+        )
+        '''
+        self.thread.start()
+
+    def process_PSF(self):
+        self.thread = QThread()
+        self.worker = ProcessPSFWorker(self.parent)
+        # Déplacement du worker dans le thread
+        self.worker.moveToThread(self.thread)
+        # Démarrage du traitement
+        self.thread.started.connect(self.worker.run)
+        # Progression
+        self.worker.progress.connect(
+            self.update_progress_psf
+        )
+        # End of processes
+        self.worker.finished.connect(
+            self.display_results_psf
+        )
+        # Errors management
+        self.worker.error.connect(
+            self.worker_calculation_error
+        )
+        # Arrêt propre du thread
+        self.worker.finished.connect(
+            self.thread.quit
+        )
+        self.worker.error.connect(
+            self.thread.quit
+        )
+        self.worker.finished.connect(
+            self.worker.deleteLater
+        )
+        self.worker.error.connect(
+            self.worker.deleteLater
+        )
+        self.thread.finished.connect(
+            self.thread.deleteLater
+        )
         self.thread.start()
 
     def update_progress(self, step):
         self.top_left.update_text(step)
+
+    def update_progress_psf(self, step):
+        print(f'PSF step = {step}')
 
     def display_results(self, results):
         ## Update Local Variables / Results
@@ -123,6 +170,12 @@ class ZygoAberrationsController(TemplateController):
         coeffs = self.zernike_coeffs.get_coeffs()
         #self.bot_right.set_array(self.surface)
 
+        #self.process_PSF()
+
+    def display_results_psf(self, results):
+        ## Update Local Variables / Results
+        print('FINISHED')
+
     def init_view(self):
         super().init_view()
 
@@ -145,26 +198,14 @@ class ZygoAberrationsController(TemplateController):
         if coeffs is not None:
             _, corrected_phase = self.zernike_coeffs.process_surface_correction_by_coeff(coeffs)
             self.bot_left.set_array(corrected_phase)
+            pv, rms = process_statistics_surface(corrected_phase)
         else:
             _, unwrapped_phase = self.zernike_coeffs.process_surface_correction_by_coeff(coeff_list)
             self.bot_left.set_array(unwrapped_phase)
-
-        '''
-        # Downsampling  ?
-        downsampling_factor = 4
-        unwrapped_phase_down = downsample_array(unwrapped_phase, downsampling_factor)
-        new_mask = downsample_array(self.phase.get_mask().astype(np.uint8), downsampling_factor)
-        new_mask = new_mask < 0.5
-
-        print(f'Unw Type = {unwrapped_phase_down.dtype}')
-        psf_uncorr = PSFModel(wavefront=unwrapped_phase_down, mask=new_mask)
-        psf_uncorr_display, psf_uncorr_display_perfect = psf_uncorr.get_psf()
-        #self.top_left.set_psf_uncorrect(psf_uncorr_display)
-        '''
-
+            pv, rms = process_statistics_surface(unwrapped_phase)
+        self.bot_zernike.set_pv_rms(pv, rms, units=LAMBDA)
 
     def handle_correction_changed(self, coeffs):
-        print(f'Correction changed: {coeffs}')
         self._process_correction_coeff(coeffs)
 
     def handle_wavelength_changed(self, value):
@@ -229,4 +270,43 @@ class ProcessDataWorker(Worker):
                 self.zernike_coeffs.process_zernike_coefficient(0)
                 for k in range(self.nb_coeff + 1):
                     self.zernike_coeffs.process_zernike_coefficient(k)
+                return
+
+
+class ProcessPSFWorker(Worker):
+
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+        self.phase = None
+        self.surface, self.mask = None, None
+        self.psf = None
+        self.psf_perfect = None
+
+    def run(self):
+        try:
+            self.process_step(1)
+            self.emit_progress(1)
+
+            # Result
+            ## Create all data then send in a dict ??
+            results = {
+                'psf': self.psf,
+                'psf_perfect': self.psf_perfect
+            }
+            self.finished.emit(results)
+
+        except Exception as e:
+            self.error.emit(e)
+
+    def process_step(self, index):
+        match index:
+            case 1:
+                ## GET PHASE
+                self.phase = self.parent.variables['phase']
+                surface = self.phase.get_surface()
+                mask = self.phase.get_mask()
+                ## PROCESS PSF
+                psf = PSFModel(wavefront=surface, mask=mask)
+                psf_c, psf_perfect, center_x, padding = psf.get_psf(normalized=True)
                 return

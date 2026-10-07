@@ -14,6 +14,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from _app.main_manager import MainManager
 
+def get_disp_mode(parent):
+    if parent is None:
+        return 'LITE'
+    else:
+        return parent.get_config('general_mode')
+
+
 class MainWindow(QMainWindow):
     """
     Main window of the application.
@@ -91,7 +98,7 @@ class MainWindow(QMainWindow):
         for k, element in enumerate(self.menu_button_list):
             b_title = translate(f'{self.menu_button_name_list[k]}_menu')
             element.setText(b_title)
-
+            print(f'General Display Mode: {self.general_display_mode}')
             element.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
 
             if element == self.actual_button:

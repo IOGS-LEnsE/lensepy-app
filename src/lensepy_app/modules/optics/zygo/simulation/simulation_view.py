@@ -11,6 +11,7 @@ from lensepy.css import *
 from lensepy_app import make_hline
 from lensepy_app.widgets.objects import *
 from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
+from lensepy_app.appli._app.main_view import get_disp_mode
 from PyQt6.QtWidgets import (
     QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
     QVBoxLayout, QGridLayout,

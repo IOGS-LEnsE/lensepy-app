@@ -13,6 +13,7 @@ from lensepy_app.widgets.objects import *
 from lensepy_app import make_hline
 from lensepy_app.widgets.objects import *
 from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
+from lensepy_app.appli._app.main_view import get_disp_mode
 from PyQt6.QtWidgets import (
     QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
     QVBoxLayout, QGridLayout,
@@ -28,11 +29,7 @@ import numpy as np
 from urllib3.connection import VerifiedHTTPSConnection
 
 
-def get_disp_mode(parent):
-    if parent is None:
-        return 'LITE'
-    else:
-        return parent.get_config('general_mode')
+
 
 class AnalysisInProgressView(QWidget):
     """Analysis in progress."""
@@ -60,7 +57,6 @@ class AnalysisInProgressView(QWidget):
 
         self.label.setText(self.text)
         self.label.repaint()
-
 
 
 class TwoChartWidget(QWidget):

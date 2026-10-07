@@ -13,6 +13,7 @@ from lensepy_app.widgets.widget_progress_bar import ProgressBarView, QProgressBa
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget, ImageDisplayWithCrosshair
 from lensepy_app.widgets.histogram_widget import HistogramWidget
 from lensepy_app.widgets.xy_multi_chart_widget import XYMultiChartWidget
+from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy_app.widgets.widget_xy_chart import XYChartWidget
 from PyQt6.QtCore import Qt, pyqtSignal, QRectF, QRect
 from PyQt6.QtGui import QPainter, QColor, QPen
@@ -422,12 +423,14 @@ class LineEditWidget(QWidget):
     def __init__(self, title:str='', value='', units='', parent=None):
         super().__init__(None)
         layout = QHBoxLayout()
+        self.general_disp_mode = get_disp_mode(parent)
         self.setLayout(layout)
         self.value = value
         self.units = units
 
         # Label
         self.label = QLabel(title)
+        self.label.setStyleSheet(STYLE_H2[self.general_disp_mode])
         layout.addWidget(self.label, 1)
         # Line Edit
         self.line_edit = QLineEdit()

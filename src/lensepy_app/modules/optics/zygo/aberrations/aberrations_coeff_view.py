@@ -12,7 +12,9 @@ from lensepy_app.widgets import Surface2DView
 from lensepy_app.widgets.objects import *
 from lensepy_app import make_hline
 from lensepy_app.widgets.objects import *
+from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
+from lensepy_app.modules.optics.zygo.aberrations.aberrations_params_view import ParamsView
 from PyQt6.QtWidgets import (
     QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
     QVBoxLayout, QGridLayout,
@@ -27,12 +29,6 @@ from lensepy.images import slice_image
 import numpy as np
 from urllib3.connection import VerifiedHTTPSConnection
 
-
-def get_disp_mode(parent):
-    if parent is None:
-        return 'LITE'
-    else:
-        return parent.get_config('general_mode')
 
 coeff_order = [1, 1, 1, 1, 3, 3, 3, 3, 3, 5, 5,
                5, 5, 5, 5, 5, 7, 7, 7, 7, 7,
@@ -100,14 +96,14 @@ class CoefficientsView(QWidget):
     correction_changed = pyqtSignal(list)
     tilt_changed = pyqtSignal(bool)
     focus_changed = pyqtSignal(bool)
+    params_windowed = pyqtSignal(bool)
 
     def __init__(self, parent = None, number=36):
         super().__init__()
-        self.parent = parent
+        self.parent = parent # controller
         self.general_display_mode = get_disp_mode(self.parent)
         self.number = number
         self.range = (-2, 2)
-        self.params_window = ParamsView()
 
         self.sliders = []
         self.coeffs_correction = [0] * (self.number + 1)
@@ -274,20 +270,13 @@ class CoefficientsView(QWidget):
         return coeffs
 
     def handle_parameters_view(self):
-        print('handle_parameters_view')
-        self.params_window.show()
+        self.params_button.setEnabled(False)
+        self.params_button.setStyleSheet(INACTIVATED_)
+        self.params_windowed.emit(True)
 
     def set_pv_rms(self, pv, rms, units=''):
         self.pv_rms.set_pv(value=pv, unit=units)
         self.pv_rms.set_rms(value=rms, unit=units)
-
-
-class ParamsView(QWidget):
-
-    def __init__(self, parent=None):
-        super(ParamsView, self).__init__(parent)
-
-
 
 
 def main():

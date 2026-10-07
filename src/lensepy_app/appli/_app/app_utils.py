@@ -148,14 +148,35 @@ class XMLFileConfig:
         if self.xml_file is not None:
             tree = ET.parse(self.xml_file)
             xml_root = tree.getroot()
-            module = xml_root.find(parameter)
-            if module is not None:
-                t = module.find(sub_parameter).text
-                print(t)
-                return module.find(sub_parameter).text
-            else:
-                return None
+            param_value = xml_root.find(parameter)
+            if param_value is not None:
+                sub_param = param_value.find(sub_parameter)
+
+                if sub_param is not None:
+                    value = sub_param.text
+                    print(f'Sub Param = {value}')
+                    return value
         return None
+
+
+    def list_sub_parameter(self, parameter: str, sub_parameter: str):
+        """
+        Get a sub parameter in the XML config file.
+        :param parameter:       Name of the parameter to get.
+        :param sub_parameter:    Name of the sub paramter to get.
+        :return:    Dictionary with all the parameters.
+        """
+        if self.xml_file is not None:
+            tree = ET.parse(self.xml_file)
+            xml_root = tree.getroot()
+            category = xml_root.find(parameter)
+
+            if category is not None:
+                return {
+                    child.tag: child.text
+                    for child in category
+                }
+        return {}
 
     def get_xml_file(self):
         """
