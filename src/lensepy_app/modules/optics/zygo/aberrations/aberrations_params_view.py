@@ -13,18 +13,14 @@ from lensepy_app.widgets.objects import *
 from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
 from PyQt6.QtWidgets import (
-    QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
-    QVBoxLayout, QGridLayout,
-    QApplication,
-    QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox, QSlider
+    QWidget, QVBoxLayout, QApplication
 )
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent, QResizeEvent, QFont
-from lensepy.optics.zygo.fourier_manager import FourierManager
-from lensepy.images import slice_image
+from PyQt6.QtCore import pyqtSignal
 
 
 class ParamsView(QWidget):
+
+    window_closed = pyqtSignal()
 
     def __init__(self, parent=None):
         super(ParamsView, self).__init__(None)
@@ -62,7 +58,8 @@ class ParamsView(QWidget):
         f_number = self.f_number.get_value()
         self.parent.set_variables('f_number', f_number)
 
-        print("La fenêtre a été fermée")
+        # Send signal to controller
+        self.window_closed.emit()
         event.accept()
 
 

@@ -16,18 +16,11 @@ from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_params_view import ParamsView
 from PyQt6.QtWidgets import (
-    QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
-    QVBoxLayout, QGridLayout,
-    QApplication,
-    QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox, QSlider
+    QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
+    QVBoxLayout, QApplication, QGridLayout
 )
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent, QResizeEvent, QFont
-from lensepy.optics.zygo.fourier_manager import FourierManager
-from lensepy.images import slice_image
-
+from PyQt6.QtCore import Qt, pyqtSignal
 import numpy as np
-from urllib3.connection import VerifiedHTTPSConnection
 
 
 coeff_order = [1, 1, 1, 1, 3, 3, 3, 3, 3, 5, 5,
@@ -40,7 +33,8 @@ class ZernikeCoeffBar(QWidget):
 
     correction_changed = pyqtSignal(bool)
 
-    def __init__(self, parent=None, title='', min_value=0, max_value=100, min_width=10):
+    def __init__(self, parent=None, title='', min_value=0,
+                 max_value=100, min_width=10):
         super().__init__(parent)
         self.parent = parent
         self.general_display_mode = get_disp_mode(self.parent)
@@ -97,12 +91,15 @@ class CoefficientsView(QWidget):
     tilt_changed = pyqtSignal(bool)
     focus_changed = pyqtSignal(bool)
     params_windowed = pyqtSignal(bool)
+    coeffs_windowed = pyqtSignal(bool)
 
     def __init__(self, parent = None, number=36):
         super().__init__()
         self.parent = parent # controller
         self.general_display_mode = get_disp_mode(self.parent)
         self.number = number
+        self.params_button_ok = True
+        self.coeffs_button_ok = True
         self.range = (-2, 2)
 
         self.sliders = []
@@ -132,11 +129,10 @@ class CoefficientsView(QWidget):
         options_layout.addWidget(self.tilt_button, 1)
         options_layout.addWidget(self.focus_button, 1)
         self.coeffs_button = QPushButton(translate("coeffs_button"))
-        self.coeffs_button.setStyleSheet(unactived_button)
+        self.coeffs_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
         self.coeffs_button.setMinimumWidth(100)
         self.params_button = QPushButton(translate("parameters_button"))
-        self.params_button.setStyleSheet(unactived_button)
-        self.params_button.clicked.connect(self.handle_parameters_view)
+        self.params_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
         self.params_button.setMinimumWidth(100)
         options_layout.addWidget(self.coeffs_button, 1)
         options_layout.addWidget(self.params_button, 1)
@@ -155,6 +151,7 @@ class CoefficientsView(QWidget):
         self.strehl_ratio = LabelWidget(translate('strehl_ratio'), size=size)
         results_layout.addWidget(self.strehl_ratio)
         results_layout.addStretch()
+
         ## Sliders / Gauges
         self.slider_widget = QWidget()
         self.slider_layout = QHBoxLayout()
@@ -166,6 +163,10 @@ class CoefficientsView(QWidget):
         layout.addWidget(options_widget)
         layout.addWidget(make_vline())
         layout.addWidget(self.slider_widget)
+
+        # Signals
+        self.params_button.clicked.connect(self.handle_parameters_view)
+        self.coeffs_button.clicked.connect(self.handle_coefficients_view)
 
         # Setup
         self.init_view()
@@ -270,27 +271,116 @@ class CoefficientsView(QWidget):
         return coeffs
 
     def handle_parameters_view(self):
-        self.params_button.setEnabled(False)
-        self.params_button.setStyleSheet(INACTIVATED_)
-        self.params_windowed.emit(True)
+        if self.params_button_ok:
+            self.params_button.setEnabled(False)
+            self.params_button.setStyleSheet(DISABLED_BUTTON[self.general_display_mode])
+            self.params_button_ok = False
+            self.params_windowed.emit(True)
+
+    def handle_coefficients_view(self):
+        if self.coeffs_button_ok:
+            self.coeffs_button.setEnabled(False)
+            self.coeffs_button.setStyleSheet(DISABLED_BUTTON[self.general_display_mode])
+            self.coeffs_button_ok = False
+            self.coeffs_windowed.emit(True)
+
+    def reactivate_params_button(self):
+        self.params_button.setEnabled(True)
+        self.params_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.params_button_ok = True
+
+    def reactivate_coeffs_button(self):
+        self.coeffs_button.setEnabled(True)
+        self.coeffs_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.coeffs_button_ok = True
 
     def set_pv_rms(self, pv, rms, units=''):
         self.pv_rms.set_pv(value=pv, unit=units)
         self.pv_rms.set_rms(value=rms, unit=units)
 
 
+class CoefficientsValueView(QWidget):
+
+    window_closed = pyqtSignal()
+
+    def __init__(self, parent=None, number=36):
+        super(CoefficientsValueView, self).__init__(None)
+        self.parent = parent # controller
+        self.setWindowTitle(translate('coefficients_window'))
+        self.setMinimumWidth(300)
+        self.general_display_mode = get_disp_mode(self.parent)
+        self.number = number
+        self.coeffs = None
+        self.gauges = []
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        ## Label
+        label_zernike_coefficients = QLabel(translate("label_zernike_coefficients"))
+        label_zernike_coefficients.setStyleSheet(STYLE_H1[self.general_display_mode])
+        label_zernike_coefficients.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(label_zernike_coefficients)
+        layout.addWidget(make_hline())
+
+        ## Sliders / Gauges
+        self.gauges_widget = QWidget()
+        self.gauges_layout = QGridLayout()
+        self.gauges_widget.setLayout(self.gauges_layout)
+
+        layout.addWidget(self.gauges_widget)
+
+        layout.addStretch()
+        self.init_view()
+
+    def set_coeffs(self, coeffs):
+        """Set a list of coefficients."""
+        self.coeffs = coeffs
+        for i in range(self.number+1):
+            self.gauges[i].set_value(str(self.coeffs[i]))
+        self.update()
+
+    def init_view(self):
+        screen = QApplication.primaryScreen()
+        width = screen.size().width()
+        print(width)
+
+        cols = {}
+        for k in range(self.number+1):
+            gauge = LabelValueWidget(title=f'C{k}', value='0', ratio=0.3,
+                                     tooltip=f'Coef {k} (order = {coeff_order[k]})')
+            gauge.setMinimumWidth(width // 20)
+            line = int(coeff_order[k]/2)
+            if line in cols:
+                cols[line] += 1
+            else:
+                cols[line] = 1
+            color = coeff_colors[coeff_order[k]//2]
+            gauge.set_background_color(color)
+            self.gauges.append(gauge)
+            self.gauges_layout.addWidget(self.gauges[k], line, cols[line])
+        self.gauges[0].set_value('0')
+        self.update()
+
+
+    def closeEvent(self, event):
+        # Send signal to controller
+        self.window_closed.emit()
+        event.accept()
+
+
+
 def main():
 
     app = QApplication(sys.argv)
-    window = CoefficientsView()
+    window = CoefficientsValueView()
     window.set_coeffs([1.01, -3.3, 2.5, 5.2, -6.7, 1.01,
                        -3.3, 2.5, 5.2, -6.7, 1.01, -3.3,
                        2.5, 5.2, -6.7, 1.01, -3.3, 2.5,
                        5.2, -0.7, 1.01, -0.3, 2.5, 5.2,
                        -6.7, 0.01, 0, 0.5, 5.2, -6.7,
                        1.01, -3.3, 2.5, 5.2, -0.7, 1.01, 0.5])
-    window.set_pv_rms(1.5, -0.2, 'nm')
-    window.showMaximized()
+    window.show()
     sys.exit(app.exec())
 
 

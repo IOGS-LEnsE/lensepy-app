@@ -35,6 +35,7 @@ class ZygoAberrationsController(TemplateController):
         self.tilt = False
         self.focus = False
         self.params_window = ParamsView(self)
+        self.coeffs_window = CoefficientsValueView(self)
         # Threads
         self.thread = QThread()
         self.worker = None
@@ -49,9 +50,12 @@ class ZygoAberrationsController(TemplateController):
 
         self.update()
 
+        # Signals
+        self.params_window.window_closed.connect(self.handle_params_window_closed)
+        self.coeffs_window.window_closed.connect(self.handle_coeffs_window_closed)
         # ANALYSIS in PROGRESS
         self.process_surface()
-        #self.process_PSF()
+
 
     def process_surface(self):
         self.thread = QThread()
@@ -155,6 +159,8 @@ class ZygoAberrationsController(TemplateController):
         self.bot_zernike.correction_changed.connect(self.handle_correction_changed)
         self.bot_zernike.tilt_changed.connect(self.handle_tilt_changed)
         self.bot_zernike.focus_changed.connect(self.handle_focus_changed)
+        self.bot_zernike.params_windowed.connect(self.handle_params_windowed)
+        self.bot_zernike.coeffs_windowed.connect(self.handle_coeffs_windowed)
 
         ## Interferogram
         image1 = self.data_set.get_image_from_set(1, 1)
@@ -186,6 +192,21 @@ class ZygoAberrationsController(TemplateController):
     def handle_focus_changed(self, value):
         self.focus = value
         self._process_correction_coeff()
+
+    def handle_params_windowed(self, value):
+        if value:
+            self.params_window.show()
+
+    def handle_params_window_closed(self):
+        self.bot_zernike.reactivate_params_button()
+
+    def handle_coeffs_windowed(self, value):
+        if value:
+            self.coeffs_window.show()
+            self.coeffs_window.set_coeffs(self.zernike_coeffs.get_coeffs())
+
+    def handle_coeffs_window_closed(self):
+        self.bot_zernike.reactivate_coeffs_button()
 
     def _process_correction_coeff(self, coeffs=None):
         coeff_list = []

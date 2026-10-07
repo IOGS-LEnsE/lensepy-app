@@ -1,5 +1,5 @@
 __all__ = ['message_box', 'make_hline', 'make_vline',
-           'SelectWidget', 'LabelWidget',
+           'SelectWidget', 'LabelWidget', 'LabelValueWidget',
            'SliderBloc', 'VerticalGauge', 'LineEditWidget',
            'SliderBlocVertical', 'ImageDisplayWithCrosshair',
            'ImageDisplayWidget', 'HistogramWidget', 'XYChartWidget',
@@ -15,6 +15,7 @@ from lensepy_app.widgets.histogram_widget import HistogramWidget
 from lensepy_app.widgets.xy_multi_chart_widget import XYMultiChartWidget
 from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy_app.widgets.widget_xy_chart import XYChartWidget
+from lensepy_app.appli._app.main_view import get_disp_mode
 from PyQt6.QtCore import Qt, pyqtSignal, QRectF, QRect
 from PyQt6.QtGui import QPainter, QColor, QPen
 from PyQt6.QtWidgets import (
@@ -483,6 +484,9 @@ class LineEditWidget(QWidget):
     def get_value(self):
         return self.line_edit.text()
 
+    def set_background_color(self, bg_color):
+        self.setStyleSheet(f'background-color: {bg_color}')
+
 
 class VerticalGauge(QWidget):
 
@@ -876,9 +880,9 @@ class LabelWidget(QWidget):
         layout = QHBoxLayout()
 
         self.label = QLabel(title)
-        self.label.setStyleSheet(style_L)
+        #self.label.setStyleSheet(style_L)
         self.text = QLabel(value)
-        self.text.setStyleSheet(style_T)
+        #self.text.setStyleSheet(style_T)
         self.text.setMinimumWidth(MINIMUM_WIDTH)
         self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.unit = QLabel(unit)
@@ -891,6 +895,49 @@ class LabelWidget(QWidget):
     def set_value(self, value, unit=''):
         self.text.setText(str(value))
         self.unit.setText(unit)
+
+    def set_background_color(self, bg_color):
+        self.setStyleSheet(f'background-color: {bg_color}')
+
+
+class LabelValueWidget(QWidget):
+
+    def __init__(self, title='', value='', unit='', parent=None,
+                 size='', ratio=0.5, tooltip=''):
+        """
+        Initialize a widget that displays a label.
+        :param title: title of the Label
+        :param value: value to display
+        :param unit: unit of the widget
+        :param ratio: ratio between label and value
+        :param tooltip: tooltip to display
+        """
+        super().__init__(parent)
+
+        layout = QHBoxLayout()
+        self.general_display_mode = get_disp_mode(parent)
+        self.label = QLabel(title)
+        self.label.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.text = QLabel(value)
+        self.text.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.unit = QLabel(unit)
+        self.text.setStyleSheet(f'background-color: white')
+        layout.addWidget(self.label, int(ratio*100))
+        layout.addWidget(self.text, int((1-ratio)*100))
+        if unit != '':
+            layout.addWidget(self.unit)
+        self.setLayout(layout)
+
+        if tooltip:
+            self.setToolTip(tooltip)
+
+    def set_value(self, value, unit=''):
+        self.text.setText(str(value))
+        self.unit.setText(unit)
+
+    def set_background_color(self, bg_color):
+        self.label.setStyleSheet(f'background-color: {bg_color}')
 
 
 if __name__ == "__main__":
