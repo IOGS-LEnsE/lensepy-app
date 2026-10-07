@@ -112,7 +112,6 @@ class ZygoAberrationsController(TemplateController):
         '''
         #self.bot_right.set_array(self.surface)
 
-
     def init_view(self):
         super().init_view()
 
@@ -164,7 +163,6 @@ class ZygoAberrationsController(TemplateController):
 
     def handle_wavelength_changed(self, value):
         print(f'Value = {value}')
-
 
 
 class ProcessDataWorker(Worker):

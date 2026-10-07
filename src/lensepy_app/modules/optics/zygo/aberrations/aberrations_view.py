@@ -47,6 +47,10 @@ class AnalysisInProgressView(QWidget):
             self.text += '\n'+translate('analysis_phase_ok')
         if step >= 2:
             self.text += '\n'+translate('analysis_auto_mask_ok')
+        if step >= 3:
+            self.text += '\n'+translate('analysis_surface_ok')
+        if step >= 4:
+            self.text += '\n'+translate('analysis_zernike_ok')
 
         self.label.setText(self.text)
         self.label.repaint()
