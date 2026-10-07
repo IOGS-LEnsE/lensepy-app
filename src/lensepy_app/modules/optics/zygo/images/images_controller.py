@@ -23,7 +23,7 @@ class ZygoImagesController(TemplateController):
 
         """
         super().__init__(parent)
-        self.parent
+        self.parent = parent
         self.name = 'ZygoImagesController'
         self.mask_displayed = 0
 

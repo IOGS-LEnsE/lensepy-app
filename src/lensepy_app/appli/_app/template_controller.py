@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 from PyQt6 import sip
 from PyQt6.QtCore import pyqtSignal, QObject, QThread
-from PyQt6.QtWidgets import QWidget, QMessageBox, QFileDialog
+from PyQt6.QtWidgets import QWidget, QMessageBox, QFileDialog, QApplication
 
 
 class TemplateController(QObject):
@@ -53,6 +53,35 @@ class TemplateController(QObject):
             self.parent.main_window.set_mode3()
         # Update display mode
         self.parent.main_window.update_containers()
+
+    def update(self):
+        self.parent.main_window.repaint()
+        QApplication.processEvents()
+
+    def _replace_top_left_widget(self, new_widget):
+        self.top_left = new_widget
+        self.parent.main_window.top_left_container = self.top_left
+        self.update_view()
+
+    def _replace_bot_left_widget(self, new_widget):
+        self.bot_left = new_widget
+        self.parent.main_window.bot_left_container = self.bot_left
+        self.update_view()
+
+    def _replace_top_right_widget(self, new_widget):
+        self.top_right = new_widget
+        self.parent.main_window.top_right_container = self.top_right
+        self.update_view()
+
+    def _replace_bot_right_widget(self, new_widget):
+        self.bot_right = new_widget
+        self.parent.main_window.bot_right_container = self.bot_right
+        self.update_view()
+
+    def _replace_zernike_widget(self, new_widget):
+        self.bot_zernike = new_widget
+        self.parent.main_window.bot_zernike_container = self.bot_zernike
+        self.update_view()
 
     def handle_controller(self, event):
         """
@@ -126,6 +155,12 @@ class TemplateController(QObject):
     def cleanup(self):
         pass
 
+    def worker_calculation_error(self, exception):
+        """Errors management."""
+        print("ERRORS :", exception)
+        self.thread = None
+        self.worker = None
+
 
 class ImageLive(QObject):
     """
@@ -184,3 +219,25 @@ class ImageLive(QObject):
 
     def stop(self):
         self._running = False
+
+
+class Worker(QObject):
+    """
+    Base for a process running in a thread.
+    Process has to be implemented in the run() method.
+    """
+
+    progress = pyqtSignal(int)
+    finished = pyqtSignal(object)
+    error = pyqtSignal(Exception)
+
+    def run(self):
+        """
+        Method called in the worker thread.
+        Must be surcharged.
+        """
+        raise NotImplementedError
+
+    def emit_progress(self, step: int):
+        """Emit a signal to the worker thread after a new step."""
+        self.progress.emit(step)

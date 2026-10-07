@@ -28,6 +28,31 @@ import numpy as np
 from urllib3.connection import VerifiedHTTPSConnection
 
 
+class AnalysisInProgressView(QWidget):
+    """Analysis in progress."""
+    def __init__(self, parent=None):
+        super().__init__(None)
+        self.parent = parent
+        self.general_display_mode = self.parent.get_config('general_mode')
+        layout = QVBoxLayout()
+        self.text = translate('analysis_in_progress')
+        self.label = QLabel(self.text)
+        self.label.setStyleSheet(STYLE_H2[self.general_display_mode])
+        layout.addWidget(self.label)
+        self.setLayout(layout)
+
+    def update_text(self, step: 0):
+        self.text = translate('analysis_in_progress')
+        if step >= 1:
+            self.text += '\n'+translate('analysis_phase_ok')
+        if step >= 2:
+            self.text += '\n'+translate('analysis_auto_mask_ok')
+
+        self.label.setText(self.text)
+        self.label.repaint()
+
+
+
 class TwoChartWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
