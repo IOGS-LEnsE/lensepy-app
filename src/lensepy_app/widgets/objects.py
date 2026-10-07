@@ -19,7 +19,7 @@ from PyQt6.QtGui import QPainter, QColor, QPen
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QComboBox,
     QVBoxLayout, QLineEdit, QSlider, QProgressBar,
-    QSizePolicy, QFrame, QMessageBox)
+    QSizePolicy, QFrame, QMessageBox, QToolTip)
 from lensepy.css import *
 
 
@@ -604,6 +604,23 @@ class VerticalCenteredGauge(QWidget):
     def get_value(self):
         return self.value
 
+    def mouseMoveEvent(self, event):
+        """Affiche la valeur de la jauge au passage de la souris."""
+
+        QToolTip.showText(
+            event.globalPosition().toPoint(),
+            f"{self.value:g}",
+            self
+        )
+
+        super().mouseMoveEvent(event)
+
+    def leaveEvent(self, event):
+        """Masque l'infobulle lorsque la souris quitte la jauge."""
+
+        QToolTip.hideText()
+        super().leaveEvent(event)
+
     def paintEvent(self, event):
         painter = QPainter(self)
         w = self.width()
@@ -630,12 +647,11 @@ class VerticalCenteredGauge(QWidget):
             center_y
         )
 
-        amplitude = max(
-            abs(self.minimum),
-            abs(self.maximum)
-        )
+        if self.value > 0:
+            ratio = self.value / self.maximum
 
-        ratio = abs(self.value) / amplitude
+        if self.value < 0:
+            ratio = self.value / self.minimum
 
         if self.value > 0:
             filled_height = int(

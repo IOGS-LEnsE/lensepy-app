@@ -153,11 +153,11 @@ class PVRMSView(QWidget):
         self.pv_label = LabelWidget(translate('label_PV'), size=size)
         self.rms_label = LabelWidget(translate('label_RMS'), size=size)
 
-        self.layout.addStretch()
+        #self.layout.addStretch()
         self.layout.addWidget(self.pv_label)
-        self.layout.addStretch()
+        #self.layout.addStretch()
         self.layout.addWidget(self.rms_label)
-        self.layout.addStretch()
+        #self.layout.addStretch()
 
     def set_pv(self, value: float, unit: str = ''):
         """
@@ -192,10 +192,12 @@ class LabelWidget(QWidget):
             style_L = styleL
             style_T = styleT
             MINIMUM_WIDTH = 75
+            MINIMUM_WIDTH2 = 30
         else:
             style_L = styleL_s
             style_T = styleT_s
             MINIMUM_WIDTH = 40
+            MINIMUM_WIDTH2 = 20
 
         layout = QHBoxLayout()
 
@@ -206,7 +208,7 @@ class LabelWidget(QWidget):
         self.text.setMinimumWidth(MINIMUM_WIDTH)
         self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.unit = QLabel(unit)
-        self.unit.setMinimumWidth(MINIMUM_WIDTH//2)
+        self.unit.setMinimumWidth(MINIMUM_WIDTH2)
         layout.addWidget(self.label)
         layout.addWidget(self.text)
         layout.addWidget(self.unit)
@@ -346,3 +348,15 @@ class SurfaceChoiceView(QWidget):
                 self.wrap_3D_button.setStyleSheet(actived_button)
             elif value_split[1] == 'unwrap':
                 self.unwrap_3D_button.setStyleSheet(actived_button)
+
+
+def main():
+
+    app = QApplication(sys.argv)
+    window = PVRMSView('S')
+    window.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
