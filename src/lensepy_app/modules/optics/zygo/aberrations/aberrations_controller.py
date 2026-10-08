@@ -27,6 +27,20 @@ class ZygoAberrationsController(TemplateController):
 
         """
         super().__init__(parent)
+        '''
+        TO DELETE
+        '''
+        import pathlib
+        print(pathlib.Path.cwd())
+        file_path = '../lensepy-data/optics/zygo/test3.mat'
+        data_set = DataSet()
+        data_set.load_images_set_from_file(file_path)
+        data_set.load_masks_from_file(file_path)
+        self.parent.variables['dataset'] = data_set
+        '''
+        END DELETE
+        '''
+
         self.nb_coeff = nb_coeff
         self.data_set : DataSet = self.parent.variables['dataset']
         self.number_of_repetition = 1
@@ -93,11 +107,9 @@ class ZygoAberrationsController(TemplateController):
         self.thread.finished.connect(
             self.thread.deleteLater
         )
-        '''
         self.thread.finished.connect(
             self.process_PSF
         )
-        '''
         self.thread.start()
 
     def process_PSF(self):
@@ -304,6 +316,8 @@ class ProcessPSFWorker(Worker):
         self.surface, self.mask = None, None
         self.psf = None
         self.psf_perfect = None
+        self.center_x = 0
+        self.pad_factor = 2
 
     def run(self):
         try:
@@ -324,11 +338,13 @@ class ProcessPSFWorker(Worker):
     def process_step(self, index):
         match index:
             case 1:
+                print(f'PSF Process 1')
                 ## GET PHASE
                 self.phase = self.parent.variables['phase']
-                surface = self.phase.get_surface()
+                surface, size_s = self.phase.get_surface()
                 mask = self.phase.get_mask()
                 ## PROCESS PSF
                 psf = PSFModel(wavefront=surface, mask=mask)
-                psf_c, psf_perfect, center_x, padding = psf.get_psf(normalized=True)
+                self.psf, self.psf_perfect, self.center_x, self.pad_factor = (
+                    psf.get_psf(normalized=True))
                 return

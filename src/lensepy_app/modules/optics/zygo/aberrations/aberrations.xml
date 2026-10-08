@@ -2,7 +2,7 @@
 <appli>
     <name>aberrations</name>
     <requirements>images</requirements>
-    <req_var>dataset,dataset_loaded</req_var>
+    <req_var2>dataset,dataset_loaded</req_var2>
     <display>ZERNIKE</display>
     <controller>ZygoAberrationsController</controller>
     <location>aberrations_controller</location>

@@ -10,10 +10,12 @@ Optionnel   : pip install scikit-image   (meilleur déroulement de phase)
 """
 import sys
 import numpy as np
+from lensepy.css import *
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from pyqtgraph.Qt import QtWidgets, QtCore
 from pyqtgraph.Qt.QtWidgets import QApplication, QWidget, QLabel
+from lensepy_app.appli._app.main_view import get_disp_mode
 
 from pyqtgraph.Qt.QtCore import pyqtSignal, Qt
 
@@ -32,14 +34,16 @@ class _WavefrontBase(QWidget):
     """
     stats_changed = pyqtSignal(float, float)
 
-    def __init__(self, parent=None, colormap="viridis", subsample=1,
+    def __init__(self, title, parent=None, colormap="viridis", subsample=1,
                  subsample_method="moyenne", disp_cmap=True):
         super().__init__(None)
         self.parent = parent
+        self.general_display_mode = get_disp_mode(self.parent)
         self._cmap_name = colormap
         self._k = max(1, int(subsample))
         self._methode = subsample_method
         self._disp_cmap = disp_cmap
+        self.title = title
 
         # Données en pleine résolution
         self._W = self._mask = self._X = self._Y = None
@@ -161,16 +165,13 @@ class Wavefront3D(_WavefrontBase):
     """Surface 3D OpenGL + barre de couleur + stats. set_z_scale() en plus."""
     view_changed = QtCore.Signal()
 
-    def __init__(self, parent=None, colormap="viridis", subsample=1,
+    def __init__(self, title, parent=None, colormap="viridis", subsample=1,
                  subsample_method="moyenne", z_scale=1.0, disp_cmap=True,
                  y_axis_inverted=False):
-        super().__init__(parent, colormap, subsample, subsample_method,
+        super().__init__(title, parent, colormap, subsample, subsample_method,
                          disp_cmap=disp_cmap)
         self._z_scale = z_scale
         self._y_inverted = y_axis_inverted
-
-    def _y3d(self, y):
-        return -y if self._y_inverted else y
 
     def _build_ui(self):
         self._surf = None
@@ -179,7 +180,7 @@ class Wavefront3D(_WavefrontBase):
         self.view = _GLView()
         self.view.cameraChanged.connect(self.view_changed)
         self.view.setBackgroundColor("k")
-        self.view.setCameraPosition(distance=6.5, elevation=70, azimuth=-90)
+        self.view.setCameraPosition(distance=6.5, elevation=60, azimuth=-90)
 
         grille = gl.GLGridItem()
         grille.setSize(2, 2)
@@ -204,11 +205,17 @@ class Wavefront3D(_WavefrontBase):
         self._cb_plot.setMouseEnabled(False, False)
         self._cb_plot.setMenuEnabled(False)
 
+        # Title
+        self._title_label = QtWidgets.QLabel(self.title)
+        self._title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._title_label.setStyleSheet(STYLE_H2[self.general_display_mode])
+
         haut = QtWidgets.QHBoxLayout()
         haut.addWidget(self.view, stretch=1)
         haut.addWidget(self._cb_widget)
         lay = QtWidgets.QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(self._title_label)
         lay.addLayout(haut, stretch=1)
         lay.addWidget(self.label)
 
@@ -252,7 +259,57 @@ class Wavefront3D(_WavefrontBase):
         W, masque, X, Y, cmap, vmin, vmax = self._donnees_affichage()
         etendue = max(vmax - vmin, 1e-12)
 
-        Y3D = self._y3d(Y)
+        norm = np.clip((W - vmin) / etendue, 0, 1)
+        colors = cmap.map(
+            norm.ravel(), mode="float"
+        ).reshape(*W.shape, 4)
+
+        colors[~masque, 3] = 0.0
+
+        z = np.where(
+            masque,
+            W,
+            self._W[self._mask].mean()
+        )
+
+        z = z * self._z_scale / max(
+            abs(vmin), abs(vmax), 1e-12
+        )
+
+        if self._surf is not None:
+            self.view.removeItem(self._surf)
+
+        self._surf = gl.GLSurfacePlotItem(
+            x=X[0, :],
+            y=Y[:, 0],
+            z=z.T,
+            colors=colors.transpose(1, 0, 2),
+            shader=None,
+            smooth=True,
+            computeNormals=False
+        )
+
+        self._surf.setGLOptions("translucent")
+        self.view.addItem(self._surf)
+
+        # Barre de couleur
+        self._cb_img.setImage(
+            np.linspace(0, 1, 256)[None, :],
+            levels=(0, 1)
+        )
+        self._cb_img.setColorMap(cmap)
+        self._cb_img.setRect(
+            QtCore.QRectF(0, vmin, 1, etendue)
+        )
+        self._cb_plot.setXRange(0, 1, padding=0)
+        self._cb_plot.setYRange(vmin, vmax, padding=0)
+
+    def _refresh2(self):
+        W, masque, X, Y, cmap, vmin, vmax = self._donnees_affichage()
+        etendue = max(vmax - vmin, 1e-12)
+
+        X3D = X[0, :]
+        Y3D = -Y[:, 0] if self._y_inverted else Y[:, 0]
 
         norm = np.clip((W - vmin) / etendue, 0, 1)
         colors = cmap.map(norm.ravel(), mode="float").reshape(*W.shape, 4)
@@ -264,11 +321,12 @@ class Wavefront3D(_WavefrontBase):
         if self._surf is not None:
             self.view.removeItem(self._surf)
         self._surf = gl.GLSurfacePlotItem(
-            x=X[0, :], y=Y3D[:, 0], z=z.T, colors=colors.transpose(1, 0, 2),
+            x=X3D, y=Y3D,
+            z=np.flipud(z).T,
+            colors=np.flipud(colors).transpose(1, 0, 2),
             shader=None, smooth=True, computeNormals=False)
         self._surf.setGLOptions("translucent")
         self.view.addItem(self._surf)
-
         # Barre de couleur (1 colonne x 256 lignes, croissante vers le haut)
         self._cb_img.setImage(np.linspace(0, 1, 256)[None, :], levels=(0, 1))
         self._cb_img.setColorMap(cmap)
@@ -300,8 +358,14 @@ class Wavefront2D(_WavefrontBase):
                                     label="Front d'onde (λ)")
         self.cbar.setImageItem(self.img, insert_in=self.plot)
 
+        # Title
+        self._title_label = QtWidgets.QLabel(self.title)
+        self._title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._title_label.setStyleSheet(STYLE_H2[self.general_display_mode])
+
         lay = QtWidgets.QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(self._title_label)
         lay.addWidget(self.glw, stretch=1)
         lay.addWidget(self.label)
 
@@ -327,7 +391,7 @@ class Wavefront2D(_WavefrontBase):
 
         # Hors pupille : NaN (rendu transparent)
         img = np.where(masque, W, np.nan)
-        self.img.setImage(img.T, autoLevels=False)    # .T : [x, y]
+        self.img.setImage(img, autoLevels=False)    # .T : [x, y]
         self.cbar.setColorMap(cmap)
         self.cbar.setLevels((vmin, vmax))
 
@@ -434,11 +498,35 @@ if __name__ == "__main__":
     W = derouler(phase_4_pas(I1, I2, I3, I4), masque) / (2 * np.pi)   # en λ
     #W = retirer_piston_tilt(W, X, Y, masque)
 
+    ### REAL DATA
+    from lensepy.optics.zygo import DataSet, PhaseModel
+    from matplotlib import pyplot as plt
+    nb_of_images_per_set = 5
+    file_path = '../../../../lensepy-data/optics/zygo/test4.mat'
+    data_set = DataSet()
+    data_set.load_images_set_from_file(file_path)
+    data_set.load_masks_from_file(file_path)
+
+    phase_test = PhaseModel(data_set)
+
+    ## Test class
+    phase_test.prepare_data()
+
+    if phase_test.process_wrapped_phase():
+        print('Wrapped Phase OK')
+    wrapped = phase_test.get_wrapped_phase()
+    if phase_test.process_unwrapped_phase():
+        print('Unwrapped Phase OK')
+    unwrapped = phase_test.get_unwrapped_phase()
+    mask = phase_test.get_mask()
+
+
     # --- Affichage ----------------------------------------------------
     fen = QtWidgets.QWidget()
     fen.setWindowTitle("Front d'onde (phase-shifting)")
-    w2d = Wavefront2D(colormap="viridis", subsample=1)
-    w3d = Wavefront3D(colormap="viridis", subsample=4)
+    w2d = Wavefront2D('Test', colormap="viridis", subsample=1)
+    w3d = Wavefront3D('Test', colormap="viridis", subsample=4,
+                      disp_cmap=False)
 
     combo = QtWidgets.QComboBox()
     combo.addItems(["viridis", "inferno", "plasma", "magma", "cividis"])
@@ -474,8 +562,8 @@ if __name__ == "__main__":
     chk.toggled.connect(lien.set_enabled)
     btn.clicked.connect(lambda: w2d.plot.autoRange())   # la vue 3D suit
 
-    w2d.set_data(W, masque) #, X, Y)
-    w3d.set_data(W, masque) #, X, Y)
+    w2d.set_data(unwrapped, mask) #, X, Y)
+    w3d.set_data(unwrapped, mask) #, X, Y)
 
     fen.resize(1500, 780)
     fen.show()
