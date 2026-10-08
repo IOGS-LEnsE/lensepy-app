@@ -35,7 +35,8 @@ class _WavefrontBase(QWidget):
     stats_changed = pyqtSignal(float, float)
 
     def __init__(self, title, parent=None, colormap="viridis", subsample=1,
-                 subsample_method="moyenne", disp_cmap=True):
+                 subsample_method="moyenne", disp_cmap=True,
+                 disp_pvrms=False):
         super().__init__(None)
         self.parent = parent
         self.general_display_mode = get_disp_mode(self.parent)
@@ -43,14 +44,16 @@ class _WavefrontBase(QWidget):
         self._k = max(1, int(subsample))
         self._methode = subsample_method
         self._disp_cmap = disp_cmap
+        self.disp_pvrms = disp_pvrms
         self.title = title
 
         # Données en pleine résolution
         self._W = self._mask = self._X = self._Y = None
         self._pv = self._rms = np.nan
 
-        self.label = QLabel("PV = –   RMS = –")
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_PV_RMS = QLabel("PV = –   RMS = –")
+        self.label_PV_RMS.setStyleSheet(STYLE_H3[self.general_display_mode])
+        self.label_PV_RMS.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self._build_ui()
 
@@ -77,7 +80,7 @@ class _WavefrontBase(QWidget):
         vals = W[self._mask]
         self._pv = float(vals.max() - vals.min())
         self._rms = float(vals.std())
-        self.label.setText("PV = %.3f λ     RMS = %.3f λ" % (self._pv, self._rms))
+        self.label_PV_RMS.setText("PV = %.3f λ     RMS = %.3f λ" % (self._pv, self._rms))
         self.stats_changed.emit(self._pv, self._rms)
 
         self._refresh()
@@ -217,7 +220,8 @@ class Wavefront3D(_WavefrontBase):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self._title_label)
         lay.addLayout(haut, stretch=1)
-        lay.addWidget(self.label)
+        if self.disp_pvrms:
+            lay.addWidget(self.label_PV_RMS)
 
         self._cb_widget.setVisible(self._disp_cmap)
 
@@ -367,7 +371,8 @@ class Wavefront2D(_WavefrontBase):
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self._title_label)
         lay.addWidget(self.glw, stretch=1)
-        lay.addWidget(self.label)
+        if self.disp_pvrms:
+            lay.addWidget(self.label_PV_RMS)
 
     # --- état de la vue (pour la synchronisation avec la vue 3D) -----
     def view_state(self):

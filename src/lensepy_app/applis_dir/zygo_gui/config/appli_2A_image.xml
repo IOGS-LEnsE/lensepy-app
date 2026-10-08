@@ -32,7 +32,8 @@
     <variable name="dataset_loaded"/>
 	<variable name="mask_loaded"/>
 	<variable name="phase"/>
-	<variable name="phase_calculated"/>
+	<variable name="phase_results"/>
+	<variable name="psf_results"/>
     <init_params>
         <f_number>1</f_number>
         <wavelength>632.8</wavelength>

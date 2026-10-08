@@ -60,7 +60,6 @@ class TemplateController(QObject):
 
     def _replace_top_left_widget(self, new_widget):
         self.top_left = new_widget
-        self.parent.main_window.top_left_container.deleteLater()
         self.parent.main_window.top_left_container = self.top_left
         self.update_view()
 

@@ -95,6 +95,12 @@ class ParamsView(QWidget):
     def get_padding_value(self):
         return int(self.padding_value[self.padding_selection-1])
 
+    def get_wavelength(self):
+        return float(self.wavelength.get_value())
+
+    def get_f_number(self):
+        return float(self.f_number.get_value())
+
     def handle_padding_changed(self):
         index_pad = self.padding_selector.get_index()
         self.padding_selection = index_pad + 1
