@@ -10,8 +10,8 @@ from .image_display_widget import *
 from .xy_multi_chart_widget import *
 from .camera_widget import *
 from .surface_2D_view import *
-
-
+from .double_3d_view import Surface3DView
+from .wavefront_2D3D_view import Wavefront3D, Wavefront2D, ViewLink
 from PyQt6.QtWidgets import QWidget, QHBoxLayout
 from PyQt6.QtCore import Qt
 

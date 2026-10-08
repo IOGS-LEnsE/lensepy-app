@@ -9,6 +9,7 @@ from lensepy_app.appli._app.template_controller import TemplateController, Worke
 from lensepy.optics.zygo.psf import PSFModel
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_view import AnalysisInProgressView
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_coeff_view import *
+from lensepy_app.modules.optics.zygo.aberrations.aberrations_surface_view import *
 from lensepy.optics.zygo import *
 from lensepy.utils import downsample_array
 from lensepy_app import *
@@ -149,8 +150,9 @@ class ZygoAberrationsController(TemplateController):
 
         self._replace_top_left_widget(Surface2DView(
             translate('interferogram'), colormap_2D='gray'))
-        self._replace_bot_left_widget(Surface2DView(
-            translate('unwrapped_surface'), colormap_2D=self.colormap_2D))
+        self._replace_bot_left_widget(Surface2D3DView(
+            translate('unwrapped_surface'), parent=self,
+            colormap=self.colormap_2D))
         self._replace_bot_right_widget(QWidget())
         self._replace_top_right_widget(QWidget())
         self._replace_zernike_widget(CoefficientsView(self, number=self.nb_coeff))
@@ -216,11 +218,11 @@ class ZygoAberrationsController(TemplateController):
 
         if coeffs is not None:
             _, corrected_phase = self.zernike_coeffs.process_surface_correction_by_coeff(coeffs)
-            self.bot_left.set_array(corrected_phase)
+            self.bot_left.set_surface(corrected_phase)
             pv, rms = process_statistics_surface(corrected_phase)
         else:
             _, unwrapped_phase = self.zernike_coeffs.process_surface_correction_by_coeff(coeff_list)
-            self.bot_left.set_array(unwrapped_phase)
+            self.bot_left.set_surface(unwrapped_phase)
             pv, rms = process_statistics_surface(unwrapped_phase)
         self.bot_zernike.set_pv_rms(pv, rms, units=LAMBDA)
 
