@@ -3,7 +3,7 @@ __all__ = ['message_box', 'make_hline', 'make_vline',
            'SliderBloc', 'VerticalGauge', 'LineEditWidget',
            'SliderBlocVertical', 'ImageDisplayWithCrosshair',
            'ImageDisplayWidget', 'HistogramWidget', 'XYChartWidget',
-           'XYMultiChartWidget', 'CircleWidget',
+           'XYMultiChartWidget', 'CircleWidget', 'ComboBoxBloc',
            'ProgressBarView', 'QProgressBar', 'SwitchWidget', 'LabelWidget',
            'VerticalCenteredGauge', 'VerticalCenteredGaugeTitle']
 
@@ -13,6 +13,7 @@ from lensepy_app.widgets.widget_progress_bar import ProgressBarView, QProgressBa
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget, ImageDisplayWithCrosshair
 from lensepy_app.widgets.histogram_widget import HistogramWidget
 from lensepy_app.widgets.xy_multi_chart_widget import XYMultiChartWidget
+from lensepy_app.widgets.widget_combobox import ComboBoxBloc
 from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy_app.widgets.widget_xy_chart import XYChartWidget
 from lensepy_app.appli._app.main_view import get_disp_mode
@@ -936,8 +937,8 @@ class LabelValueWidget(QWidget):
         self.text.setText(str(value))
         self.unit.setText(unit)
 
-    def set_background_color(self, bg_color):
-        self.label.setStyleSheet(f'background-color: {bg_color}')
+    def set_background_color(self, bg_color, t_color='black'):
+        self.label.setStyleSheet(f'background-color: {bg_color}; color: {t_color};')
 
 
 if __name__ == "__main__":

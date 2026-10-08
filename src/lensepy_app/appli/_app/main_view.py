@@ -98,7 +98,6 @@ class MainWindow(QMainWindow):
         for k, element in enumerate(self.menu_button_list):
             b_title = translate(f'{self.menu_button_name_list[k]}_menu')
             element.setText(b_title)
-            print(f'General Display Mode: {self.general_display_mode}')
             element.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
 
             if element == self.actual_button:

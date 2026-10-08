@@ -28,6 +28,7 @@ coeff_order = [1, 1, 1, 1, 3, 3, 3, 3, 3, 5, 5,
                7, 7, 7, 7, 9, 9, 9, 9, 9, 9,
                9, 9, 9, 9, 9, 11]
 coeff_colors = ['orange', 'lightblue', 'red', 'green', 'purple', 'magenta', 'black']
+coeff_text_colors = ['black', 'black', 'white', 'white', 'white', 'white', 'white']
 
 class ZernikeCoeffBar(QWidget):
 
@@ -175,7 +176,7 @@ class CoefficientsView(QWidget):
         for k in range(self.number+1):
             gauge = ZernikeCoeffBar(title=f'C{k}', min_value=self.range[0], max_value=self.range[1], min_width=10)
             color = coeff_colors[coeff_order[k]//2]
-            gauge.set_colors(BLUE_IOGS, color)
+            t_color = coeff_text_colors[coeff_order[k] // 2]
             gauge.set_colors('#FFFFFF', color)
             self.sliders.append(gauge)
             if k != 0:
@@ -356,7 +357,8 @@ class CoefficientsValueView(QWidget):
             else:
                 cols[line] = 1
             color = coeff_colors[coeff_order[k]//2]
-            gauge.set_background_color(color)
+            t_color = coeff_text_colors[coeff_order[k]//2]
+            gauge.set_background_color(color, t_color)
             self.gauges.append(gauge)
             self.gauges_layout.addWidget(self.gauges[k], line, cols[line])
         self.gauges[0].set_value('0')

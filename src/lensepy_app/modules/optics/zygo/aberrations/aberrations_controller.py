@@ -145,6 +145,7 @@ class ZygoAberrationsController(TemplateController):
     def display_results(self, results):
         ## Update Local Variables / Results
         self.zernike_coeffs = results['zernike_coeffs']
+        self.params_window.set_phase(self.parent.variables['phase'])
 
         self._replace_top_left_widget(Surface2DView(
             translate('interferogram'), colormap_2D='gray'))
@@ -174,9 +175,6 @@ class ZygoAberrationsController(TemplateController):
         # Process zernike coefficients correction from phase
         self._process_correction_coeff()
         coeffs = self.zernike_coeffs.get_coeffs()
-        #self.bot_right.set_array(self.surface)
-
-        #self.process_PSF()
 
     def display_results_psf(self, results):
         ## Update Local Variables / Results
@@ -237,7 +235,7 @@ class ProcessDataWorker(Worker):
 
     def __init__(self, parent, nb_coeff):
         super().__init__()
-        self.parent = parent
+        self.parent = parent # Manager
         self.nb_coeff = nb_coeff
         self.data_set = self.parent.variables['dataset']
         self.phase = None
@@ -298,7 +296,7 @@ class ProcessPSFWorker(Worker):
 
     def __init__(self, parent):
         super().__init__()
-        self.parent = parent
+        self.parent = parent # Manager
         self.phase = None
         self.surface, self.mask = None, None
         self.psf = None
