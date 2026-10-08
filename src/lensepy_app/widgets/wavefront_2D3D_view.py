@@ -13,36 +13,40 @@ import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from pyqtgraph.Qt import QtWidgets, QtCore
+from pyqtgraph.Qt.QtWidgets import QApplication, QWidget, QLabel
+
+from pyqtgraph.Qt.QtCore import pyqtSignal, Qt
 
 
 # ======================================================================
 # Classe de base : données, stats, colormap, sous-échantillonnage
 # ======================================================================
-class _WavefrontBase(QtWidgets.QWidget):
+class _WavefrontBase(QWidget):
     """
-    API commune :
+    Common class :
         set_data(W, masque=None, X=None, Y=None)
         set_colormap(name)
         set_subsample(k, methode=None)     # "moyenne" ou "decimation"
         pv, rms                            # propriétés (pleine résolution)
-    Signal : statsChanged(pv, rms)
+    Signal : stats_changed(pv, rms)
     """
-    statsChanged = QtCore.Signal(float, float)
+    stats_changed = pyqtSignal(float, float)
 
     def __init__(self, parent=None, colormap="viridis", subsample=1,
-                 subsample_method="moyenne"):
+                 subsample_method="moyenne", disp_cmap=True):
         super().__init__(None)
         self.parent = parent
         self._cmap_name = colormap
         self._k = max(1, int(subsample))
         self._methode = subsample_method
+        self._disp_cmap = disp_cmap
 
         # Données en pleine résolution
         self._W = self._mask = self._X = self._Y = None
         self._pv = self._rms = np.nan
 
-        self.label = QtWidgets.QLabel("PV = –   RMS = –")
-        self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.label = QLabel("PV = –   RMS = –")
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self._build_ui()
 
@@ -70,7 +74,7 @@ class _WavefrontBase(QtWidgets.QWidget):
         self._pv = float(vals.max() - vals.min())
         self._rms = float(vals.std())
         self.label.setText("PV = %.3f λ     RMS = %.3f λ" % (self._pv, self._rms))
-        self.statsChanged.emit(self._pv, self._rms)
+        self.stats_changed.emit(self._pv, self._rms)
 
         self._refresh()
 
@@ -155,21 +159,27 @@ class _GLView(gl.GLViewWidget):
 
 class Wavefront3D(_WavefrontBase):
     """Surface 3D OpenGL + barre de couleur + stats. set_z_scale() en plus."""
-    viewChanged = QtCore.Signal()
+    view_changed = QtCore.Signal()
 
     def __init__(self, parent=None, colormap="viridis", subsample=1,
-                 subsample_method="moyenne", z_scale=1.0):
-        super().__init__(parent, colormap, subsample, subsample_method)
+                 subsample_method="moyenne", z_scale=1.0, disp_cmap=True,
+                 y_axis_inverted=False):
+        super().__init__(parent, colormap, subsample, subsample_method,
+                         disp_cmap=disp_cmap)
         self._z_scale = z_scale
+        self._y_inverted = y_axis_inverted
+
+    def _y3d(self, y):
+        return -y if self._y_inverted else y
 
     def _build_ui(self):
         self._surf = None
         self._z_scale = 1.0
 
         self.view = _GLView()
-        self.view.cameraChanged.connect(self.viewChanged)
+        self.view.cameraChanged.connect(self.view_changed)
         self.view.setBackgroundColor("k")
-        self.view.setCameraPosition(distance=4.5, elevation=30, azimuth=-60)
+        self.view.setCameraPosition(distance=6.5, elevation=70, azimuth=-90)
 
         grille = gl.GLGridItem()
         grille.setSize(2, 2)
@@ -202,20 +212,30 @@ class Wavefront3D(_WavefrontBase):
         lay.addLayout(haut, stretch=1)
         lay.addWidget(self.label)
 
+        self._cb_widget.setVisible(self._disp_cmap)
+
     # --- état de la vue (pour la synchronisation avec la vue 2D) -----
     def view_state(self):
         """(cx, cy, largeur) : largeur = étendue en x visible au point visé."""
         o = self.view.opts
         c = o["center"]
         largeur = 2 * o["distance"] * np.tan(np.radians(o["fov"]) / 2)
-        return c.x(), c.y(), largeur
+        cy = -c.y() if self._y_inverted else c.y()
+        return c.x(), cy, largeur
 
     def set_view_state(self, largeur, cx=None, cy=None):
         o = self.view.opts
-        o["distance"] = largeur / (2 * np.tan(np.radians(o["fov"]) / 2))
+        o["distance"] = largeur / (
+                2 * np.tan(np.radians(o["fov"]) / 2)
+        )
         c = o["center"]
-        o["center"] = pg.Vector(c.x() if cx is None else cx,
-                                c.y() if cy is None else cy, c.z())
+        if cy is not None and self._y_inverted:
+            cy = -cy
+        o["center"] = pg.Vector(
+            c.x() if cx is None else cx,
+            c.y() if cy is None else cy,
+            c.z()
+        )
         self.view.update()
 
     def set_z_scale(self, z_scale):
@@ -223,9 +243,16 @@ class Wavefront3D(_WavefrontBase):
         if self._W is not None:
             self._refresh()
 
+    def set_colorbar_visible(self, visible):
+        """Affiche ou masque la barre de couleur à droite de la vue 3D."""
+        self._disp_cmap = bool(visible)
+        self._cb_widget.setVisible(self._disp_cmap)
+
     def _refresh(self):
         W, masque, X, Y, cmap, vmin, vmax = self._donnees_affichage()
         etendue = max(vmax - vmin, 1e-12)
+
+        Y3D = self._y3d(Y)
 
         norm = np.clip((W - vmin) / etendue, 0, 1)
         colors = cmap.map(norm.ravel(), mode="float").reshape(*W.shape, 4)
@@ -237,7 +264,7 @@ class Wavefront3D(_WavefrontBase):
         if self._surf is not None:
             self.view.removeItem(self._surf)
         self._surf = gl.GLSurfacePlotItem(
-            x=X[0, :], y=Y[:, 0], z=z.T, colors=colors.transpose(1, 0, 2),
+            x=X[0, :], y=Y3D[:, 0], z=z.T, colors=colors.transpose(1, 0, 2),
             shader=None, smooth=True, computeNormals=False)
         self._surf.setGLOptions("translucent")
         self.view.addItem(self._surf)
@@ -255,7 +282,7 @@ class Wavefront3D(_WavefrontBase):
 # ======================================================================
 class Wavefront2D(_WavefrontBase):
     """Carte 2D du front d'onde (ImageItem) + ColorBarItem + stats."""
-    viewChanged = QtCore.Signal()
+    view_changed = QtCore.Signal()
 
     def _build_ui(self):
         self.glw = pg.GraphicsLayoutWidget()
@@ -264,7 +291,7 @@ class Wavefront2D(_WavefrontBase):
         self.plot.setLabel("bottom", "x (pupille normalisée)")
         self.plot.setLabel("left", "y (pupille normalisée)")
         self.plot.getViewBox().sigRangeChanged.connect(
-            lambda *args: self.viewChanged.emit())
+            lambda *args: self.view_changed.emit())
 
         self.img = pg.ImageItem()             # tableau indexé [x, y] (col-major)
         self.plot.addItem(self.img)
@@ -313,17 +340,13 @@ class Wavefront2D(_WavefrontBase):
         self.plot.autoRange()
 
 
-# ======================================================================
-# Synchronisation du zoom (et du déplacement) entre deux vues
-# ======================================================================
 class ViewLink(QtCore.QObject):
     """
-    Synchronise le zoom (et, si pan=True, le centre) de deux widgets
-    Wavefront2D / Wavefront3D, dans les deux sens.
-    À conserver dans une variable (sinon il est détruit).
-
-        lien = ViewLink(w2d, w3d)
-        lien.set_enabled(False)
+    Synchronizes zoom between deux widgets Wavefront2D / Wavefront3D,
+    in both direction.
+    Need to be stored in a variable:
+        link = ViewLink(w2d, w3d)
+        link.set_enabled(False)
     """
 
     def __init__(self, a, b, pan=True, parent=None):
@@ -331,8 +354,8 @@ class ViewLink(QtCore.QObject):
         self._a, self._b, self._pan = a, b, pan
         self._busy = False
         self._enabled = True
-        a.viewChanged.connect(lambda: self._sync(a, b))
-        b.viewChanged.connect(lambda: self._sync(b, a))
+        a.view_changed.connect(lambda: self._sync(a, b))
+        b.view_changed.connect(lambda: self._sync(b, a))
         self._sync(a, b)                      # alignement initial sur a
 
     def set_enabled(self, on):
@@ -409,7 +432,7 @@ if __name__ == "__main__":
     X, Y, R, masque = pupille(200)
     I1, I2, I3, I4 = interferogrammes(front_d_onde_simule(X, Y, R), masque)
     W = derouler(phase_4_pas(I1, I2, I3, I4), masque) / (2 * np.pi)   # en λ
-    W = retirer_piston_tilt(W, X, Y, masque)
+    #W = retirer_piston_tilt(W, X, Y, masque)
 
     # --- Affichage ----------------------------------------------------
     fen = QtWidgets.QWidget()
@@ -451,8 +474,8 @@ if __name__ == "__main__":
     chk.toggled.connect(lien.set_enabled)
     btn.clicked.connect(lambda: w2d.plot.autoRange())   # la vue 3D suit
 
-    w2d.set_data(W, masque, X, Y)
-    w3d.set_data(W, masque, X, Y)
+    w2d.set_data(W, masque) #, X, Y)
+    w3d.set_data(W, masque) #, X, Y)
 
     fen.resize(1500, 780)
     fen.show()

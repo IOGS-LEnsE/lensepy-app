@@ -35,7 +35,8 @@ class Surface2D3DView(QWidget):
 
         self.left_view = Wavefront2D(
             translate('unwrapped_2D_surface'), colormap=colormap)
-        self.right_view = Wavefront3D(translate('unwrapped_3D_surface'))
+        self.right_view = Wavefront3D(translate('unwrapped_3D_surface'),
+                                      disp_cmap=False, colormap=colormap)
 
         layout.addWidget(self.left_view, 1)
         layout.addWidget(self.right_view, 1)

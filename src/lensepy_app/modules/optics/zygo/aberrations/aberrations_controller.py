@@ -210,6 +210,7 @@ class ZygoAberrationsController(TemplateController):
 
     def _process_correction_coeff(self, coeffs=None):
         coeff_list = []
+        coeff_list.append(0)
         if self.tilt:
             coeff_list.append(1)
             coeff_list.append(2)

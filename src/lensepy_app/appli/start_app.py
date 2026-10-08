@@ -13,6 +13,8 @@ import importlib.util
 
 DEFAULT_LANG = 'FR'
 
+os.environ["QSG_RHI_BACKEND"] = "opengl"   # avant QApplication
+
 class My_Application(QApplication):
 
     def __init__(self, app_name=None, standalone=False, argv=None):
