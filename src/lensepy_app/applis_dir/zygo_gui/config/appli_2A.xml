@@ -35,19 +35,11 @@
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>
 	<module>
-		<name>masks</name>
-		<location>lensepy_app.modules.optics.zygo</location>
-	</module>
-	<module>
 		<name>interfer_control</name>
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>
 	<module>
 		<name>aberrations</name>
-		<location>lensepy_app.modules.optics.zygo</location>
-	</module>
-	<module>
-		<name>simulation</name>
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>
     <variable name="dataset"/>
