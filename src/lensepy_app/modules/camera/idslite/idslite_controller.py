@@ -230,7 +230,7 @@ class IDSController(TemplateController):
             first_image = self.parent.variables["image"] // (2**pow)
         else:
             first_image = self.parent.variables["image"]
-        dialog = MasksView(first_image, type, help)
+        dialog = MasksView(first_image, type, help, parent=self)
         result = dialog.exec()
         if result == QDialog.DialogCode.Rejected:
             message_box('No mask added', 'No mask will be added to the list of masks.')

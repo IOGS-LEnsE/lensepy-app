@@ -10,6 +10,7 @@
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>%USERPROFILE%\Documents</img_dir>
     <default_langage>EN</default_langage>
+    <mode>CLASSIC</mode>
     <contributors>
         <contributor type="main_dev">
             <name>Julien VILLEMEJANE</name>

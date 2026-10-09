@@ -25,7 +25,8 @@ class ZygoAcquisitionController(TemplateController):
         """
 
         """
-        super().__init__(parent)
+        super().__init__(None)
+        self.parent = parent
         self.data_set = DataSet()
         self.acquiring = False
         self.camera_connected = False

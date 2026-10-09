@@ -5,6 +5,7 @@
     <organization>LEnsE</organization>
     <year>2025</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
+    <mode>CLASSIC</mode>
     <contributors>
         <contributor type="main_dev">
             <name>Julien VILLEMEJANE</name>

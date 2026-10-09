@@ -13,6 +13,7 @@ from lensepy import load_dictionary, translate, dictionary, is_float
 from lensepy.css import *
 from lensepy_app.widgets import make_hline
 from lensepy_app.widgets.widget_editline import LineEditView
+from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy.images.conversion import resize_image_ratio
 from lensepy_app.utils import array_to_qimage
 from PyQt6.QtWidgets import (
@@ -227,7 +228,8 @@ class SurfaceChoiceView(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(None)
-        self.parent = parent
+        self.parent = parent # controller
+        self.general_display_mode = get_disp_mode(self.parent)
         # Graphical objects
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -235,46 +237,46 @@ class SurfaceChoiceView(QWidget):
         ## Title of the widget
         layout.addWidget(make_hline())
         self.label_interfer_options = QLabel(translate("surface_choice_interfer"))
-        self.label_interfer_options.setStyleSheet(styleH1)
+        self.label_interfer_options.setStyleSheet(STYLE_H1[self.general_display_mode])
         self.label_interfer_options.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.label_interfer_options)
         layout.addWidget(make_hline())
 
         self.unwrap_2D_button = QPushButton(translate('2D_unwrap_button'))
-        self.unwrap_2D_button.setStyleSheet(unactived_button)
-        self.unwrap_2D_button.setFixedHeight(BUTTON_HEIGHT)
+        self.unwrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.unwrap_2D_button.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
         self.unwrap_2D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.unwrap_2D_button)
 
         self.unwrap_3D_button = QPushButton(translate('3D_unwrap_button'))
-        self.unwrap_3D_button.setStyleSheet(unactived_button)
-        self.unwrap_3D_button.setFixedHeight(BUTTON_HEIGHT)
+        self.unwrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.unwrap_3D_button.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
         self.unwrap_3D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.unwrap_3D_button)
         layout.addStretch()
         self.tilt_check = QCheckBox(translate('tilt_check_box'))
-        self.tilt_check.setStyleSheet(styleH3)
+        self.tilt_check.setStyleSheet(STYLE_H3[self.general_display_mode])
         layout.addWidget(self.tilt_check)
         layout.addStretch()
 
         layout.addWidget(make_hline())
         self.wrap_2D_button = QPushButton(translate('2D_wrap_button'))
-        self.wrap_2D_button.setStyleSheet(unactived_button)
-        self.wrap_2D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.wrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.wrap_2D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
         self.wrap_2D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.wrap_2D_button)
 
         self.wrap_3D_button = QPushButton(translate('3D_wrap_button'))
-        self.wrap_3D_button.setStyleSheet(unactived_button)
-        self.wrap_3D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.wrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.wrap_3D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
         self.wrap_3D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.wrap_3D_button)
         layout.addWidget(make_hline())
         layout.addStretch()
 
         self.save_button = QPushButton(translate('save_current_view'))
-        self.save_button.setStyleSheet(unactived_button)
-        self.save_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.save_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.save_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
         self.save_button.clicked.connect(self.handle_saved)
         layout.addWidget(self.save_button)
         layout.addWidget(make_hline())
@@ -311,10 +313,10 @@ class SurfaceChoiceView(QWidget):
 
     def inactivate_buttons(self):
         """Inactivate all the buttons."""
-        self.wrap_2D_button.setStyleSheet(unactived_button)
-        self.unwrap_2D_button.setStyleSheet(unactived_button)
-        self.wrap_3D_button.setStyleSheet(unactived_button)
-        self.unwrap_3D_button.setStyleSheet(unactived_button)
+        self.wrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.unwrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.wrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.unwrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
 
     def handle_selected(self):
         """Action performed when 2D unwrapped surface is selected."""
@@ -323,16 +325,16 @@ class SurfaceChoiceView(QWidget):
         # Send signal to display selected surface
         sender = self.sender()
         if sender == self.unwrap_2D_button:
-            self.unwrap_2D_button.setStyleSheet(actived_button)
+            self.unwrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
             self.surface_selected.emit('2D_unwrap')
         elif sender == self.wrap_2D_button:
-            self.wrap_2D_button.setStyleSheet(actived_button)
+            self.wrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
             self.surface_selected.emit('2D_wrap')
         elif sender == self.unwrap_3D_button:
-            self.unwrap_3D_button.setStyleSheet(actived_button)
+            self.unwrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
             self.surface_selected.emit('3D_unwrap')
         elif sender == self.wrap_3D_button:
-            self.wrap_3D_button.setStyleSheet(actived_button)
+            self.wrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
             self.surface_selected.emit('3D_wrap')
 
     def activate_button(self, value):
@@ -340,14 +342,14 @@ class SurfaceChoiceView(QWidget):
         self.inactivate_buttons()
         if value_split[0] == '2D':
             if value_split[1] == 'wrap':
-                self.wrap_2D_button.setStyleSheet(actived_button)
+                self.wrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
             elif value_split[1] == 'unwrap':
-                self.unwrap_2D_button.setStyleSheet(actived_button)
+                self.unwrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
         elif value_split[0] == '3D':
             if value_split[1] == 'wrap':
-                self.wrap_3D_button.setStyleSheet(actived_button)
+                self.wrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
             elif value_split[1] == 'unwrap':
-                self.unwrap_3D_button.setStyleSheet(actived_button)
+                self.unwrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
 
 
 def main():

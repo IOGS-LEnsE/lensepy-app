@@ -27,11 +27,16 @@ class TemplateController(QObject):
         self.destroyed.connect(self.on_destroy)
 
     def init_view(self):
-        self.parent.main_window.top_left_container.deleteLater()
-        self.parent.main_window.top_right_container.deleteLater()
-        self.parent.main_window.bot_left_container.deleteLater()
-        self.parent.main_window.bot_right_container.deleteLater()
-        self.parent.main_window.bot_zernike_container.deleteLater()
+        if self.parent.main_window.top_left_container is not None:
+            self.parent.main_window.top_left_container.deleteLater()
+        if self.parent.main_window.top_right_container is not None:
+            self.parent.main_window.top_right_container.deleteLater()
+        if self.parent.main_window.bot_left_container is not None:
+            self.parent.main_window.bot_left_container.deleteLater()
+        if self.parent.main_window.bot_right_container is not None:
+            self.parent.main_window.bot_right_container.deleteLater()
+        if self.parent.main_window.bot_zernike_container is not None:
+            self.parent.main_window.bot_zernike_container.deleteLater()
         # Update new containers
         self.parent.main_window.top_left_container = self.top_left
         self.parent.main_window.bot_left_container = self.bot_left

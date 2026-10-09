@@ -8,6 +8,8 @@
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>%USERPROFILE%\Documents</img_dir>
     <mode>LITE</mode>
+    <theme>WHITE</theme>
+    <opengl></opengl>
     <contributors>
         <contributor type="main_dev">
             <name>Julien VILLEMEJANE</name>
@@ -34,6 +36,7 @@
 	<variable name="phase"/>
 	<variable name="phase_results"/>
 	<variable name="psf_results"/>
+    <variable name="pad_factor"/>
     <init_params>
         <f_number>1</f_number>
         <wavelength>632.8</wavelength>

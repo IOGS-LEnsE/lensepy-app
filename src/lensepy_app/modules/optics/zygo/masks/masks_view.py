@@ -15,6 +15,7 @@ from lensepy import load_dictionary, translate, dictionary
 from lensepy.css import *
 from lensepy_app.widgets import make_hline
 from lensepy.images.conversion import resize_image_ratio
+from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy_app.utils import array_to_qimage
 from PyQt6.QtWidgets import (
     QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
@@ -314,7 +315,7 @@ class MasksView(QDialog):
     dialog.exec()
     """
 
-    def __init__(self, pixel: np.ndarray, mask_type: str, help_text: str = 'Help') -> None:
+    def __init__(self, pixel: np.ndarray, mask_type: str, help_text: str = 'Help', parent=None) -> None:
         """
         Initializes the MasksView dialog.
         :param pixel: The image on which the mask will be drawn.
@@ -322,6 +323,8 @@ class MasksView(QDialog):
         :param help_text: Text displayed to help the user.
         """
         super().__init__()
+        self.controller = parent
+        self.general_display_mode = get_disp_mode(self.controller)
         # Data of the class
         self.image = np.array(pixel.copy(), dtype='uint8')
         self.type = mask_type
@@ -330,7 +333,7 @@ class MasksView(QDialog):
 
         # Create a QLabel to display help
         self.help = QLabel(help_text)
-        self.help.setStyleSheet(styleH2)
+        self.help.setStyleSheet(STYLE_H2[self.general_display_mode])
         self.help.setFixedHeight(50)
         # Create a QLabel to display the image
         self.label = QLabel()
@@ -723,26 +726,27 @@ class AddMaskView(QWidget):
 
     mask_added = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
-
+        self.controller = parent
+        self.general_display_mode = get_disp_mode(self.controller)
         layout = QVBoxLayout()
         layout.addWidget(make_hline())
 
         label = QLabel(translate('add_mask_title'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.general_display_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
         layout.addWidget(make_hline())
 
         self.button_circ = QPushButton(translate('circular_mask_add'))
-        self.button_circ.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.button_circ.setStyleSheet(unactived_button)
+        self.button_circ.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
+        self.button_circ.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
         layout.addWidget(self.button_circ)
 
         self.button_polygon = QPushButton(translate('polygon_mask_add'))
-        self.button_polygon.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
-        self.button_polygon.setStyleSheet(unactived_button)
+        self.button_polygon.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
+        self.button_polygon.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
         layout.addWidget(self.button_polygon)
 
         layout.addStretch()

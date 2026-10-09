@@ -13,6 +13,7 @@ from lensepy_app.modules.optics.zygo.aberrations.aberrations_surface_view import
 from lensepy.optics.zygo import *
 from lensepy.utils import downsample_array
 from lensepy_app import *
+from lensepy_app.widgets import Surface3DView
 from lensepy_app.widgets.image_cross_sections import *
 from .aberrations_models import *
 
@@ -32,8 +33,6 @@ class ZygoAberrationsController(TemplateController):
         '''
         TO DELETE
         '''
-        import pathlib
-        print(pathlib.Path.cwd())
         file_path = '../lensepy-data/optics/zygo/test3.mat'
         data_set = DataSet()
         data_set.load_images_set_from_file(file_path)
@@ -56,6 +55,7 @@ class ZygoAberrationsController(TemplateController):
         # Threads
         self.thread = QThread()
         self.worker = None
+        self.parent.variables['pad_factor'] = self.params_window.get_padding_value()
 
         # Graphical layout
         ### TO DO  - default colormap in default_parameters
@@ -65,18 +65,20 @@ class ZygoAberrationsController(TemplateController):
         self.top_right = QWidget()  # SimulationChoiceView()
         self.bot_zernike = QWidget()
 
-        self.update()
-
         # Signals
         self.params_window.window_closed.connect(self.handle_params_window_closed)
         self.coeffs_window.window_closed.connect(self.handle_coeffs_window_closed)
+
         # Start surface processing
         if self.parent.variables['phase_results'] is None:
             self.process_surface()
         else:
             results = self.parent.variables['phase_results']
-            self.display_results(results)
+            self.display_results(results, first=False)
+            self.process_PSF()
 
+    def init_view(self):
+        super().init_view()
 
     def process_surface(self):
         self.thread = QThread()
@@ -162,20 +164,26 @@ class ZygoAberrationsController(TemplateController):
     def update_progress_psf(self, step):
         print(f'PSF step = {step}')
 
-    def display_results(self, results):
+    def display_results(self, results, first=True):
         self.parent.variables['phase_results'] = results
         ## Update Local Variables / Results
         self.zernike_coeffs = results['zernike_coeffs']
         self.params_window.set_phase(self.parent.variables['phase'])
 
-        self._replace_top_left_widget(Surface2DView(
-            translate('interferogram'), colormap_2D='gray'))
-        self._replace_bot_left_widget(Surface2D3DView(
-            translate('unwrapped_surface'), parent=self,
-            colormap=self.colormap_2D))
-        self._replace_bot_right_widget(QWidget())
-        self._replace_top_right_widget(QWidget())
-        self._replace_zernike_widget(CoefficientsView(self, number=self.nb_coeff))
+        if first:
+            self._replace_top_left_widget(Surface2DView(
+                translate('interferogram'), colormap_2D='gray'))
+            self._replace_bot_left_widget(Surface2D3DView(
+                translate('unwrapped_surface'), parent=self,
+                colormap=self.colormap_2D))
+            self._replace_bot_right_widget(QWidget())
+            self._replace_top_right_widget(QWidget())
+            self._replace_zernike_widget(CoefficientsView(self, number=self.nb_coeff))
+        else:
+            self.top_left = Surface2DView(translate('interferogram'), colormap_2D='gray')
+            self.bot_left = Surface2D3DView(translate('unwrapped_surface'), parent=self,
+                colormap=self.colormap_2D)
+            self.bot_zernike = CoefficientsView(self, number=self.nb_coeff)
 
         # Signals
         self.bot_zernike.correction_changed.connect(self.handle_correction_changed)
@@ -224,7 +232,11 @@ class ZygoAberrationsController(TemplateController):
             self.params_window.show()
 
     def handle_params_window_closed(self):
-        self.bot_zernike.reactivate_params_button()
+        if isinstance(self.bot_zernike, CoefficientsView):
+            self.bot_zernike.reactivate_params_button()
+        # Restart process of PSF
+        print(f'New PAD = {self.parent.get_variable("pad_factor")}')
+
 
     def handle_coeffs_windowed(self, value):
         if value:
@@ -232,7 +244,8 @@ class ZygoAberrationsController(TemplateController):
             self.coeffs_window.set_coeffs(self.zernike_coeffs.get_coeffs())
 
     def handle_coeffs_window_closed(self):
-        self.bot_zernike.reactivate_coeffs_button()
+        if isinstance(self.bot_zernike, CoefficientsView):
+            self.bot_zernike.reactivate_coeffs_button()
 
     def _process_correction_coeff(self, coeffs=None):
         coeff_list = []
@@ -258,6 +271,10 @@ class ZygoAberrationsController(TemplateController):
 
     def handle_wavelength_changed(self, value):
         print(f'Value = {value}')
+
+    def cleanup(self):
+        self.params_window.deleteLater()
+        self.coeffs_window.deleteLater()
 
 
 class ProcessDataWorker(Worker):
@@ -331,7 +348,7 @@ class ProcessPSFWorker(Worker):
         self.psf = None
         self.psf_perfect = None
         self.center_x = 0
-        self.pad_factor = self.parent.controller.params_window.get_padding_value()
+        self.pad_factor = self.parent.controller.get_variables('pad_factor')
         print(f'Padding = {self.pad_factor}')
 
     def run(self):

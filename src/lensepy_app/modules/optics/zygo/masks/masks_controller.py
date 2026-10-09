@@ -23,8 +23,8 @@ class ZygoMasksController(TemplateController):
         self.first_image = self.data_set.get_image_from_set(1, 1)
 
         # Graphical layout
-        self.top_left = ImageDisplayWidget()
-        self.bot_left = AddMaskView()
+        self.top_left = ImageDisplayWidget(self)
+        self.bot_left = AddMaskView(self)
         self.bot_right = QWidget()
         self.top_right = MasksOptionsView(self)
 
@@ -53,7 +53,7 @@ class ZygoMasksController(TemplateController):
                 help = ('Select N different points, the last one must be at the same place'
                         ' as the first one and then Click Enter')
                 type_m = 'polygon'
-            dialog = MasksView(self.first_image, type, help)
+            dialog = MasksView(self.first_image, type, help, parent=self)
             result = dialog.exec()
             if result == QDialog.DialogCode.Rejected:
                 message_box('No mask added', 'No mask will be added to the list of masks.')

@@ -65,7 +65,6 @@ class ParamsView(QWidget):
                                                    'OK', unit='pixels')
         self.label_padding_size = LabelValueWidget(translate('label_padding_size'),
                                                    'OK', unit='pixels')
-
         # Lambda / nm
         self.switch_scale = SwitchWidget('\u03BB', 'nm')
 
@@ -113,6 +112,8 @@ class ParamsView(QWidget):
         self.parent.set_variables('wavelength', w_length)
         f_number = self.f_number.get_value()
         self.parent.set_variables('f_number', f_number)
+        pad_factor = int(self.padding_value[self.padding_selection - 1])
+        self.parent.set_variables('pad_factor', pad_factor)
 
         # Send signal to controller
         self.window_closed.emit()

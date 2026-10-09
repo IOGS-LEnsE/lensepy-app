@@ -10,6 +10,7 @@ from lensepy import load_dictionary, translate, dictionary, is_float
 from lensepy.css import *
 
 from lensepy_app.widgets.objects import *
+from lensepy_app.appli._app.main_view import get_disp_mode
 from PyQt6.QtWidgets import (
     QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
     QVBoxLayout
@@ -30,6 +31,7 @@ class AcquisitionView(QWidget):
         """
         super().__init__(None)
         self.controller = parent
+        self.general_display_mode = get_disp_mode(self.controller)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
@@ -53,13 +55,13 @@ class AcquisitionView(QWidget):
         self.start_acq_button = QPushButton(translate('start_acq_button'))
         self.start_acq_button.setStyleSheet(disabled_button)
         self.start_acq_button.setEnabled(False)
-        self.start_acq_button.setFixedHeight(BUTTON_HEIGHT)
+        self.start_acq_button.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
         self.start_acq_button.clicked.connect(self.handle_start_acquisition)
         self.layout.addWidget(self.start_acq_button)
 
         # Progression Bar
         self.label_progress_bar = QLabel(translate('label_progress_acq_bar'))
-        self.label_progress_bar.setStyleSheet(styleH2)
+        self.label_progress_bar.setStyleSheet(STYLE_H2[self.general_display_mode])
         self.progress_bar = QProgressBar(self)
         self.progress_bar.setObjectName("IOGSProgressBar")
         self.progress_bar.setStyleSheet(StyleSheet)
@@ -131,12 +133,13 @@ class CameraParamsView(QWidget):
         """
         super().__init__(None)
         self.controller = parent
+        self.general_display_mode = get_disp_mode(self.controller)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
         self.layout.addWidget(make_hline())
         self.label_camera_params= QLabel(translate("label_camera_params"))
-        self.label_camera_params.setStyleSheet(styleH2)
+        self.label_camera_params.setStyleSheet(STYLE_H2[self.general_display_mode])
         self.label_camera_params.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_camera_params)
         self.layout.addWidget(make_hline())
@@ -166,6 +169,7 @@ class PiezoControlView(QWidget):
         """
         super().__init__(None)
         self.controller = parent
+        self.general_display_mode = get_disp_mode(self.controller)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
@@ -174,7 +178,7 @@ class PiezoControlView(QWidget):
         mini_layout = QHBoxLayout()
         mini_widget.setLayout(mini_layout)
         self.label_piezo_control = QLabel(translate("label_piezo_control"))
-        self.label_piezo_control.setStyleSheet(styleH2)
+        self.label_piezo_control.setStyleSheet(STYLE_H2[self.general_display_mode])
         self.label_piezo_control.setAlignment(Qt.AlignmentFlag.AlignCenter)
         mini_layout.addWidget(self.label_piezo_control)
         self.circle_ok = CircleWidget(diameter=20)

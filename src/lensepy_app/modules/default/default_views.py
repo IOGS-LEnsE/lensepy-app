@@ -72,7 +72,8 @@ class DefaultBotRightWidget(QWidget):
         self.layout_left = QVBoxLayout()
         self.layout_right = QVBoxLayout()
         layout.addLayout(self.layout_left, 3)
-        layout.addWidget(Surface3DWidget(), 1)
+        if self.parent.get_config('open_gl') is not None:
+            layout.addWidget(Surface3DWidget(), 1)
 
     def init_ui(self):
         # Get list of contributors
@@ -115,18 +116,8 @@ class Surface3DWidget(QWidget):
         y = np.linspace(-6, 6, n)
         X, Y = np.meshgrid(x, y)
         R = np.sqrt(X**2 + Y**2)
-        Z = np.sin(R) / (R + 0.3)
-
+        Z = np.sin(R)*np.cos(R) / (R + 0.3)
         self.surface = gl.GLSurfacePlotItem( x=x, y=y, z=Z,
                                              shader="shaded", smooth=True, )
-        # Amplification verticale
         self.surface.scale(1, 1, 3)
         self.view.addItem(self.surface)
-        self.grid = gl.GLGridItem()
-        self.grid.setSize(12, 12)
-        self.grid.setSpacing(1, 1)
-        self.grid.translate(0, 0, -0.5)
-        self.view.addItem(self.grid)
-        self.axis = gl.GLAxisItem()
-        self.axis.setSize(6, 6, 4)
-        self.view.addItem(self.axis)

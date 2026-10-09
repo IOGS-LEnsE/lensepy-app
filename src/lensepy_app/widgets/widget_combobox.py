@@ -9,6 +9,8 @@
 """
 
 import sys
+
+from PyQt6.QtGui import QPalette, QColor
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget,
     QVBoxLayout, QHBoxLayout, QGridLayout,
@@ -48,6 +50,20 @@ class ComboBoxBloc(QWidget):
 
         self.setLayout(self.layout)
         self.layout.setContentsMargins(0, 0, 0, 0)
+
+        # No transparency on list (bug from a global parameter ?)
+        view = self.combobox.view()
+        view.viewport().setAutoFillBackground(True)
+        palette = view.viewport().palette()
+        palette.setColor(QPalette.ColorRole.Base, QColor("white"))
+        palette.setColor(QPalette.ColorRole.Window, QColor("white"))
+        view.viewport().setPalette(palette)
+
+        palette = self.combobox.view().palette()
+        palette.setColor(QPalette.ColorRole.Base, QColor("white"))
+        palette.setColor(QPalette.ColorRole.Text, QColor("black"))
+        self.combobox.view().setPalette(palette)
+        # END / No transparency on list (bug from a global parameter ?)
 
         self.combobox.currentTextChanged.connect(self.emit_selection_changed)
 

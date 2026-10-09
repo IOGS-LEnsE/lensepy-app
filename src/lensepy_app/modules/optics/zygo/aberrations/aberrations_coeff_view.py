@@ -93,6 +93,7 @@ class CoefficientsView(QWidget):
     focus_changed = pyqtSignal(bool)
     params_windowed = pyqtSignal(bool)
     coeffs_windowed = pyqtSignal(bool)
+    closing_coeff_view = pyqtSignal()
 
     def __init__(self, parent = None, number=36):
         super().__init__()

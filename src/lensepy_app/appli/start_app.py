@@ -1,6 +1,9 @@
 import sys, os
 from pathlib import Path
 
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPalette, QColor
+
 import lensepy_app
 from lensepy import translate, load_dictionary, dictionary
 
@@ -14,6 +17,19 @@ import importlib.util
 DEFAULT_LANG = 'FR'
 
 os.environ["QSG_RHI_BACKEND"] = "opengl"   # avant QApplication
+
+# Palette sombre
+palette = QPalette()
+palette.setColor(QPalette.ColorRole.Window, QColor(45, 45, 45))
+palette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
+palette.setColor(QPalette.ColorRole.Base, QColor(30, 30, 30))
+palette.setColor(QPalette.ColorRole.AlternateBase, QColor(45, 45, 45))
+palette.setColor(QPalette.ColorRole.Text, Qt.GlobalColor.white)
+palette.setColor(QPalette.ColorRole.Button, QColor(55, 55, 55))
+palette.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.white)
+palette.setColor(QPalette.ColorRole.Highlight, QColor(42, 130, 218))
+palette.setColor(QPalette.ColorRole.HighlightedText, Qt.GlobalColor.white)
+
 
 class My_Application(QApplication):
 
@@ -53,6 +69,11 @@ class My_Application(QApplication):
 
         xml_data: XMLFileConfig = self.manager.xml_app
         if self.config_ok:
+            self.config['global_theme'] = xml_data.get_parameter_xml('theme')
+            if self.config['global_theme'] == 'BLACK':
+                print(f'BLACK theme')
+                self.setPalette(palette)
+            self.config['open_gl'] = xml_data.get_parameter_xml('open_gl')
             app_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             app_path += '/applis_dir/'
             self.config['general_mode'] = xml_data.get_parameter_xml('mode')
