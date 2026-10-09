@@ -39,8 +39,9 @@ class Switch(QWidget):
         self.toggled.emit(self._checked)
         self.update()
 
+
 class SwitchWidget(QWidget):
-    toggled = pyqtSignal(str)
+    toggled = pyqtSignal(bool)
 
     def __init__(self, left='', right='', parent=None):
         super().__init__(parent)
@@ -58,6 +59,12 @@ class SwitchWidget(QWidget):
         self.label_right.setStyleSheet(styleH2)
         layout.addWidget(self.label_right)
         layout.addStretch()
+
+        # Signal
+        self.switch_button.toggled.connect(self.handle_toggled)
+
+    def handle_toggled(self, value):
+        self.toggled.emit(value)
 
 
 

@@ -21,8 +21,9 @@ class ImagesOpeningWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(None)
         self.parent = parent    # Controller
-        layout = QVBoxLayout()
+        self.general_display_mode = self.parent.get_config('general_mode')
 
+        layout = QVBoxLayout()
         layout.addWidget(make_hline())
 
         label = QLabel(translate('image_opening_dialog'))
@@ -32,24 +33,24 @@ class ImagesOpeningWidget(QWidget):
         layout.addWidget(make_hline())
 
         self.open_button = QPushButton(translate('image_opening_button'))
-        self.open_button.setStyleSheet(unactived_button)
-        self.open_button.setFixedHeight(BUTTON_HEIGHT)
+        self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.open_button.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
         self.open_button.clicked.connect(self.handle_opening)
         layout.addWidget(self.open_button)
         layout.addStretch()
 
         self.save_png_button = QPushButton(translate('image_saving_png_button'))
-        self.save_png_button.setStyleSheet(disabled_button)
+        self.save_png_button.setStyleSheet(DISABLED_BUTTON[self.general_display_mode])
         self.save_png_button.setEnabled(False)
-        self.save_png_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.save_png_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
         self.save_png_button.clicked.connect(self.handle_saving_png)
         layout.addWidget(self.save_png_button)
         layout.addStretch()
 
         self.save_mat_button = QPushButton(translate('image_saving_mat_button'))
-        self.save_mat_button.setStyleSheet(disabled_button)
+        self.save_mat_button.setStyleSheet(DISABLED_BUTTON[self.general_display_mode])
         self.save_mat_button.setEnabled(False)
-        self.save_mat_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.save_mat_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
         self.save_mat_button.clicked.connect(self.handle_saving_mat)
         layout.addWidget(self.save_mat_button)
 
@@ -99,17 +100,17 @@ class ImagesOpeningWidget(QWidget):
     def handle_opening(self):
         sender = self.sender()
         if sender == self.open_button:
-            self.open_button.setStyleSheet(actived_button)
+            self.open_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
             # Check if for a default directory for images.
             module_path = self.parent.parent.xml_app.get_parameter_xml('img_dir')
             image_filepath = self.open_image(module_path)
             if image_filepath is not None:
                 self.image_opened.emit(image_filepath)
-                self.open_button.setStyleSheet(unactived_button)
+                self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
                 self.save_png_button.setEnabled(True)
-                self.save_png_button.setStyleSheet(unactived_button)
+                self.save_png_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
                 self.save_mat_button.setEnabled(True)
-                self.save_mat_button.setStyleSheet(unactived_button)
+                self.save_mat_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
 
     def open_image(self, default_dir: str = '') -> str:
         """
@@ -130,6 +131,7 @@ class ImagesOpeningWidget(QWidget):
             )
             dlg.setIcon(QMessageBox.Icon.Warning)
             button = dlg.exec()
+            self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
             return None
 
     def set_enabled(self, value = True):

@@ -23,6 +23,7 @@ class ZygoSimulationController(TemplateController):
 
         """
         super().__init__(parent)
+        self.general_display_mode = 'CLASSIC'
 
         # TO DO  - default colormap in default_parameters
         self.colormap_2D = 'cividis'

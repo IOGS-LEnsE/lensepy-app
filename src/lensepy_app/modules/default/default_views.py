@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QGuiApplication
-from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
 from lensepy import translate
 from lensepy.css import *
 from lensepy_app.widgets import make_hline
@@ -67,8 +67,12 @@ class DefaultBotRightWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(None)
         self.parent = parent  # Controller
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
         self.setLayout(layout)
+        self.layout_left = QVBoxLayout()
+        self.layout_right = QVBoxLayout()
+        layout.addLayout(self.layout_left, 3)
+        layout.addWidget(Surface3DWidget(), 1)
 
     def init_ui(self):
         # Get list of contributors
@@ -78,12 +82,51 @@ class DefaultBotRightWidget(QWidget):
             if len(contributors) != 0:
                 title_label = QLabel(translate(f'contributors_{c_type}'))
                 title_label.setStyleSheet(styleH3)
-                self.layout().addWidget(title_label)
+                self.layout_left.addWidget(title_label)
                 for i, info in enumerate(contributors, 1):
                     c_name = f"\t{info['name']} ({info.get('organization', 'N/A')})"
                     contrib = QLabel(c_name)
-                    self.layout().addWidget(contrib)
+                    self.layout_left.addWidget(contrib)
 
-        self.layout().addStretch()
+        self.layout_left.addStretch()
 
 
+import pyqtgraph.opengl as gl
+import numpy as np
+
+class Surface3DWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.view = gl.GLViewWidget()
+        layout.addWidget(self.view)
+        self.view.opts["distance"] = 18
+        self.view.opts["elevation"] = 30
+        self.view.opts["azimuth"] = 45
+
+        self.create_scene()
+
+    def create_scene(self):
+        n = 150
+        x = np.linspace(-6, 6, n)
+        y = np.linspace(-6, 6, n)
+        X, Y = np.meshgrid(x, y)
+        R = np.sqrt(X**2 + Y**2)
+        Z = np.sin(R) / (R + 0.3)
+
+        self.surface = gl.GLSurfacePlotItem( x=x, y=y, z=Z,
+                                             shader="shaded", smooth=True, )
+        # Amplification verticale
+        self.surface.scale(1, 1, 3)
+        self.view.addItem(self.surface)
+        self.grid = gl.GLGridItem()
+        self.grid.setSize(12, 12)
+        self.grid.setSpacing(1, 1)
+        self.grid.translate(0, 0, -0.5)
+        self.view.addItem(self.grid)
+        self.axis = gl.GLAxisItem()
+        self.axis.setSize(6, 6, 4)
+        self.view.addItem(self.axis)

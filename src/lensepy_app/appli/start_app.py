@@ -13,6 +13,8 @@ import importlib.util
 
 DEFAULT_LANG = 'FR'
 
+os.environ["QSG_RHI_BACKEND"] = "opengl"   # avant QApplication
+
 class My_Application(QApplication):
 
     def __init__(self, app_name=None, standalone=False, argv=None):
@@ -39,6 +41,7 @@ class My_Application(QApplication):
         # Parser for options
         self.config_ok = False
         self.config = {}
+        self.initial_params = {}
         # Dependencies
         self.required_modules = []
         self.missing_modules = []
@@ -52,6 +55,7 @@ class My_Application(QApplication):
         if self.config_ok:
             app_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             app_path += '/applis_dir/'
+            self.config['general_mode'] = xml_data.get_parameter_xml('mode')
             self.config['default_lang'] = xml_data.get_parameter_xml('default_langage')
             if self.config['default_lang'] is None:
                 self.config['default_lang'] = DEFAULT_LANG
@@ -74,6 +78,16 @@ class My_Application(QApplication):
             self.config['camera_ini'] = xml_data.get_sub_parameter('camera', 'init_file')
             if isinstance(self.manager.controller, DefaultController):
                 self.manager.controller.display()
+            self.manager.main_window.update_general_display()
+            self.manager.update_menu()
+            return True
+        else:
+            return False
+
+    def init_params(self):
+        xml_data: XMLFileConfig = self.manager.xml_app
+        if self.config_ok:
+            self.initial_params = xml_data.list_sub_parameter('init_params', '')
             return True
         else:
             return False
@@ -152,6 +166,7 @@ def start_app(app_path, standalone=False, argv=None):
 
     if app.init_config():
         if app.check_dependencies():
+            app.init_params()
             app.init_app()
             app.show()
             sys.exit(app.exec())

@@ -19,25 +19,29 @@ from PyQt6.QtCore import pyqtSignal, QTimer, Qt
 import numpy as np
 from lensepy import load_dictionary, translate
 from lensepy.css import *
+from lensepy_app.appli._app.main_view import get_disp_mode
 
 # %% Widget
 class ComboBoxBloc(QWidget):
     selection_changed = pyqtSignal(str)
 
-    def __init__(self, title: str, list_options: list, default: bool = True) -> None:
+    def __init__(self, title: str, list_options: list,
+                 default: bool = True, current=0, parent=None) -> None:
         super().__init__(parent=None)
+        self.parent = parent
+        self.general_display_mode = get_disp_mode(self.parent)
 
         self.layout = QHBoxLayout()
 
         self.label = QLabel(translate(title))
-        self.label.setStyleSheet(styleH2)
+        self.label.setStyleSheet(STYLE_H2[self.general_display_mode])
 
         self.combobox = QComboBox()
         if default:
             self.combobox.addItem(translate('select_option_default'))
-        self.combobox.setCurrentIndex(0)
         self.combobox.addItems(list_options)
-        self.combobox.setStyleSheet(styleH3)
+        self.combobox.setCurrentIndex(current)
+        self.combobox.setStyleSheet(STYLE_H3[self.general_display_mode])
 
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.combobox)

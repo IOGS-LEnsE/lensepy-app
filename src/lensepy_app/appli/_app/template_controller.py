@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 from PyQt6 import sip
 from PyQt6.QtCore import pyqtSignal, QObject, QThread
-from PyQt6.QtWidgets import QWidget, QMessageBox, QFileDialog
+from PyQt6.QtWidgets import QWidget, QMessageBox, QFileDialog, QApplication
 
 
 class TemplateController(QObject):
@@ -54,6 +54,35 @@ class TemplateController(QObject):
         # Update display mode
         self.parent.main_window.update_containers()
 
+    def update(self):
+        self.parent.main_window.repaint()
+        QApplication.processEvents()
+
+    def _replace_top_left_widget(self, new_widget):
+        self.top_left = new_widget
+        self.parent.main_window.top_left_container = self.top_left
+        self.update_view()
+
+    def _replace_bot_left_widget(self, new_widget):
+        self.bot_left = new_widget
+        self.parent.main_window.bot_left_container = self.bot_left
+        self.update_view()
+
+    def _replace_top_right_widget(self, new_widget):
+        self.top_right = new_widget
+        self.parent.main_window.top_right_container = self.top_right
+        self.update_view()
+
+    def _replace_bot_right_widget(self, new_widget):
+        self.bot_right = new_widget
+        self.parent.main_window.bot_right_container = self.bot_right
+        self.update_view()
+
+    def _replace_zernike_widget(self, new_widget):
+        self.bot_zernike = new_widget
+        self.parent.main_window.bot_zernike_container = self.bot_zernike
+        self.update_view()
+
     def handle_controller(self, event):
         """
         Action performed when the controller changed.
@@ -71,6 +100,12 @@ class TemplateController(QObject):
         else:
             return self.parent.get_variable(index)
 
+    def is_variable(self, var_name):
+        """
+        Check if variable name exists.
+        """
+        return var_name in self.parent.variables
+
     def set_variables(self, var_name, value):
         """Update a variable in the variables' dictionary.
         :param var_name:    Key of the variable.
@@ -81,6 +116,11 @@ class TemplateController(QObject):
     def get_config(self, name=''):
         """Return the config dictionary from the main manager."""
         return self.parent.get_config(name)
+
+    def get_initial_params(self, name=''):
+        """Return the initial value of the parameters from
+        the main manager init_params dictionary."""
+        return self.parent.get_initial_params(name)
 
     def _get_image_dir(self, filepath):
         if filepath is None:
@@ -125,6 +165,12 @@ class TemplateController(QObject):
 
     def cleanup(self):
         pass
+
+    def worker_calculation_error(self, exception):
+        """Errors management."""
+        print("ERRORS :", exception)
+        self.thread = None
+        self.worker = None
 
 
 class ImageLive(QObject):
@@ -184,3 +230,25 @@ class ImageLive(QObject):
 
     def stop(self):
         self._running = False
+
+
+class Worker(QObject):
+    """
+    Base for a process running in a thread.
+    Process has to be implemented in the run() method.
+    """
+
+    progress = pyqtSignal(int)
+    finished = pyqtSignal(object)
+    error = pyqtSignal(Exception)
+
+    def run(self):
+        """
+        Method called in the worker thread.
+        Must be surcharged.
+        """
+        raise NotImplementedError
+
+    def emit_progress(self, step: int):
+        """Emit a signal to the worker thread after a new step."""
+        self.progress.emit(step)

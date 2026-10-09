@@ -14,6 +14,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from _app.main_manager import MainManager
 
+def get_disp_mode(parent):
+    if parent is None:
+        return 'LITE'
+    else:
+        return parent.get_config('general_mode')
+
+
 class MainWindow(QMainWindow):
     """
     Main window of the application.
@@ -31,6 +38,7 @@ class MainWindow(QMainWindow):
         self.menu_button_name_list = []
         self.menu_button_list = []
         self.actual_button = None
+        self.general_display_mode = 'CLASSIC'
 
         self.right_container = QWidget()
         self.right_layout = QGridLayout()
@@ -62,7 +70,7 @@ class MainWindow(QMainWindow):
             b_title = translate(f'{element}_menu')
             button = QPushButton(b_title)
             button.clicked.connect(self.handle_main_menu)
-            button.setFixedHeight(BUTTON_HEIGHT)
+            button.setFixedHeight(BUTTON_HEIGHT['CLASSIC'])
             self.menu_button_name_list.append(f'{element}')
             self.menu_button_list.append(button)
         # Logo
@@ -90,22 +98,24 @@ class MainWindow(QMainWindow):
         for k, element in enumerate(self.menu_button_list):
             b_title = translate(f'{self.menu_button_name_list[k]}_menu')
             element.setText(b_title)
+            element.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
+
             if element == self.actual_button:
-                element.setStyleSheet(actived_button)
+                element.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
                 element.setEnabled(True)
             else:
                 # CHECK IF REQUIRED VARIABLES ARE NOT NONE then UPDATE Menu
                 module_name = self.menu_button_name_list[self.menu_button_list.index(element)]
                 if self.check_variables(module_name):
-                    element.setStyleSheet(unactived_button)
+                    element.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
                     element.setEnabled(True)
                 else:
                     # Check if the module has requirements (other module)
                     if self.parent.check_module_requirements(module_name):
-                        element.setStyleSheet(unactived_button)
+                        element.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
                         element.setEnabled(True)
                     else:
-                        element.setStyleSheet(disabled_button)
+                        element.setStyleSheet(DISABLED_BUTTON[self.general_display_mode])
                         element.setEnabled(False)
             self.menu_layout.addWidget(element)
 
@@ -146,6 +156,15 @@ class MainWindow(QMainWindow):
             self.right_layout.addWidget(self.bot_right_container, 1, 1)
         if self.bot_zernike_container:
             self.right_layout.addWidget(self.bot_zernike_container, 2, 0, 1, 2)
+
+    def update_general_display(self):
+        self.general_display_mode = self.parent.parent.config['general_mode']
+        if self.general_display_mode == 'CLASSIC':
+            self.main_layout.setStretch(1, 6)  # 6/7
+        elif self.general_display_mode == 'LITE':
+            self.main_layout.setStretch(1, 10)  # 10/11
+        else:
+            self.main_layout.setStretch(1, 6)  # 6/7
 
     def set_mode1(self):
         """Disposition 2x2 (par défaut)"""

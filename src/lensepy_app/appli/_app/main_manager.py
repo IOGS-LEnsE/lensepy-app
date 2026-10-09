@@ -191,6 +191,12 @@ class MainManager:
         else:
             return self.parent.config
 
+    def get_initial_params(self, name=''):
+        if name in self.parent.initial_params:
+            return self.parent.initial_params[name]
+        else:
+            return self.parent.initial_params
+
     def handle_menu_changed(self, event):
         """
         Action performed when menu changed.
