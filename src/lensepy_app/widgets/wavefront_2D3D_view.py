@@ -39,7 +39,7 @@ class _WavefrontBase(QWidget):
                  disp_pvrms=False):
         super().__init__(None)
         self.parent = parent
-        self.general_display_mode = get_disp_mode(self.parent)
+        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
         self._cmap_name = colormap
         self._k = max(1, int(subsample))
         self._methode = subsample_method

@@ -15,10 +15,14 @@ if TYPE_CHECKING:
     from _app.main_manager import MainManager
 
 def get_disp_mode(parent):
+    """
+    Return general display mode ('LITE' or 'CLASSIC')
+    and theme ('BLACK' or 'WHITE')
+    """
     if parent is None:
-        return 'LITE'
+        return 'LITE', 'WHITE'
     else:
-        return parent.get_config('general_mode')
+        return parent.get_config('general_mode'), parent.get_config('theme')
 
 
 class MainWindow(QMainWindow):

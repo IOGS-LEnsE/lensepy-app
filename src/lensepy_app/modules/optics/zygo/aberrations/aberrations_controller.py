@@ -7,7 +7,7 @@ from lensepy import translate, is_float
 from lensepy.optics.zygo.phase import process_statistics_surface
 from lensepy_app.appli._app.template_controller import TemplateController, Worker
 from lensepy.optics.zygo.psf import PSFModel
-from lensepy_app.modules.optics.zygo.aberrations.aberrations_view import AnalysisInProgressView
+from lensepy_app.modules.optics.zygo.aberrations.aberrations_view import *
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_coeff_view import *
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_surface_view import *
 from lensepy.optics.zygo import *
@@ -162,6 +162,10 @@ class ZygoAberrationsController(TemplateController):
         self.top_left.update_text(step)
 
     def update_progress_psf(self, step):
+        if step == 1:
+            self.top_left.set_visible('top')
+        if step == 2:
+            self.top_left.set_visible('bot')
         print(f'PSF step = {step}')
 
     def display_results(self, results, first=True):
@@ -171,8 +175,7 @@ class ZygoAberrationsController(TemplateController):
         self.params_window.set_phase(self.parent.variables['phase'])
 
         if first:
-            self._replace_top_left_widget(Surface2DView(
-                translate('interferogram'), colormap_2D='gray'))
+            self._replace_top_left_widget(SurfaceOptionsView())
             self._replace_bot_left_widget(Surface2D3DView(
                 translate('unwrapped_surface'), parent=self,
                 colormap=self.colormap_2D))
@@ -191,11 +194,12 @@ class ZygoAberrationsController(TemplateController):
         self.bot_zernike.focus_changed.connect(self.handle_focus_changed)
         self.bot_zernike.params_windowed.connect(self.handle_params_windowed)
         self.bot_zernike.coeffs_windowed.connect(self.handle_coeffs_windowed)
+        self.top_left.selection_changed.connect(self.handle_right_selection_changed)
 
         ## Interferogram
         image1 = self.data_set.get_image_from_set(1, 1)
         mask = self.data_set.get_global_mask()  # TO CHANGE WITH AUTO MASK
-        self.top_left.set_array(image1 * mask)
+        self.top_left.set_surface(image1 * mask)
 
         ## Zernike Coefficients
         coeffs = self.zernike_coeffs.get_coeffs()
@@ -218,6 +222,43 @@ class ZygoAberrationsController(TemplateController):
 
     def init_view(self):
         super().init_view()
+
+    def handle_right_selection_changed(self, index, value):
+        """
+        :param index:   'top' or 'bot'
+        :param value:
+                translate('psf_and_slice'),
+                translate('psf_only'),
+                translate('psf_slice'),
+                translate('ftm_and_slice'),
+                translate('ftm_only'),
+                translate('ftm_slice')
+        """
+        if index == 'top':
+            if value == translate('psf_and_slice'):
+                widget = ImageCrossSections()
+                widget.set_data(self.psf)
+                widget.set_color_map(self.colormap_2D)
+                self.top_right.deleteLater()
+                self._replace_top_right_widget(widget)
+            else:
+                widget = QWidget()
+                self.top_right.deleteLater()
+                self._replace_top_right_widget(widget)
+
+        if index == 'bot':
+            if value == translate('psf_and_slice'):
+                widget = ImageCrossSections()
+                widget.set_data(self.psf)
+                widget.set_color_map(self.colormap_2D)
+                self.bot_right.deleteLater()
+                self._replace_bot_right_widget(widget)
+            else:
+                widget = QWidget()
+                self.bot_right.deleteLater()
+                self._replace_bot_right_widget(widget)
+
+        print(f'Index = {index}, value = {value}')
 
     def handle_tilt_changed(self, value):
         self.tilt = value
@@ -353,8 +394,9 @@ class ProcessPSFWorker(Worker):
 
     def run(self):
         try:
-            self.process_step(1)
-            self.emit_progress(1)
+            for i in range(2):
+                self.process_step(i+1)
+                self.emit_progress(i+1)
 
             # Result
             ## Create all data then send in a dict ??
@@ -370,7 +412,6 @@ class ProcessPSFWorker(Worker):
     def process_step(self, index):
         match index:
             case 1:
-                print(f'PSF Process 1')
                 ## GET PHASE
                 self.phase = self.parent.variables['phase']
                 surface, size_s = self.phase.get_surface()
@@ -380,3 +421,6 @@ class ProcessPSFWorker(Worker):
                 self.psf, self.psf_perfect, self.center_x, self.pad_factor = (
                     psf.get_psf(normalized=True, pad_factor=self.pad_factor))
                 return
+            case 2:
+                ## PROCESS FTM
+                pass

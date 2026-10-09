@@ -28,12 +28,16 @@ class ComboBoxBloc(QWidget):
     selection_changed = pyqtSignal(str)
 
     def __init__(self, title: str, list_options: list,
-                 default: bool = True, current=0, parent=None) -> None:
+                 default: bool = True, current=0, parent=None,
+                 vertical=False) -> None:
         super().__init__(parent=None)
         self.parent = parent
-        self.general_display_mode = get_disp_mode(self.parent)
+        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
 
-        self.layout = QHBoxLayout()
+        if vertical:
+            self.layout = QVBoxLayout()
+        else:
+            self.layout = QHBoxLayout()
 
         self.label = QLabel(translate(title))
         self.label.setStyleSheet(STYLE_H2[self.general_display_mode])

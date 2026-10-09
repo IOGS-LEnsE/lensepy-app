@@ -38,7 +38,7 @@ class ZernikeCoeffBar(QWidget):
                  max_value=100, min_width=10):
         super().__init__(parent)
         self.parent = parent
-        self.general_display_mode = get_disp_mode(self.parent)
+        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
         self.title = title
         self.min_value = min_value
         self.max_value = max_value
@@ -98,7 +98,7 @@ class CoefficientsView(QWidget):
     def __init__(self, parent = None, number=36):
         super().__init__()
         self.parent = parent # controller
-        self.general_display_mode = get_disp_mode(self.parent)
+        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
         self.number = number
         self.params_button_ok = True
         self.coeffs_button_ok = True
@@ -310,7 +310,7 @@ class CoefficientsValueView(QWidget):
         self.parent = parent # controller
         self.setWindowTitle(translate('coefficients_window'))
         self.setMinimumWidth(300)
-        self.general_display_mode = get_disp_mode(self.parent)
+        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
         self.number = number
         self.coeffs = None
         self.gauges = []

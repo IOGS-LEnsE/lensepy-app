@@ -77,6 +77,7 @@ class My_Application(QApplication):
             app_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             app_path += '/applis_dir/'
             self.config['general_mode'] = xml_data.get_parameter_xml('mode')
+            self.config['theme'] = xml_data.get_parameter_xml('theme')
             self.config['default_lang'] = xml_data.get_parameter_xml('default_langage')
             if self.config['default_lang'] is None:
                 self.config['default_lang'] = DEFAULT_LANG

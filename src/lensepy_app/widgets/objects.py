@@ -425,7 +425,7 @@ class LineEditWidget(QWidget):
     def __init__(self, title:str='', value='', units='', parent=None):
         super().__init__(None)
         layout = QHBoxLayout()
-        self.general_disp_mode = get_disp_mode(parent)
+        self.general_disp_mode, self.general_theme = get_disp_mode(parent)
         self.setLayout(layout)
         self.value = value
         self.units = units
@@ -916,7 +916,7 @@ class LabelValueWidget(QWidget):
         super().__init__(parent)
 
         layout = QHBoxLayout()
-        self.general_display_mode = get_disp_mode(parent)
+        self.general_display_mode, self.general_theme = get_disp_mode(parent)
         self.label = QLabel(title)
         self.label.setStyleSheet(STYLE_H2[self.general_display_mode])
         self.text = QLabel(value)

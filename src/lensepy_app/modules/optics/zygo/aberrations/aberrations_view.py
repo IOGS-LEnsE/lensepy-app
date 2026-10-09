@@ -28,7 +28,14 @@ from lensepy.images import slice_image
 import numpy as np
 from urllib3.connection import VerifiedHTTPSConnection
 
-
+display_options_values = [
+    translate('psf_and_slice'),
+    translate('psf_only'),
+    translate('psf_slice'),
+    translate('ftm_and_slice'),
+    translate('ftm_only'),
+    translate('ftm_slice')
+]
 
 
 class AnalysisInProgressView(QWidget):
@@ -36,7 +43,7 @@ class AnalysisInProgressView(QWidget):
     def __init__(self, parent=None):
         super().__init__(None)
         self.parent = parent
-        self.general_display_mode = get_disp_mode(self.parent)
+        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
         layout = QVBoxLayout()
         self.text = translate('analysis_in_progress')
         self.label = QLabel(self.text)
@@ -79,6 +86,88 @@ class PSFInProgressView(QWidget):
 
         self.label.setText(self.text)
         self.label.repaint()
+
+
+class SurfaceOptionsView(QWidget):
+
+    selection_changed = pyqtSignal(str, str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
+
+        layout = QHBoxLayout()
+        self.setLayout(layout)
+
+        self.surface = Surface2DView(
+                translate('interferogram'), colormap_2D='gray')
+        self.options = OptionsView()
+
+        layout.addWidget(self.surface, 4)
+        layout.addWidget(self.options, 1)
+
+        # Signals
+        self.options.selection_changed.connect(self.handle_selection_changed)
+
+    def set_surface(self, surface):
+        self.surface.set_array(surface)
+
+    def set_visible(self, index):
+        self.options.set_visible(index)
+
+    def handle_selection_changed(self, index, value):
+        self.selection_changed.emit(index, value)
+
+
+class OptionsView(QWidget):
+
+    selection_changed = pyqtSignal(str, str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        self.top_right_option = ComboBoxBloc(translate('top_right_option'),
+                                             display_options_values,
+                                             parent=self.parent,
+                                             default=False,
+                                             vertical=True)
+        self.bot_right_option = ComboBoxBloc(translate('bot_right_option'),
+                                             display_options_values,
+                                             parent=self.parent,
+                                             default=False,
+                                             vertical=True)
+
+        layout.addWidget(self.top_right_option)
+        self.top_right_option.hide()
+        layout.addWidget(make_hline())
+        layout.addWidget(self.bot_right_option)
+        self.bot_right_option.hide()
+        layout.addStretch()
+
+        # Signals
+        self.top_right_option.selection_changed.connect(self.handle_selection_changed)
+        self.bot_right_option.selection_changed.connect(self.handle_selection_changed)
+
+    def set_visible(self, index):
+        if index == 'top':
+            self.top_right_option.show()
+        if index == 'bot':
+            self.bot_right_option.show()
+
+    def handle_selection_changed(self):
+        sender = self.sender()
+        if sender == self.top_right_option:
+            value = sender.get_text()
+            self.selection_changed.emit('top', value)
+        elif sender == self.bot_right_option:
+            value = sender.get_text()
+            self.selection_changed.emit('bot', value)
 
 
 class TwoChartWidget(QWidget):
