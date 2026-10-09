@@ -20,6 +20,7 @@ def get_disp_mode(parent):
     and theme ('BLACK' or 'WHITE')
     """
     if parent is None:
+        print(f'Parent == NOne')
         return 'LITE', 'WHITE'
     else:
         return parent.get_config('general_mode'), parent.get_config('theme')

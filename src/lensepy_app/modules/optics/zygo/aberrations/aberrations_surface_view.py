@@ -18,8 +18,6 @@ from PyQt6.QtWidgets import (
     QApplication,
     QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox, QSlider
 )
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent, QResizeEvent, QFont
 
 
 class Surface2D3DView(QWidget):
@@ -27,7 +25,7 @@ class Surface2D3DView(QWidget):
         super().__init__(None)
         self.parent = parent # controller
         self.title = title
-        self.general_display_mode = get_disp_mode(self.parent)
+        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
         self.surface = None
 
         layout = QHBoxLayout()
@@ -54,9 +52,6 @@ class Surface2D3DView(QWidget):
             self.mask = None
             self.left_view.set_data(surface)
             self.right_view.set_data(surface)
-
-
-
 
 
 def main():

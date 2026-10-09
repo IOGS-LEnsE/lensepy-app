@@ -8,7 +8,7 @@
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>%USERPROFILE%\Documents</img_dir>
     <mode>LITE</mode>
-    <theme>WHITE</theme>
+    <theme>BLACK</theme>
     <opengl></opengl>
     <contributors>
         <contributor type="main_dev">

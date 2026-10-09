@@ -3,7 +3,7 @@
     <name>zygo_images</name>
     <requirements></requirements>
     <req_var></req_var>
-    <display>MODE1</display>
+    <display>MODE2</display>
     <controller>ZygoImagesController</controller>
     <location>images_controller</location>
 </appli>

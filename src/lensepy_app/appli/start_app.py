@@ -20,9 +20,9 @@ os.environ["QSG_RHI_BACKEND"] = "opengl"   # avant QApplication
 
 # Palette sombre
 palette = QPalette()
-palette.setColor(QPalette.ColorRole.Window, QColor(45, 45, 45))
+palette.setColor(QPalette.ColorRole.Window, QColor(10, 10, 10))
 palette.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
-palette.setColor(QPalette.ColorRole.Base, QColor(30, 30, 30))
+palette.setColor(QPalette.ColorRole.Base, QColor(0, 0, 0))
 palette.setColor(QPalette.ColorRole.AlternateBase, QColor(45, 45, 45))
 palette.setColor(QPalette.ColorRole.Text, Qt.GlobalColor.white)
 palette.setColor(QPalette.ColorRole.Button, QColor(55, 55, 55))
