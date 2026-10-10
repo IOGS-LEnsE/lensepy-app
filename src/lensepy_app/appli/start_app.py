@@ -3,13 +3,11 @@ from pathlib import Path
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPalette, QColor
-
+from lensepy_app.appli._app.main_manager import MainManager
+from lensepy_app.modules.default.default_controller import DefaultController
 import lensepy_app
 from lensepy import translate, load_dictionary, dictionary
 
-from lensepy_app.modules.default.default_controller import DefaultController
-from lensepy_app.appli._app.app_utils import XMLFileConfig, XMLFileModule
-from lensepy_app.appli._app.main_manager import MainManager
 from PyQt6.QtWidgets import QApplication
 import importlib
 import importlib.util
@@ -69,15 +67,16 @@ class My_Application(QApplication):
 
         xml_data: XMLFileConfig = self.manager.xml_app
         if self.config_ok:
+            # Display Config
             self.config['global_theme'] = xml_data.get_parameter_xml('theme')
+            self.config['general_display_mode'] = xml_data.get_parameter_xml('mode')
+            print(f'CONFIG _global_theme : {self.config['global_theme']}')
             if self.config['global_theme'] == 'BLACK':
-                print(f'BLACK theme')
                 self.setPalette(palette)
             self.config['open_gl'] = xml_data.get_parameter_xml('open_gl')
+            # Applis PATH
             app_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             app_path += '/applis_dir/'
-            self.config['general_mode'] = xml_data.get_parameter_xml('mode')
-            self.config['theme'] = xml_data.get_parameter_xml('theme')
             self.config['default_lang'] = xml_data.get_parameter_xml('default_langage')
             if self.config['default_lang'] is None:
                 self.config['default_lang'] = DEFAULT_LANG
@@ -98,10 +97,12 @@ class My_Application(QApplication):
             self.config['img_dir'] = xml_data.get_parameter_xml('img_dir') or None
             # Init Camera if exists
             self.config['camera_ini'] = xml_data.get_sub_parameter('camera', 'init_file')
+
             if isinstance(self.manager.controller, DefaultController):
                 self.manager.controller.display()
             self.manager.main_window.update_general_display()
             self.manager.update_menu()
+            self.manager.init_main_menu()
             return True
         else:
             return False
@@ -117,6 +118,7 @@ class My_Application(QApplication):
     def check_options(self):
         if not self.standalone:
             path = f'applis_dir.{self.app_name}'
+            print(f'Path = {path}')
             module = importlib.import_module(path)
             module.init_app(self)
 

@@ -35,7 +35,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self, parent):
         super().__init__()
-        self.parent: MainManager = parent
+        self.manager: MainManager = parent
         self.app_logo: LogoLabel = None
         self.menu_container = QWidget()
         self.menu_container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -79,17 +79,17 @@ class MainWindow(QMainWindow):
             self.menu_button_name_list.append(f'{element}')
             self.menu_button_list.append(button)
         # Logo
-        if self.parent.app_logo != '':
-            logo = QPixmap(self.parent.app_logo)
+        if self.manager.app_logo != '':
+            logo = QPixmap(self.manager.app_logo)
             self.app_logo = LogoLabel(logo)
-            w_width = self.parent.main_window.width()
-            h_width = self.parent.main_window.height()
+            w_width = self.manager.main_window.width()
+            h_width = self.manager.main_window.height()
             self.app_logo.setMinimumHeight(h_width // 4)
             self.app_logo.setMaximumWidth(w_width // 7)
             self.menu_layout.addWidget(self.app_logo)
         # Title
-        if self.parent.app_title != '':
-            app_title = QLabel(self.parent.app_title)
+        if self.manager.app_title != '':
+            app_title = QLabel(self.manager.app_title)
             app_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
             app_title.setStyleSheet(styleH2)
             self.menu_layout.addWidget(app_title)
@@ -116,7 +116,7 @@ class MainWindow(QMainWindow):
                     element.setEnabled(True)
                 else:
                     # Check if the module has requirements (other module)
-                    if self.parent.check_module_requirements(module_name):
+                    if self.manager.check_module_requirements(module_name):
                         element.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
                         element.setEnabled(True)
                     else:
@@ -131,12 +131,12 @@ class MainWindow(QMainWindow):
         :return:            True if variables were checked.
         """
         var_list = []
-        if module in self.parent.req_variables:
-            var_module_list = self.parent.req_variables[module]
+        if module in self.manager.req_variables:
+            var_module_list = self.manager.req_variables[module]
             if var_module_list is not None:
-                var_module_list = self.parent.req_variables[module].split(',')
+                var_module_list = self.manager.req_variables[module].split(',')
                 for var_m in var_module_list:
-                    if self.parent.get_variable(var_m) is None:
+                    if self.manager.get_variable(var_m) is None:
                         var_list.append(var_m)
         return len(var_list) == 0
 
@@ -163,7 +163,7 @@ class MainWindow(QMainWindow):
             self.right_layout.addWidget(self.bot_zernike_container, 2, 0, 1, 2)
 
     def update_general_display(self):
-        self.general_display_mode = self.parent.parent.config['general_mode']
+        self.general_display_mode = self.manager.parent.config['general_display_mode']
         if self.general_display_mode == 'CLASSIC':
             self.main_layout.setStretch(1, 6)  # 6/7
         elif self.general_display_mode == 'LITE':
@@ -203,10 +203,10 @@ class MainWindow(QMainWindow):
 
 
     def closeEvent(self, event):
-        if self.parent.controller is not None:
+        if self.manager.controller is not None:
             print('Controller closed')
-            if hasattr(self.parent.controller, "cleanup"):
-                self.parent.controller.cleanup()
+            if hasattr(self.manager.controller, "cleanup"):
+                self.manager.controller.cleanup()
         print('End of application')
         event.accept()  # ou event.ignore()
 

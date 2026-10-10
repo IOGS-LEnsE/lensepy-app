@@ -44,7 +44,7 @@ class MainManager:
             if self.init_variables():
                 self.list_modules_name = self.xml_app.get_list_modules()
                 self.req_variables = self.get_module_required_variables()
-                return self.init_main_menu()
+                return True
             return False
         else:
             return False
