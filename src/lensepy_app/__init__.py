@@ -1,4 +1,3 @@
-from . import css
 from .css import *
 from .css import __all__ as css_all
 

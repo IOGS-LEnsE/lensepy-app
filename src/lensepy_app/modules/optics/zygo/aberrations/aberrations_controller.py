@@ -6,14 +6,14 @@ from PyQt6.QtCore import QThread
 from lensepy import translate, is_float
 from lensepy.optics.zygo.phase import process_statistics_surface
 from lensepy_app.appli._app.template_controller import TemplateController, Worker
-from lensepy.optics.zygo.psf import PSFModel
+
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_view import *
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_coeff_view import *
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_surface_view import *
 from lensepy.optics.zygo import *
 from lensepy.utils import downsample_array
 from lensepy_app import *
-from lensepy_app.widgets import Surface3DView
+from lensepy_app.modules.optics.zygo.aberrations.aberrations_params_view import ParamsView
 from lensepy_app.widgets.image_cross_sections import *
 from .aberrations_models import *
 
@@ -181,12 +181,12 @@ class ZygoAberrationsController(TemplateController):
                 colormap=self.colormap_2D))
             self._replace_bot_right_widget(QWidget())
             self._replace_top_right_widget(QWidget())
-            self._replace_zernike_widget(CoefficientsView(self, number=self.nb_coeff))
+            self._replace_zernike_widget(CoefficientsView(parent=self, number=self.nb_coeff))
         else:
             self.top_left = Surface2DView(translate('interferogram'), colormap_2D='gray')
             self.bot_left = Surface2D3DView(translate('unwrapped_surface'), parent=self,
                 colormap=self.colormap_2D)
-            self.bot_zernike = CoefficientsView(self, number=self.nb_coeff)
+            self.bot_zernike = CoefficientsView(parent=self, number=self.nb_coeff)
 
         # Signals
         self.bot_zernike.correction_changed.connect(self.handle_correction_changed)

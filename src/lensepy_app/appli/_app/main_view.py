@@ -1,5 +1,5 @@
 from lensepy import translate
-from lensepy.css import *
+from lensepy_app import *
 from PyQt6.QtWidgets import (
     QMainWindow, QSizePolicy,
     QHBoxLayout, QVBoxLayout, QGridLayout,
@@ -7,7 +7,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt, pyqtSignal
-from lensepy_app.appli._app.app_utils import XMLFileModule
 
 from typing import TYPE_CHECKING
 
@@ -23,7 +22,7 @@ def get_disp_mode(parent):
         print(f'Parent == NOne')
         return 'LITE', 'WHITE'
     else:
-        return parent.get_config('general_mode'), parent.get_config('theme')
+        return parent.get_config('global_mode'), parent.get_config('global_theme')
 
 
 class MainWindow(QMainWindow):
@@ -75,7 +74,9 @@ class MainWindow(QMainWindow):
             b_title = translate(f'{element}_menu')
             button = QPushButton(b_title)
             button.clicked.connect(self.handle_main_menu)
-            button.setFixedHeight(BUTTON_HEIGHT['CLASSIC'])
+            theme = self.manager.get_config('global_theme')
+            mode = self.manager.get_config('global_mode')
+            button.setFixedHeight(BUTTON_HEIGHT[theme][mode])
             self.menu_button_name_list.append(f'{element}')
             self.menu_button_list.append(button)
         # Logo
@@ -91,7 +92,7 @@ class MainWindow(QMainWindow):
         if self.manager.app_title != '':
             app_title = QLabel(self.manager.app_title)
             app_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            app_title.setStyleSheet(styleH2)
+            app_title.setStyleSheet(STYLE_H2[theme][mode])
             self.menu_layout.addWidget(app_title)
         self.menu_layout.addStretch()
         self.update_menu()
@@ -100,27 +101,29 @@ class MainWindow(QMainWindow):
         """
         Update the main menu
         """
+        theme = self.manager.get_config('global_theme')
+        mode = self.manager.get_config('global_mode')
         for k, element in enumerate(self.menu_button_list):
             b_title = translate(f'{self.menu_button_name_list[k]}_menu')
             element.setText(b_title)
-            element.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
+            element.setFixedHeight(BUTTON_HEIGHT[theme][mode])
 
             if element == self.actual_button:
-                element.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+                element.setStyleSheet(ACTIVATED_BUTTON[theme][mode])
                 element.setEnabled(True)
             else:
                 # CHECK IF REQUIRED VARIABLES ARE NOT NONE then UPDATE Menu
                 module_name = self.menu_button_name_list[self.menu_button_list.index(element)]
                 if self.check_variables(module_name):
-                    element.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+                    element.setStyleSheet(INACTIVATED_BUTTON[theme][mode])
                     element.setEnabled(True)
                 else:
                     # Check if the module has requirements (other module)
                     if self.manager.check_module_requirements(module_name):
-                        element.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+                        element.setStyleSheet(INACTIVATED_BUTTON[theme][mode])
                         element.setEnabled(True)
                     else:
-                        element.setStyleSheet(DISABLED_BUTTON[self.general_display_mode])
+                        element.setStyleSheet(DISABLED_BUTTON[theme][mode])
                         element.setEnabled(False)
             self.menu_layout.addWidget(element)
 
@@ -163,10 +166,10 @@ class MainWindow(QMainWindow):
             self.right_layout.addWidget(self.bot_zernike_container, 2, 0, 1, 2)
 
     def update_general_display(self):
-        self.general_display_mode = self.manager.parent.config['general_display_mode']
-        if self.general_display_mode == 'CLASSIC':
+        self.general_mode = self.manager.get_config('global_mode')
+        if self.general_mode == 'CLASSIC':
             self.main_layout.setStretch(1, 6)  # 6/7
-        elif self.general_display_mode == 'LITE':
+        elif self.general_mode == 'LITE':
             self.main_layout.setStretch(1, 10)  # 10/11
         else:
             self.main_layout.setStretch(1, 6)  # 6/7
@@ -235,3 +238,12 @@ class LogoLabel(QLabel):
         )
         self.setPixmap(scaled_pixmap)
         super().resizeEvent(event)
+
+
+class ModuleWidget(QWidget):
+
+    def __init__(self, parent=None):
+        super().__init__(None)
+        self.controller = parent
+        print(f'MODULE WIDGET {self.controller}')
+        self.global_mode, self.global_theme = get_disp_mode(self.controller)

@@ -23,7 +23,7 @@ class ZygoImagesController(TemplateController):
 
         """
         super().__init__(parent)
-        self.parent = parent
+        self.manager = parent
         self.name = 'ZygoImagesController'
         self.mask_displayed = 0
 
@@ -58,8 +58,8 @@ class ZygoImagesController(TemplateController):
         image1 = self.data_set.images_sets.get_image_from_set(1,1)
         self.top_left.set_image_from_array(image1)
         self.bot_left.update_dataset(self.data_set)
-        self.parent.variables['dataset_loaded'] = True
-        self.parent.update_menu()
+        self.manager.variables['dataset_loaded'] = True
+        self.manager.update_menu()
 
     def handle_saving_png(self, filepath):
         """Save grid and first image to png file."""
@@ -81,8 +81,8 @@ class ZygoImagesController(TemplateController):
         if im_ok:
             mask_ok = self.data_set.load_masks_from_file(filepath)
             if mask_ok:
-                self.parent.variables['mask_loaded'] = True
-                self.parent.update_menu()
+                self.manager.variables['mask_loaded'] = True
+                self.manager.update_menu()
             self.update_images()
 
     def handle_image_changed(self, index, set_index):

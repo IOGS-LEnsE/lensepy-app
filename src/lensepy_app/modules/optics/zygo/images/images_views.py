@@ -1,15 +1,11 @@
-import importlib
-import os
-
-import numpy as np
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog, QMessageBox, QHBoxLayout
-from lensepy_app.widgets.objects import make_hline
 from lensepy import translate
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 
 
-class ImagesOpeningWidget(QWidget):
+class ImagesOpeningWidget(ModuleWidget):
     """
     Widget to display image opening options.
     """
@@ -19,38 +15,37 @@ class ImagesOpeningWidget(QWidget):
     image_mat_saving = pyqtSignal(str)
 
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent    # Controller
-        self.general_display_mode = self.parent.get_config('general_mode')
+        super().__init__(parent=parent)
+        self.controller = parent
 
         layout = QVBoxLayout()
         layout.addWidget(make_hline())
 
         label = QLabel(translate('image_opening_dialog'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
         layout.addWidget(make_hline())
 
         self.open_button = QPushButton(translate('image_opening_button'))
-        self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
-        self.open_button.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
+        self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.open_button.setFixedHeight(BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.open_button.clicked.connect(self.handle_opening)
         layout.addWidget(self.open_button)
         layout.addStretch()
 
         self.save_png_button = QPushButton(translate('image_saving_png_button'))
-        self.save_png_button.setStyleSheet(DISABLED_BUTTON[self.general_display_mode])
+        self.save_png_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
         self.save_png_button.setEnabled(False)
-        self.save_png_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
+        self.save_png_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.save_png_button.clicked.connect(self.handle_saving_png)
         layout.addWidget(self.save_png_button)
         layout.addStretch()
 
         self.save_mat_button = QPushButton(translate('image_saving_mat_button'))
-        self.save_mat_button.setStyleSheet(DISABLED_BUTTON[self.general_display_mode])
+        self.save_mat_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
         self.save_mat_button.setEnabled(False)
-        self.save_mat_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
+        self.save_mat_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.save_mat_button.clicked.connect(self.handle_saving_mat)
         layout.addWidget(self.save_mat_button)
 
@@ -100,17 +95,17 @@ class ImagesOpeningWidget(QWidget):
     def handle_opening(self):
         sender = self.sender()
         if sender == self.open_button:
-            self.open_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+            self.open_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
             # Check if for a default directory for images.
-            module_path = self.parent.parent.xml_app.get_parameter_xml('img_dir')
+            module_path = self.controller.manager.xml_app.get_parameter_xml('img_dir')
             image_filepath = self.open_image(module_path)
             if image_filepath is not None:
                 self.image_opened.emit(image_filepath)
-                self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+                self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
                 self.save_png_button.setEnabled(True)
-                self.save_png_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+                self.save_png_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
                 self.save_mat_button.setEnabled(True)
-                self.save_mat_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+                self.save_mat_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def open_image(self, default_dir: str = '') -> str:
         """
@@ -131,28 +126,28 @@ class ImagesOpeningWidget(QWidget):
             )
             dlg.setIcon(QMessageBox.Icon.Warning)
             button = dlg.exec()
-            self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+            self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
             return None
 
     def set_enabled(self, value = True):
         if value:
-            self.save_mat_button.setStyleSheet(unactived_button)
-            self.save_png_button.setStyleSheet(unactived_button)
+            self.save_mat_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+            self.save_png_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         else:
-            self.save_mat_button.setStyleSheet(disabled_button)
-            self.save_png_button.setStyleSheet(disabled_button)
+            self.save_mat_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
+            self.save_png_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
         self.save_mat_button.setEnabled(value)
         self.save_png_button.setEnabled(value)
 
 
-class ImagesChoiceView(QWidget):
+class ImagesChoiceView(ModuleWidget):
     """Images Choice."""
 
     images_changed = pyqtSignal(int, int)   # Image index, Set index
     masks_changed = pyqtSignal(int, int, int)   # Image index, Set index, mask index
 
-    def __init__(self, parent) -> None:
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
         self.controller = parent
         self.data_set = None
 
@@ -167,20 +162,20 @@ class ImagesChoiceView(QWidget):
 
         # ---- Title ----
         self.label_images_choice_title = QLabel(translate("label_images_choice_title"))
-        self.label_images_choice_title.setStyleSheet(styleH2)
+        self.label_images_choice_title.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.label_images_choice_title.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # ---- Labels ----
         self.label_set_of_images = QLabel(translate('no_data_loaded'))
-        self.label_set_of_images.setStyleSheet(styleH3)
+        self.label_set_of_images.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         self.label_set_of_images.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.label_status_images = QLabel(translate('no_image_loaded'))
-        self.label_status_images.setStyleSheet(styleH3)
+        self.label_status_images.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         self.label_status_images.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.label_status_masks = QLabel(translate('no_mask_loaded'))
-        self.label_status_masks.setStyleSheet(styleH3)
+        self.label_status_masks.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         self.label_status_masks.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # ---- Images widget ----
@@ -248,7 +243,7 @@ class ImagesChoiceView(QWidget):
         for i in range(self.number_of_images_per_set):
             button = QPushButton(str(i + 1))
             button.setFixedWidth(40)
-            button.setStyleSheet(unactived_button)
+            button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
             button.clicked.connect(self.handle_display_image)
             self.images_button_select.append(button)
             self.layout_images.addWidget(button)
@@ -266,7 +261,9 @@ class ImagesChoiceView(QWidget):
         for i in range(self.sets_of_images_number):
             button = QPushButton(f"S{i + 1}")
             button.setFixedWidth(40)
-            button.setStyleSheet(actived_button if i == 0 else unactived_button)
+            button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode]
+                                 if i == 0 else
+                                 INACTIVATED_BUTTON[self.global_theme][self.global_mode])
             button.clicked.connect(self.select_set)
             self.sets_button_list.append(button)
             self.layout_set.addWidget(button)
@@ -288,7 +285,7 @@ class ImagesChoiceView(QWidget):
             else:
                 button = QPushButton(str(i))
             button.setFixedWidth(40)
-            button.setStyleSheet(unactived_button)
+            button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
             button.clicked.connect(self.handle_display_mask)
             self.masks_button_select.append(button)
             self.layout_masks.addWidget(button)
@@ -301,7 +298,7 @@ class ImagesChoiceView(QWidget):
         self.label_status_images.setText(translate('image_displayed'))
 
         if self.images_button_select:
-            self.images_button_select[index - 1].setStyleSheet(actived_button)
+            self.images_button_select[index - 1].setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def set_masks_status(self, index: int = 0):
         if not self.data_set.has_mask():
@@ -310,7 +307,7 @@ class ImagesChoiceView(QWidget):
         number = self.data_set.masks_sets.get_masks_number()
         self.label_status_masks.setText(f'{number} {translate("mask_s_title")}')
 
-        self.masks_button_select[index].setStyleSheet(actived_button)
+        self.masks_button_select[index].setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
 
     # =========================================================
@@ -321,7 +318,7 @@ class ImagesChoiceView(QWidget):
         try:
             self.inactivate_buttons_image()
             sender = self.sender()
-            sender.setStyleSheet(actived_button)
+            sender.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
             for i in range(self.number_of_images_per_set):
                 if sender == self.images_button_select[i]:
@@ -337,7 +334,7 @@ class ImagesChoiceView(QWidget):
         try:
             self.inactivate_buttons_mask()
             sender = self.sender()
-            sender.setStyleSheet(actived_button)
+            sender.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
             mask_number = self.data_set.masks_sets.get_masks_number()
             for i in range(mask_number + 1):
@@ -350,11 +347,11 @@ class ImagesChoiceView(QWidget):
     # =========================================================
     def inactivate_buttons_image(self):
         for btn in self.images_button_select:
-            btn.setStyleSheet(unactived_button)
+            btn.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def inactivate_buttons_mask(self):
         for btn in self.masks_button_select:
-            btn.setStyleSheet(unactived_button)
+            btn.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def select_set(self):
         sender = self.sender()
@@ -362,9 +359,9 @@ class ImagesChoiceView(QWidget):
         for i, btn in enumerate(self.sets_button_list):
             if btn == sender:
                 self.selected_set = i + 1
-                btn.setStyleSheet(actived_button)
+                btn.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
             else:
-                btn.setStyleSheet(unactived_button)
+                btn.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     # =========================================================
     def clear_layout(self, layout):

@@ -8,13 +8,10 @@ Creation : march/2025
 import sys, os, time
 from lensepy import load_dictionary, translate, dictionary, is_float
 from lensepy_app import *
-from lensepy_app.widgets import Surface2DView
-from lensepy_app.widgets.objects import *
-from lensepy_app import make_hline
+from lensepy_app.appli import ModuleWidget
 from lensepy_app.widgets.objects import *
 from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
-from lensepy_app.modules.optics.zygo.aberrations.aberrations_params_view import ParamsView
 from PyQt6.QtWidgets import (
     QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
     QVBoxLayout, QApplication, QGridLayout
@@ -30,15 +27,14 @@ coeff_order = [1, 1, 1, 1, 3, 3, 3, 3, 3, 5, 5,
 coeff_colors = ['orange', 'lightblue', 'red', 'green', 'purple', 'magenta', 'black']
 coeff_text_colors = ['black', 'black', 'white', 'white', 'white', 'white', 'white']
 
-class ZernikeCoeffBar(QWidget):
+class ZernikeCoeffBar(ModuleWidget):
 
     correction_changed = pyqtSignal(bool)
 
     def __init__(self, parent=None, title='', min_value=0,
                  max_value=100, min_width=10):
-        super().__init__(None)
-        self.parent = parent
-        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
+        super().__init__(parent=parent)
+
         self.title = title
         self.min_value = min_value
         self.max_value = max_value
@@ -51,7 +47,7 @@ class ZernikeCoeffBar(QWidget):
         # Label au-dessus
         self.label = QLabel(self.title)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label.setStyleSheet(STYLE_H3[self.general_theme][self.general_display_mode])
+        self.label.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         layout.addWidget(self.label)
 
         # Vertical Bar
@@ -86,7 +82,7 @@ class ZernikeCoeffBar(QWidget):
         self.checkbox.setChecked(checked)
 
 
-class CoefficientsView(QWidget):
+class CoefficientsView(ModuleWidget):
 
     correction_changed = pyqtSignal(list)
     tilt_changed = pyqtSignal(bool)
@@ -96,9 +92,7 @@ class CoefficientsView(QWidget):
     closing_coeff_view = pyqtSignal()
 
     def __init__(self, parent = None, number=36):
-        super().__init__()
-        self.parent = parent # controller
-        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
+        super().__init__(parent=parent)
         self.number = number
         self.params_button_ok = True
         self.coeffs_button_ok = True
@@ -118,7 +112,8 @@ class CoefficientsView(QWidget):
         options_layout = QVBoxLayout()
         options_widget.setLayout(options_layout)
         self.label_zernike_coefficients = QLabel(translate("label_zernike_coefficients"))
-        self.label_zernike_coefficients.setStyleSheet(STYLE_H1[self.general_theme][self.general_display_mode])
+        print(f'Glogal : {self.global_theme} / {self.global_mode}')
+        self.label_zernike_coefficients.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
         self.label_zernike_coefficients.setAlignment(Qt.AlignmentFlag.AlignCenter)
         options_layout.addWidget(self.label_zernike_coefficients)
         options_layout.addWidget(make_hline())
@@ -131,10 +126,10 @@ class CoefficientsView(QWidget):
         options_layout.addWidget(self.tilt_button, 1)
         options_layout.addWidget(self.focus_button, 1)
         self.coeffs_button = QPushButton(translate("coeffs_button"))
-        self.coeffs_button.setStyleSheet(INACTIVATED_BUTTON[self.general_theme][self.general_display_mode])
+        self.coeffs_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.coeffs_button.setMinimumWidth(100)
         self.params_button = QPushButton(translate("parameters_button"))
-        self.params_button.setStyleSheet(INACTIVATED_BUTTON[self.general_theme][self.general_display_mode])
+        self.params_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.params_button.setMinimumWidth(100)
         options_layout.addWidget(self.coeffs_button, 1)
         options_layout.addWidget(self.params_button, 1)
@@ -143,10 +138,10 @@ class CoefficientsView(QWidget):
         results_widget = QWidget()
         results_layout = QVBoxLayout()
         results_widget.setLayout(results_layout)
-        size = '' if self.general_display_mode == 'CLASSIC' else 's'
+        size = '' if self.global_mode == 'CLASSIC' else 's'
         # PV/RMS displayed (for uncorrected phase)
         self.label_pv_rms = QLabel(translate('label_pv_rms_uncorrected'))
-        self.label_pv_rms.setStyleSheet(STYLE_H3[self.general_theme][self.general_display_mode])
+        self.label_pv_rms.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         self.pv_rms = PVRMSView(size)
         results_layout.addWidget(self.label_pv_rms)
         results_layout.addWidget(self.pv_rms)
@@ -175,7 +170,7 @@ class CoefficientsView(QWidget):
 
     def init_view(self):
         for k in range(self.number+1):
-            gauge = ZernikeCoeffBar(parent=self.parent, title=f'C{k}',
+            gauge = ZernikeCoeffBar(parent=self.controller, title=f'C{k}',
                                     min_value=self.range[0], max_value=self.range[1], min_width=10)
             color = coeff_colors[coeff_order[k]//2]
             t_color = coeff_text_colors[coeff_order[k] // 2]
@@ -276,25 +271,25 @@ class CoefficientsView(QWidget):
     def handle_parameters_view(self):
         if self.params_button_ok:
             self.params_button.setEnabled(False)
-            self.params_button.setStyleSheet(DISABLED_BUTTON[self.general_theme][self.general_display_mode])
+            self.params_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
             self.params_button_ok = False
             self.params_windowed.emit(True)
 
     def handle_coefficients_view(self):
         if self.coeffs_button_ok:
             self.coeffs_button.setEnabled(False)
-            self.coeffs_button.setStyleSheet(DISABLED_BUTTON[self.general_theme][self.general_display_mode])
+            self.coeffs_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
             self.coeffs_button_ok = False
             self.coeffs_windowed.emit(True)
 
     def reactivate_params_button(self):
         self.params_button.setEnabled(True)
-        self.params_button.setStyleSheet(INACTIVATED_BUTTON[self.general_theme][self.general_display_mode])
+        self.params_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.params_button_ok = True
 
     def reactivate_coeffs_button(self):
         self.coeffs_button.setEnabled(True)
-        self.coeffs_button.setStyleSheet(INACTIVATED_BUTTON[self.general_theme][self.general_display_mode])
+        self.coeffs_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.coeffs_button_ok = True
 
     def set_pv_rms(self, pv, rms, units=''):
@@ -302,16 +297,15 @@ class CoefficientsView(QWidget):
         self.pv_rms.set_rms(value=rms, unit=units)
 
 
-class CoefficientsValueView(QWidget):
+class CoefficientsValueView(ModuleWidget):
 
     window_closed = pyqtSignal()
 
     def __init__(self, parent=None, number=36):
-        super(CoefficientsValueView, self).__init__(None)
-        self.parent = parent # controller
+        super().__init__(parent=parent)
+
         self.setWindowTitle(translate('coefficients_window'))
         self.setMinimumWidth(300)
-        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
         self.number = number
         self.coeffs = None
         self.gauges = []
@@ -321,7 +315,7 @@ class CoefficientsValueView(QWidget):
 
         ## Label
         label_zernike_coefficients = QLabel(translate("label_zernike_coefficients"))
-        label_zernike_coefficients.setStyleSheet(STYLE_H1[self.general_theme][self.general_display_mode])
+        label_zernike_coefficients.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
         label_zernike_coefficients.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label_zernike_coefficients)
         layout.addWidget(make_hline())

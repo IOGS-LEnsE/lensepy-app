@@ -69,7 +69,7 @@ class My_Application(QApplication):
         if self.config_ok:
             # Display Config
             self.config['global_theme'] = xml_data.get_parameter_xml('theme')
-            self.config['general_display_mode'] = xml_data.get_parameter_xml('mode')
+            self.config['global_mode'] = xml_data.get_parameter_xml('mode')
             print(f'CONFIG _global_theme : {self.config['global_theme']}')
             if self.config['global_theme'] == 'BLACK':
                 self.setPalette(palette)
