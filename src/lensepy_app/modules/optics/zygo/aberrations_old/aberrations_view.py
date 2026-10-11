@@ -90,11 +90,11 @@ class SimulationChoiceView(QWidget):
         # PV/RMS displayed (for uncorrected phase)
         self.label_pv_rms_uncorrected = QLabel(translate('label_pv_rms_uncorrected'))
         self.label_pv_rms_uncorrected.setStyleSheet(styleH3)
-        self.pv_rms_uncorrected = PVRMSView()
+        self.pv_rms_uncorrected = PVRMSView(parent=self.controller)
         # PV/RMS displayed (for corrected phase)
         self.label_pv_rms_corrected = QLabel(translate('label_pv_rms_uncorrected'))
         self.label_pv_rms_corrected.setStyleSheet(styleH3)
-        self.pv_rms_corrected = PVRMSView()
+        self.pv_rms_corrected = PVRMSView(parent=self.controller)
 
         # Add graphical elements to the layout.
         self.layout.addWidget(make_hline())

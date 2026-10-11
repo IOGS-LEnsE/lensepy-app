@@ -3,11 +3,12 @@ from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
 
 from lensepy import translate
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.widgets.objects import make_hline, LabelWidget, SliderBloc
 
 
-class CameraParamsWidget(QWidget):
+class CameraParamsWidget(ModuleWidget):
     """
     Widget to display image infos.
     """
@@ -15,15 +16,14 @@ class CameraParamsWidget(QWidget):
     black_level_changed = pyqtSignal(int)
 
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent     # BaslerController or equivalent
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
         # Attributes
-        self.camera = self.parent.get_variables()['camera']
+        self.camera = self.controller.get_variables()['camera']
         # Graphical objects
         layout.addWidget(make_hline())
         label = QLabel(translate('basler_params_title'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
         layout.addWidget(make_hline())
@@ -48,7 +48,7 @@ class CameraParamsWidget(QWidget):
 
         else:
             nocam = QLabel(translate('no_basler_camera'))
-            nocam.setStyleSheet(styleH3)
+            nocam.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
             nocam.setAlignment(Qt.AlignmentFlag.AlignCenter)
             layout.addWidget(nocam)
 
@@ -74,7 +74,7 @@ class CameraParamsWidget(QWidget):
         """
         Update information from camera.
         """
-        self.camera = self.parent.get_variables()['camera']
+        self.camera = self.controller.get_variables()['camera']
         if self.camera is not None:
             self.camera.open()
             fps_value = self.camera.get_parameter('BslResultingAcquisitionFrameRate')

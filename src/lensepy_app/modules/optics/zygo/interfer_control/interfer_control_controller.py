@@ -11,7 +11,7 @@ from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view impo
 from lensepy.optics.zygo import *
 from lensepy_app import *
 from lensepy_app.widgets.surface_2D_view import Surface2DView
-from lensepy_app.widgets.double_3d_view import Surface3DView, DoubleGraph3DView
+from lensepy_app.widgets.double_3d_view import Surface3DView
 
 
 class ZygoInterferControlController(TemplateController):
@@ -46,8 +46,8 @@ class ZygoInterferControlController(TemplateController):
 
         # Graphical layout
         self.top_left = Surface2DView('', self.colormap_2D)
-        self.bot_left = InterferControlView()
-        self.bot_right = ImageDisplayWidget()
+        self.bot_left = InterferControlView(self)
+        self.bot_right = ImageDisplayWidget(self)
         self.top_right = SurfaceChoiceView(self)
         
         # Setup widgets
@@ -163,7 +163,7 @@ class ZygoInterferControlController(TemplateController):
         self.top_left.set_array(unwrapped_array * gain)
 
     def display_3D_wrapped(self, gain=1):
-        widget = Surface3DView('Wrapped Phase')
+        widget = Surface3DView('Wrapped Phase', parent=self)
         self.replace_top_left_widget(widget)
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         wrapped = self.phase.get_wrapped_phase()
@@ -177,7 +177,7 @@ class ZygoInterferControlController(TemplateController):
         self.top_left.raise_()
 
     def display_3D_unwrapped(self, gain=1):
-        widget = Surface3DView('Unwrapped Phase')
+        widget = Surface3DView('Unwrapped Phase', parent=self)
         self.replace_top_left_widget(widget)
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         if self.tilt:

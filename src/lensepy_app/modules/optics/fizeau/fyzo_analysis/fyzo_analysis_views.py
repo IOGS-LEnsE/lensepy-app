@@ -2,21 +2,21 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QFileDialog, QMessageBox
 from lensepy import translate
 
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.widgets.objects import *
 from lensepy_app.widgets import ImageDisplayWidget
 from lensepy_app.widgets.double_3d_view import Surface3DView
 from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
 
 
-class FyzoAnalysisOptionsView(QWidget):
+class FyzoAnalysisOptionsView(ModuleWidget):
 
     display_changed = pyqtSignal(str)
     view_saved = pyqtSignal(str)
 
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent    # Controller
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
 
         layout.addWidget(make_hline())
@@ -77,7 +77,7 @@ class FyzoAnalysisOptionsView(QWidget):
         self.saving_button.clicked.connect(self.handle_saving_png)
         layout.addWidget(self.saving_button)
         layout.addStretch()
-        self.pv_rms = PVRMSView()
+        self.pv_rms = PVRMSView(parent=self.controller)
         layout.addWidget(self.pv_rms)
         layout.addStretch()
 
@@ -154,16 +154,16 @@ class FyzoAnalysisOptionsView(QWidget):
             return
 
 
-class Fyzo3DSurfaceView(QWidget):
+class Fyzo3DSurfaceView(ModuleWidget):
 
     surface_3D_saved = pyqtSignal(str)
 
     def __init__(self, parent=None, surface=None):
-        super().__init__(None)
+        super().__init__(parent=parent)
         self.parent = parent    # Controller
         layout = QVBoxLayout()
 
-        view_3D = Surface3DView()
+        view_3D = Surface3DView(parent=self.controller)
         if surface is not None:
             x, y, w_s = view_3D.prepare_data_for_mesh(surface, undersampling=1)
             view_3D.create_mesh_surface(x, y, w_s)

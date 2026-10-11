@@ -1,6 +1,7 @@
 __all__ = [
     'LAMBDA', 'BLUE_IOGS', 'ORANGE_IOGS',
     'STYLE_H1', 'STYLE_H2', 'STYLE_H3', 'NO_STYLE',
+    'styleL', 'styleT', 'styleL_s', 'styleT_s', 'styleCheckbox',
     'INACTIVATED_BUTTON', 'ACTIVATED_BUTTON', 'DISABLED_BUTTON',
     'BUTTON_HEIGHT', 'OPTIONS_BUTTON_HEIGHT'
 ]

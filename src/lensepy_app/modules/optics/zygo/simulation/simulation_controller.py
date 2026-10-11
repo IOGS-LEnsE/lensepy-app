@@ -77,7 +77,7 @@ class ZygoSimulationController(TemplateController):
         return widget
 
     def _create_3D_display(self):
-        widget = Surface3DView('')
+        widget = Surface3DView('', parent=self)
         return widget
 
     def _create_xy_chart(self):

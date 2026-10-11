@@ -8,15 +8,14 @@
 .. moduleauthor:: Julien VILLEMEJANE (PRAG LEnsE) <julien.villemejane@institutoptique.fr>
 Creation : march/2025
 """
-import sys, os, time
+import sys
 import numpy as np
 import cv2
-from lensepy import load_dictionary, translate, dictionary
-from lensepy.css import *
-from lensepy_app.widgets import make_hline
+from lensepy import translate
 from lensepy.images.conversion import resize_image_ratio
-from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy_app.utils import array_to_qimage
+from lensepy_app import *
+from lensepy_app.appli import *
 from PyQt6.QtWidgets import (
     QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
     QVBoxLayout,
@@ -30,7 +29,7 @@ WIDTH_MARGIN = 30
 HEIGHT_MARGIN = 80
 
 
-class MasksOptionsView(QWidget):
+class MasksOptionsView(ModuleWidget):
     """Images Choice."""
 
     masks_changed = pyqtSignal()
@@ -39,14 +38,13 @@ class MasksOptionsView(QWidget):
         """Default constructor of the class.
         :param controller: ZygoMaskController.
         """
-        super().__init__()
-        self.controller = parent
+        super().__init__(parent=parent)
         self.masks = self.controller.get_variables('masks')
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
         self.label_masks_options = QLabel(translate("label_masks_options"))
-        self.label_masks_options.setStyleSheet(styleH2)
+        self.label_masks_options.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.label_masks_options.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_masks_options)
         self.layout.addWidget(make_hline())
@@ -324,7 +322,8 @@ class MasksView(QDialog):
         """
         super().__init__()
         self.controller = parent
-        self.general_display_mode = get_disp_mode(self.controller)
+        self.global_theme = self.controller.get_config('global_theme')
+        self.global_mode = self.controller.get_config('global_mode')
         # Data of the class
         self.image = np.array(pixel.copy(), dtype='uint8')
         self.type = mask_type
@@ -333,7 +332,7 @@ class MasksView(QDialog):
 
         # Create a QLabel to display help
         self.help = QLabel(help_text)
-        self.help.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.help.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.help.setFixedHeight(50)
         # Create a QLabel to display the image
         self.label = QLabel()
@@ -722,31 +721,29 @@ class MasksView(QDialog):
         return mask
 
 
-class AddMaskView(QWidget):
+class AddMaskView(ModuleWidget):
 
     mask_added = pyqtSignal(str)
 
     def __init__(self, parent=None):
-        super().__init__()
-        self.controller = parent
-        self.general_display_mode = get_disp_mode(self.controller)
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
         layout.addWidget(make_hline())
 
         label = QLabel(translate('add_mask_title'))
-        label.setStyleSheet(STYLE_H2[self.general_display_mode])
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
         layout.addWidget(make_hline())
 
         self.button_circ = QPushButton(translate('circular_mask_add'))
-        self.button_circ.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
-        self.button_circ.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.button_circ.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
+        self.button_circ.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         layout.addWidget(self.button_circ)
 
         self.button_polygon = QPushButton(translate('polygon_mask_add'))
-        self.button_polygon.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
-        self.button_polygon.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.button_polygon.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
+        self.button_polygon.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         layout.addWidget(self.button_polygon)
 
         layout.addStretch()

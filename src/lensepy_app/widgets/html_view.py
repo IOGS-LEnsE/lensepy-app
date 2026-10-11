@@ -15,22 +15,24 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
+from lensepy_app import *
+from lensepy_app.appli import *
 
 os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-direct-composition"
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
 
-class HTMLView(QWidget):
+class HTMLView(ModuleWidget):
     """
     Widget displaying an HTML content.
     """
 
-    def __init__(self, url: str = ''):
+    def __init__(self, url: str = '', parent=None):
         """Default constructor.
         :param url: filepath or url to the HTML page. Default ''.
         """
-        super().__init__()
+        super().__init__(parent=parent)
         self.url = url
         self.view = QWebEngineView()
         self.layout = QHBoxLayout()

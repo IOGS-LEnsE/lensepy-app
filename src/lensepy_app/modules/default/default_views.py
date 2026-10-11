@@ -3,23 +3,17 @@ from PyQt6.QtGui import QGuiApplication
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
 from lensepy import translate
 from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.appli._app.main_view import get_disp_mode
 
 import lensepy_app
 
-print(lensepy_app.__file__)
-print(hasattr(lensepy_app, 'STYLE_H3'))
-print(lensepy_app.STYLE_H3['WHITE']['CLASSIC'])
-
-
 contributors_type = ['main_dev','dev','sciexp']
 
-class DefaultTopLeftWidget(QWidget):
+class DefaultTopLeftWidget(ModuleWidget):
 
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent
-        self.general_display_mode, self.general_theme = get_disp_mode(None)
+        super().__init__(parent=parent)
         self.layout = QVBoxLayout()
         label = QLabel('Top Left')
         self.layout.addWidget(label)
@@ -42,59 +36,53 @@ class DefaultTopLeftWidget(QWidget):
         self._delete_items()    # Delete all the objects in the main layout
         self.layout.addWidget(make_hline())
         label = QLabel(config['name'])
-        label.setStyleSheet(STYLE_H1[self.general_theme][self.general_display_mode])
+        label.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(label)
         self.layout.addWidget(make_hline())
         label = QLabel(config['description'])
-        label.setStyleSheet(STYLE_H2[self.general_theme][self.general_display_mode])
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(label)
         self.layout.addStretch()
         label = QLabel(f'Developped by {config["organization"]} in {config["year"]}')
-        label.setStyleSheet(STYLE_H3[self.general_theme][self.general_display_mode])
+        label.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(label)
 
         self.layout.addStretch()
 
-class DefaultBotLeftWidget(QWidget):
+class DefaultBotLeftWidget(ModuleWidget):
 
     def __init__(self, parent=None):
         super().__init__(None)
-        self.parent = parent
         layout = QVBoxLayout()
         label = QLabel('Bot Left')
         layout.addWidget(label)
         self.setLayout(layout)
 
 
-class DefaultBotRightWidget(QWidget):
+class DefaultBotRightWidget(ModuleWidget):
 
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent  # Controller
-        self.general_display_mode, self.general_theme = get_disp_mode(None)
-        print(f'general_display_mode: {self.general_display_mode}')
+        super().__init__(parent=parent)
         layout = QHBoxLayout()
         self.setLayout(layout)
         self.layout_left = QVBoxLayout()
         self.layout_right = QVBoxLayout()
         layout.addLayout(self.layout_left, 3)
-        if self.parent.get_config('open_gl') is not None:
-            layout.addWidget(Surface3DWidget(), 1)
+        if self.controller.get_config('open_gl') is not None:
+            layout.addWidget(Surface3DWidget(self.controller), 1)
 
     def init_ui(self):
+        print(f'init_ui / DefaultBotRight')
         # Get list of contributors
-        contributors_by_type = self.parent.get_contributors_by_type()
+        contributors_by_type = self.controller.get_contributors_by_type()
         for c_type in contributors_type:
             contributors = contributors_by_type.get(c_type, [])
             if len(contributors) != 0:
                 title_label = QLabel(translate(f'contributors_{c_type}'))
-
-                from lensepy_app.css import STYLE_H3
-
-                title_label.setStyleSheet(STYLE_H3[self.general_theme][self.general_display_mode])
+                title_label.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
                 self.layout_left.addWidget(title_label)
                 for i, info in enumerate(contributors, 1):
                     c_name = f"\t{info['name']} ({info.get('organization', 'N/A')})"
@@ -107,9 +95,9 @@ class DefaultBotRightWidget(QWidget):
 import pyqtgraph.opengl as gl
 import numpy as np
 
-class Surface3DWidget(QWidget):
+class Surface3DWidget(ModuleWidget):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)

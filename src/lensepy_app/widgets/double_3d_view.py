@@ -12,21 +12,19 @@ Creation : april/2025
 import sys, os
 import time
 import numpy as np
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QWidget
 from PyQt6.QtCore import Qt, QTimer
 import pyqtgraph.opengl as gl
-import pyqtgraph as pg
-import pyqtgraph.exporters
-from OpenGL.GL import glClearColor
 from PyQt6.QtGui import QTransform
 
 
-class Surface3DView(QWidget):
-    def __init__(self, title=''):
-        super().__init__()
+class Surface3DView(ModuleWidget):
+    def __init__(self, title='', parent=None ):
+        super().__init__(parent=parent)
         # Graphical structure
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
@@ -99,7 +97,7 @@ class Surface3DView(QWidget):
         :param name2: Title of the second graphic.
         """
         self.label1.setText(name1)
-        self.label1.setStyleSheet(styleH2)
+        self.label1.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
 
     def create_mesh_surface(self, x, y, Z1):
         """Crée une surface maillée avec une colormap."""
@@ -185,9 +183,9 @@ class Surface3DView(QWidget):
         image.save(filename)
 
 
-class DoubleGraph3DView(QWidget):
-    def __init__(self):
-        super().__init__()
+class DoubleGraph3DView(ModuleWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
         # Graphical structure
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
@@ -288,9 +286,9 @@ class DoubleGraph3DView(QWidget):
         :param name2: Title of the second graphic.
         """
         self.label1.setText(name1)
-        self.label1.setStyleSheet(styleH2)
+        self.label1.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.label2.setText(name2)
-        self.label2.setStyleSheet(styleH2)
+        self.label2.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
 
     def create_mesh_surface(self, x, y, Z1, Z2):
         """Crée une surface maillée avec une colormap."""

@@ -10,12 +10,10 @@ Creation : march/2025
 """
 import sys, os, time
 from lensepy import load_dictionary, translate, dictionary, is_float
-from lensepy.css import *
-from lensepy_app.widgets import make_hline
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.widgets.widget_editline import LineEditView
-from lensepy_app.appli._app.main_view import get_disp_mode
 from lensepy.images.conversion import resize_image_ratio
-from lensepy_app.utils import array_to_qimage
 from PyQt6.QtWidgets import (
     QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
     QVBoxLayout,
@@ -25,7 +23,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
 from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent, QResizeEvent, QFont
 
-class InterferControlView(QWidget):
+class InterferControlView(ModuleWidget):
     """Images Choice."""
 
     analyses_changed = pyqtSignal(str)
@@ -35,15 +33,13 @@ class InterferControlView(QWidget):
         """Default constructor of the class.
         :param parent: Parent widget or window of this widget.
         """
-        super().__init__()
-        self.controller = parent
+        super().__init__(parent=parent)
         self.tilt_on = False
-        #self.data_set = self.controller.data_set
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
         self.label_analyses_options = QLabel(translate("label_analyses_options"))
-        self.label_analyses_options.setStyleSheet(styleH1)
+        self.label_analyses_options.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
         self.label_analyses_options.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_analyses_options)
 
@@ -53,14 +49,14 @@ class InterferControlView(QWidget):
 
         # PV/RMS displayed (for uncorrected phase)
         self.label_pv_rms_uncorrected = QLabel(translate('label_pv_rms_uncorrected'))
-        self.label_pv_rms_uncorrected.setStyleSheet(styleH2)
-        self.pv_rms_uncorrected = PVRMSView()
+        self.label_pv_rms_uncorrected.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
+        self.pv_rms_uncorrected = PVRMSView(parent=self.controller)
 
         ## Only when corrected button in analyses is clicked.
         # PV/RMS displayed (for corrected phase)
         self.label_pv_rms_corrected = QLabel(translate('label_pv_rms_corrected'))
-        self.label_pv_rms_corrected.setStyleSheet(styleH2)
-        self.pv_rms_corrected = PVRMSView()
+        self.label_pv_rms_corrected.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
+        self.pv_rms_corrected = PVRMSView(parent=self.controller)
 
         # Add graphical elements to the layout.
         self.layout.addWidget(self.wedge_edit)
@@ -138,16 +134,16 @@ class InterferControlView(QWidget):
         self.pv_rms_corrected.erase_pv_rms()
 
 
-class PVRMSView(QWidget):
+class PVRMSView(ModuleWidget):
     """
     Class to display PV (Peak-to-Valley) and RMS value of a wavefront.
     """
 
-    def __init__(self, size=''):
+    def __init__(self, size='', parent=None):
         """
         Default constructor.
         """
-        super().__init__()
+        super().__init__(parent=parent)
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
 
@@ -184,10 +180,10 @@ class PVRMSView(QWidget):
         self.rms_label.set_value('', '')
 
 
-class LabelWidget(QWidget):
+class LabelWidget(ModuleWidget):
 
     def __init__(self, title='', value='', unit='', parent=None, size=''):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         if size == '':
             style_L = styleL
@@ -220,16 +216,14 @@ class LabelWidget(QWidget):
         self.unit.setText(unit)
 
 
-class SurfaceChoiceView(QWidget):
+class SurfaceChoiceView(ModuleWidget):
 
     surface_selected = pyqtSignal(str)
     tilt_changed = pyqtSignal(bool)
     view_saved = pyqtSignal(str)
 
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent # controller
-        self.general_display_mode = get_disp_mode(self.parent)
+        super().__init__(parent=parent)
         # Graphical objects
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -237,46 +231,46 @@ class SurfaceChoiceView(QWidget):
         ## Title of the widget
         layout.addWidget(make_hline())
         self.label_interfer_options = QLabel(translate("surface_choice_interfer"))
-        self.label_interfer_options.setStyleSheet(STYLE_H1[self.general_display_mode])
+        self.label_interfer_options.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
         self.label_interfer_options.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.label_interfer_options)
         layout.addWidget(make_hline())
 
         self.unwrap_2D_button = QPushButton(translate('2D_unwrap_button'))
-        self.unwrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
-        self.unwrap_2D_button.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
+        self.unwrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.unwrap_2D_button.setFixedHeight(BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.unwrap_2D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.unwrap_2D_button)
 
         self.unwrap_3D_button = QPushButton(translate('3D_unwrap_button'))
-        self.unwrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
-        self.unwrap_3D_button.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
+        self.unwrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.unwrap_3D_button.setFixedHeight(BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.unwrap_3D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.unwrap_3D_button)
         layout.addStretch()
         self.tilt_check = QCheckBox(translate('tilt_check_box'))
-        self.tilt_check.setStyleSheet(STYLE_H3[self.general_display_mode])
+        self.tilt_check.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         layout.addWidget(self.tilt_check)
         layout.addStretch()
 
         layout.addWidget(make_hline())
         self.wrap_2D_button = QPushButton(translate('2D_wrap_button'))
-        self.wrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
-        self.wrap_2D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
+        self.wrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.wrap_2D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.wrap_2D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.wrap_2D_button)
 
         self.wrap_3D_button = QPushButton(translate('3D_wrap_button'))
-        self.wrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
-        self.wrap_3D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
+        self.wrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.wrap_3D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.wrap_3D_button.clicked.connect(self.handle_selected)
         layout.addWidget(self.wrap_3D_button)
         layout.addWidget(make_hline())
         layout.addStretch()
 
         self.save_button = QPushButton(translate('save_current_view'))
-        self.save_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
-        self.save_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.general_display_mode])
+        self.save_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.save_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.save_button.clicked.connect(self.handle_saved)
         layout.addWidget(self.save_button)
         layout.addWidget(make_hline())
@@ -313,10 +307,10 @@ class SurfaceChoiceView(QWidget):
 
     def inactivate_buttons(self):
         """Inactivate all the buttons."""
-        self.wrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
-        self.unwrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
-        self.wrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
-        self.unwrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.general_display_mode])
+        self.wrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.unwrap_2D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.wrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.unwrap_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def handle_selected(self):
         """Action performed when 2D unwrapped surface is selected."""
@@ -325,16 +319,16 @@ class SurfaceChoiceView(QWidget):
         # Send signal to display selected surface
         sender = self.sender()
         if sender == self.unwrap_2D_button:
-            self.unwrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+            self.unwrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
             self.surface_selected.emit('2D_unwrap')
         elif sender == self.wrap_2D_button:
-            self.wrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+            self.wrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
             self.surface_selected.emit('2D_wrap')
         elif sender == self.unwrap_3D_button:
-            self.unwrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+            self.unwrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
             self.surface_selected.emit('3D_unwrap')
         elif sender == self.wrap_3D_button:
-            self.wrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+            self.wrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
             self.surface_selected.emit('3D_wrap')
 
     def activate_button(self, value):
@@ -342,14 +336,14 @@ class SurfaceChoiceView(QWidget):
         self.inactivate_buttons()
         if value_split[0] == '2D':
             if value_split[1] == 'wrap':
-                self.wrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+                self.wrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
             elif value_split[1] == 'unwrap':
-                self.unwrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+                self.unwrap_2D_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         elif value_split[0] == '3D':
             if value_split[1] == 'wrap':
-                self.wrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+                self.wrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
             elif value_split[1] == 'unwrap':
-                self.unwrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.general_display_mode])
+                self.unwrap_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
 
 def main():

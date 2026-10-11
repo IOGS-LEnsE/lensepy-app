@@ -7,8 +7,8 @@ Creation : march/2025
 """
 import sys, os, time
 from lensepy import load_dictionary, translate, dictionary, is_float
-from lensepy.css import *
-from lensepy_app import make_hline
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.widgets.objects import *
 from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
 from lensepy_app.appli._app.main_view import get_disp_mode
@@ -27,9 +27,9 @@ import numpy as np
 
 BUTTON_WIDTH = 50
 
-class TwoChartWidget(QWidget):
+class TwoChartWidget(ModuleWidget):
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         self.chart_1 = XYChartWidget()
         self.chart_2 = XYChartWidget()
         layout = QVBoxLayout()
@@ -63,7 +63,7 @@ class TwoChartWidget(QWidget):
         self.chart_1.refresh_chart()
         self.chart_2.refresh_chart()
 
-class SimulationChoiceView(QWidget):
+class SimulationChoiceView(ModuleWidget):
     """Images Choice."""
 
     display_changed = pyqtSignal(str)
@@ -74,10 +74,8 @@ class SimulationChoiceView(QWidget):
         """Default constructor of the class.
         :param parent: Parent widget or window of this widget.
         """
-        super().__init__()
-        self.controller = parent
+        super().__init__(parent=parent)
         self.tilt_on = False
-        #self.data_set = self.controller.data_set
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
@@ -89,11 +87,11 @@ class SimulationChoiceView(QWidget):
         # PV/RMS displayed (for uncorrected phase)
         self.label_pv_rms_uncorrected = QLabel(translate('label_pv_rms_uncorrected'))
         self.label_pv_rms_uncorrected.setStyleSheet(styleH3)
-        self.pv_rms_uncorrected = PVRMSView()
+        self.pv_rms_uncorrected = PVRMSView(parent=self.controller)
         # PV/RMS displayed (for corrected phase)
         self.label_pv_rms_corrected = QLabel(translate('label_pv_rms_uncorrected'))
         self.label_pv_rms_corrected.setStyleSheet(styleH3)
-        self.pv_rms_corrected = PVRMSView()
+        self.pv_rms_corrected = PVRMSView(parent=self.controller)
 
         # Add graphical elements to the layout.
         self.layout.addWidget(make_hline())

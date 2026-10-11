@@ -142,7 +142,7 @@ class CoefficientsView(ModuleWidget):
         # PV/RMS displayed (for uncorrected phase)
         self.label_pv_rms = QLabel(translate('label_pv_rms_uncorrected'))
         self.label_pv_rms.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
-        self.pv_rms = PVRMSView(size)
+        self.pv_rms = PVRMSView(size, parent=self.controller)
         results_layout.addWidget(self.label_pv_rms)
         results_layout.addWidget(self.pv_rms)
         self.strehl_ratio = LabelWidget(translate('strehl_ratio'), size=size)

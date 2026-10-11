@@ -8,6 +8,8 @@
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>%USERPROFILE%\Documents</img_dir>
     <mode>LITE</mode>
+    <theme>BLACK</theme>
+    <open_gl>1</open_gl>
     <contributors>
         <contributor type="main_dev">
             <name>Julien VILLEMEJANE</name>

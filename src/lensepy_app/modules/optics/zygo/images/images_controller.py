@@ -28,10 +28,10 @@ class ZygoImagesController(TemplateController):
         self.mask_displayed = 0
 
         # Graphical layout
-        self.top_left = ImageDisplayWidget()
+        self.top_left = ImageDisplayWidget(self)
         self.bot_left = ImagesChoiceView(self)
         self.bot_right = ImagesOpeningWidget(self)
-        self.top_right = ImageDisplayWidget()
+        self.top_right = ImageDisplayWidget(self)
 
         # Setup widgets
 
@@ -73,7 +73,6 @@ class ZygoImagesController(TemplateController):
 
     def handle_saving_mat(self, filepath):
         """Save data to a MAT file."""
-        print('SAVE MAT - TO DO')
         self.data_set.save_file(filepath)
 
     def handle_image_opened(self, filepath):

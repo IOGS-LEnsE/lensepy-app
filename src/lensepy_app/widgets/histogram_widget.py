@@ -51,13 +51,15 @@ from PyQt6.QtWidgets import (QVBoxLayout, QWidget, QHBoxLayout, QCheckBox,
                              QSizePolicy, QLabel)
 import pyqtgraph as pg
 from lensepy import translate
+from lensepy_app import *
+from lensepy_app.appli import *
 
 from lensepy.utils.images import resize_image_ratio
 
-class HistogramSimpleWidget(QWidget):
+class HistogramSimpleWidget(ModuleWidget):
     """Simple Histogram display from data. Auto zoom."""
     def __init__(self, title="Histogramme", parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         # Layout vertical
         self.layout = QVBoxLayout(self)
@@ -100,10 +102,10 @@ class HistogramSimpleWidget(QWidget):
         self.plot_widget.setBackground(color)
 
 
-class HistogramWidget(QWidget):
+class HistogramWidget(ModuleWidget):
     """Histogram of an image."""
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         self.image = None
         self.bits_depth = 8
@@ -279,7 +281,7 @@ class HistogramWidget(QWidget):
                 self.plot.addItem(self.bar_l)
 
 
-class HistoStatsWidget(QWidget):
+class HistoStatsWidget(ModuleWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.histo_zoom = False

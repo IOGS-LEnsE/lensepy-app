@@ -55,7 +55,7 @@ class ImagesOpeningWidget(ModuleWidget):
     def handle_saving_png(self):
         file_dialog = QFileDialog()
         # default dir ?
-        default_dir = self.parent.get_config('img_dir') or None
+        default_dir = self.controller.get_config('img_dir') or None
         # dialog box
         file_path, _ = file_dialog.getSaveFileName(self, translate('dialog_save_png_image'),
                                                    default_dir, "Images (*.png)")
@@ -75,7 +75,7 @@ class ImagesOpeningWidget(ModuleWidget):
     def handle_saving_mat(self):
         file_dialog = QFileDialog()
         # default dir ?
-        default_dir = self.parent.get_config('img_dir') or None
+        default_dir = self.controller.get_config('img_dir') or None
         # dialog box
         file_path, _ = file_dialog.getSaveFileName(self, translate('dialog_save_png_image'),
                                                    default_dir, "MAT File (*.mat)")

@@ -45,10 +45,10 @@ class FyzoAnalysisController(TemplateController):
         self.view_3D = None
 
         # Widgets
-        self.top_left = Surface2DView()
+        self.top_left = Surface2DView(self)
         self.bot_left = QWidget()
-        self.bot_right = ImageDisplayWidget()
-        self.top_right = FyzoAnalysisOptionsView()
+        self.bot_right = ImageDisplayWidget(self)
+        self.top_right = FyzoAnalysisOptionsView(self)
         # Set Up widgets
         self.top_right.activate_mode(self.disp_mode)
         # Signals
@@ -157,7 +157,7 @@ class FyzoAnalysisController(TemplateController):
             self.replace_top_left_widget(self.view_2D)
             # TO UPDATE
         elif self.disp_mode == 'surface_3D':
-            self.view_3D = Surface3DView()
+            self.view_3D = Surface3DView(parent=self)
             self.replace_top_left_widget(self.view_3D)
             x, y, w_s = self.view_3D.prepare_data_for_mesh(self.surface, undersampling=1) # TO CHANGE
             self.view_3D.create_mesh_surface(x, y, w_s)
