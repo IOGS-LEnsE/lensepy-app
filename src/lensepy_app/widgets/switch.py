@@ -1,14 +1,15 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel
 from PyQt6.QtCore import Qt, QRectF, QPropertyAnimation, pyqtSignal
 from PyQt6.QtGui import QPainter, QColor, QBrush, QPen
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 
 
-class Switch(QWidget):
+class Switch(ModuleWidget):
     toggled = pyqtSignal(bool)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         self._checked = False
         self.setFixedSize(60, 30)
         self.animation = QPropertyAnimation(self, b"offset")
@@ -40,23 +41,23 @@ class Switch(QWidget):
         self.update()
 
 
-class SwitchWidget(QWidget):
+class SwitchWidget(ModuleWidget):
     toggled = pyqtSignal(bool)
 
     def __init__(self, left='', right='', parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         layout = QHBoxLayout()
         self.setLayout(layout)
         layout.addStretch()
         self.label_left = QLabel(left, self)
         self.label_left.setFixedWidth(50)
-        self.label_left.setStyleSheet(styleH2)
+        self.label_left.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         layout.addWidget(self.label_left)
         self.switch_button = Switch()
         layout.addWidget(self.switch_button)
         self.label_right = QLabel(right, self)
         self.label_right.setFixedWidth(50)
-        self.label_right.setStyleSheet(styleH2)
+        self.label_right.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         layout.addWidget(self.label_right)
         layout.addStretch()
 

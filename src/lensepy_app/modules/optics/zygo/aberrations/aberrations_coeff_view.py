@@ -24,7 +24,11 @@ coeff_order = [1, 1, 1, 1, 3, 3, 3, 3, 3, 5, 5,
                5, 5, 5, 5, 5, 7, 7, 7, 7, 7,
                7, 7, 7, 7, 9, 9, 9, 9, 9, 9,
                9, 9, 9, 9, 9, 11]
-coeff_colors = ['orange', 'lightblue', 'red', 'green', 'purple', 'magenta', 'black']
+coeff_colors = {
+    'WHITE': ['orange', 'lightblue', 'red', 'green', 'purple', 'magenta', 'black'],
+    'BLACK': ['orange', 'lightblue', '#e65054', '#00ba37', '#3582c4', 'magenta', 'black']
+}
+
 coeff_text_colors = ['black', 'black', 'white', 'white', 'white', 'white', 'white']
 
 class ZernikeCoeffBar(ModuleWidget):
@@ -59,6 +63,7 @@ class ZernikeCoeffBar(ModuleWidget):
         self.checkbox = QCheckBox(self)
         self.checkbox.setChecked(True)
         self.checkbox.checkStateChanged.connect(self.handle_correction)
+        self.checkbox.setStyleSheet(STYLE_CHECKBOX[self.global_theme][self.global_mode])
         layout.addWidget(self.checkbox, alignment=Qt.AlignmentFlag.AlignHCenter)
 
         self.setLayout(layout)
@@ -118,9 +123,11 @@ class CoefficientsView(ModuleWidget):
         options_layout.addWidget(self.label_zernike_coefficients)
         options_layout.addWidget(make_hline())
         self.tilt_button = QCheckBox(translate("tilt_button"))
+        self.tilt_button.setStyleSheet(STYLE_CHECKBOX[self.global_theme][self.global_mode])
         self.tilt_button.setMinimumWidth(100)
         self.tilt_button.stateChanged.connect(self.handle_tilt_changed)
         self.focus_button = QCheckBox(translate("focus_button"))
+        self.focus_button.setStyleSheet(STYLE_CHECKBOX[self.global_theme][self.global_mode])
         self.focus_button.setMinimumWidth(100)
         self.focus_button.stateChanged.connect(self.handle_focus_changed)
         options_layout.addWidget(self.tilt_button, 1)
@@ -172,9 +179,9 @@ class CoefficientsView(ModuleWidget):
         for k in range(self.number+1):
             gauge = ZernikeCoeffBar(parent=self.controller, title=f'C{k}',
                                     min_value=self.range[0], max_value=self.range[1], min_width=10)
-            color = coeff_colors[coeff_order[k]//2]
+            color = coeff_colors[self.global_theme][coeff_order[k]//2]
             t_color = coeff_text_colors[coeff_order[k] // 2]
-            gauge.set_colors('#FFFFFF', color)
+            gauge.set_colors(GAUGE_BG[self.global_theme], color)
             self.sliders.append(gauge)
             if k != 0:
                 gauge.correction_changed.connect(self.handle_correction_changed)
@@ -344,7 +351,7 @@ class CoefficientsValueView(ModuleWidget):
 
         cols = {}
         for k in range(self.number+1):
-            gauge = LabelValueWidget(title=f'C{k}', value='0', ratio=0.3,
+            gauge = LabelValueWidget(title=f'C{k}', value='0', ratio=0.3, parent=self.controller,
                                      tooltip=f'Coef {k} (order = {coeff_order[k]})')
             gauge.setMinimumWidth(width // 20)
             line = int(coeff_order[k]/2)
@@ -352,7 +359,7 @@ class CoefficientsValueView(ModuleWidget):
                 cols[line] += 1
             else:
                 cols[line] = 1
-            color = coeff_colors[coeff_order[k]//2]
+            color = coeff_colors[self.global_theme][coeff_order[k]//2]
             t_color = coeff_text_colors[coeff_order[k]//2]
             gauge.set_background_color(color, t_color)
             self.gauges.append(gauge)

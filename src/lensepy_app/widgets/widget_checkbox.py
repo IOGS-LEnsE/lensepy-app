@@ -11,18 +11,19 @@
 import sys
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QCheckBox
 from PyQt6.QtCore import Qt, pyqtSignal
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 
 
-class CheckBoxView(QWidget):
+class CheckBoxView(ModuleWidget):
 
     check_changed = pyqtSignal(str)
 
-    def __init__(self, signal_name: str, title: str = ''):
+    def __init__(self, signal_name: str, title: str = '', parent=None):
         """Default Constructor.
 
         """
-        super().__init__()
+        super().__init__(parent=parent)
         self.title = title
         self.signal_name = signal_name
         self.layout = QHBoxLayout()

@@ -5,7 +5,6 @@ Creation : oct/2026
 """
 import sys, os, time
 from lensepy import load_dictionary, translate, dictionary, is_float
-from lensepy.css import *
 from lensepy_app.widgets import Surface2DView
 from lensepy_app.widgets.objects import *
 from lensepy_app import make_hline
@@ -16,18 +15,18 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QApplication
 )
 from PyQt6.QtCore import pyqtSignal
+from lensepy_app import *
+from lensepy_app.appli import *
 
 
-class ParamsView(QWidget):
+class ParamsView(ModuleWidget):
 
     window_closed = pyqtSignal()
 
     def __init__(self, parent=None):
-        super(ParamsView, self).__init__(None)
-        self.parent = parent # controller
+        super().__init__(parent=parent)
         self.setWindowTitle(translate('params_window'))
         self.setMinimumWidth(300)
-        self.general_display_mode = get_disp_mode(self.parent)
         self.phase = None
         self.size_phase = 0
         self.padding_value = ['2', '4', '8', '16', '32']
@@ -44,7 +43,7 @@ class ParamsView(QWidget):
         f_number = '4'
         #self.parent.set_variables('f_number', f_number)
         self.f_number = LineEditWidget(title=translate('f_number_param'),
-                                       value = f_number)
+                                       value = f_number, parent=self.controller)
         # Wavelength
         '''
         w_length = self.parent.get_variables('wavelength') if self.parent.is_variable('wavelength') \
@@ -53,20 +52,22 @@ class ParamsView(QWidget):
         w_length = '632.8'
         #self.parent.set_variables('wavelength', w_length)
         self.wavelength = LineEditWidget(title=translate('wavelength_param'),
-                                         value=w_length, units='nm')
+                                         value=w_length, units='nm', parent=self.controller)
 
         ## PSF Padding for FFT
         self.padding_selector = ComboBoxBloc(translate('padding_selector'),
                                               self.padding_value,
-                                              parent=self.parent,
+                                              parent=self.controller,
                                               current=self.padding_selection-1,
                                               default=False)
         self.label_phase_size = LabelValueWidget(translate('label_phase_size'),
-                                                   'OK', unit='pixels')
+                                                 'OK', unit='pixels',
+                                                 parent=self.controller)
         self.label_padding_size = LabelValueWidget(translate('label_padding_size'),
-                                                   'OK', unit='pixels')
+                                                   'OK', unit='pixels',
+                                                   parent=self.controller)
         # Lambda / nm
-        self.switch_scale = SwitchWidget('\u03BB', 'nm')
+        self.switch_scale = SwitchWidget('\u03BB', 'nm', parent=self.controller)
 
         # Global layout
         layout.addWidget(self.f_number)

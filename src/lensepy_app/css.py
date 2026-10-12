@@ -1,7 +1,8 @@
 __all__ = [
     'LAMBDA', 'BLUE_IOGS', 'ORANGE_IOGS',
     'STYLE_H1', 'STYLE_H2', 'STYLE_H3', 'NO_STYLE',
-    'styleL', 'styleT', 'styleL_s', 'styleT_s', 'styleCheckbox',
+    'STYLE_CHECKBOX', 'GAUGE_BG', 'LABEL_BG',
+    'styleL', 'styleT', 'styleL_s', 'styleT_s',
     'INACTIVATED_BUTTON', 'ACTIVATED_BUTTON', 'DISABLED_BUTTON',
     'BUTTON_HEIGHT', 'OPTIONS_BUTTON_HEIGHT'
 ]
@@ -66,7 +67,83 @@ STYLE_T = {
     'LITE': f"font-size:10px; padding:2px; font-weight: bold; background-color: white;"
 }
 
+style_checkbox_white = ("""
+    QCheckBox {
+        spacing: 5px;
+        padding: 2px;
+    }
+    QCheckBox::indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        border: 1px solid lightgray;
+        background-color: lightgray;
+    }
+    QCheckBox::indicator:checked {
+        background-color: #FF960A;
+        border: 1px solid #FF960A;
+    }
+    QCheckBox::indicator:hover {
+        border: 1px solid #0A3250;
+    }
+    QCheckBox:disabled {
+        color: #727272;
+    }
+""")
+style_checkbox_black = ("""
+    QCheckBox {
+        color: white;
+        spacing: 5px;
+        padding: 2px;
+    }
+    QCheckBox::indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        border: 1px solid lightgray;
+        background-color: lightgray;
+    }
+    QCheckBox::indicator:checked {
+        background-color: #FF960A;
+        border: 1px solid #FF960A;
+    }
+    QCheckBox::indicator:hover {
+        border: 1px solid #0A3250;
+    }
+    QCheckBox:disabled {
+        color: #727272;
+    }
+""")
 
+GAUGE_BG = {
+    'WHITE': 'white',
+    'BLACK': '#1d2327',
+}
+LABEL_BG = {
+    'WHITE': 'white',
+    'BLACK': '#1d2327',
+}
+
+STYLE_CHECKBOX = {
+    'WHITE': {
+        'CLASSIC': style_checkbox_white,
+        'LITE': style_checkbox_white,
+    },
+    'BLACK': {
+        'CLASSIC': style_checkbox_black,
+        'LITE': style_checkbox_black,
+    }
+}
+STYLE_COMBOBOX = {
+    'WHITE': {
+        'CLASSIC': style_checkbox_white,
+        'LITE': style_checkbox_white,
+    },
+    'BLACK': {
+        'CLASSIC': style_checkbox_black,
+        'LITE': style_checkbox_black,
+    }
+}
 styleCheckbox = f"font-size: 14px; padding: 3px; color: {BLUE_IOGS}; font-weight: normal;"
 styleL = f"font-size:14px; padding:0px; color:{ORANGE_IOGS}; font-weight: bold;"
 styleT = f"font-size:14px; padding:5px; font-weight: bold; background-color: white;"
@@ -142,7 +219,7 @@ if __name__ == '__main__':
     import sys
     from PyQt6.QtWidgets import (
         QApplication,
-        QWidget, QLabel, QVBoxLayout, QPushButton,
+        QWidget, QLabel, QVBoxLayout, QPushButton, QCheckBox, QComboBox,
 )
     from PyQt6.QtCore import Qt
     from PyQt6.QtGui import QPalette, QColor
@@ -193,6 +270,23 @@ if __name__ == '__main__':
             self.button_activ.setFixedHeight(BUTTON_HEIGHT[theme][size])
             layout.addWidget(self.button_activ)
 
+            self.checkbox = QCheckBox('Checkbox')
+            self.checkbox.setStyleSheet(STYLE_CHECKBOX[theme][size])
+            layout.addWidget(self.checkbox)
+
+            self.checkboxD = QCheckBox('Checkbox Disabled')
+            self.checkboxD.setStyleSheet(STYLE_CHECKBOX[theme][size])
+            self.checkboxD.setEnabled(False)
+            layout.addWidget(self.checkboxD)
+
+            self.checkboxC = QCheckBox('Checkbox Checked')
+            self.checkboxC.setStyleSheet(STYLE_CHECKBOX[theme][size])
+            self.checkboxC.setChecked(True)
+            layout.addWidget(self.checkboxC)
+
+            self.combobox = QComboBox()
+            self.combobox.addItems(['Essai 1', 'Essai 2'])
+            layout.addWidget(self.combobox)
 
     app = QApplication(sys.argv)
     widget = MainWindow(theme='WHITE')

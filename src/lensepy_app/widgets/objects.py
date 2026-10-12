@@ -23,7 +23,8 @@ from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QComboBox,
     QVBoxLayout, QLineEdit, QSlider, QProgressBar,
     QSizePolicy, QFrame, QMessageBox, QToolTip)
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 
 
 def message_box(warning="Warning - No File Loaded", text=""):
@@ -416,23 +417,22 @@ class SliderBlocVertical(QWidget):
         return max(vmin, min(vmax, val))
 
 
-class LineEditWidget(QWidget):
+class LineEditWidget(ModuleWidget):
     """
     Widget for line edit, including a title.
     """
     edit_changed = pyqtSignal(str)
 
     def __init__(self, title:str='', value='', units='', parent=None):
-        super().__init__(None)
+        super().__init__(parent=parent)
         layout = QHBoxLayout()
-        self.general_disp_mode, self.general_theme = get_disp_mode(parent)
         self.setLayout(layout)
         self.value = value
         self.units = units
 
         # Label
         self.label = QLabel(title)
-        self.label.setStyleSheet(STYLE_H2[self.general_disp_mode])
+        self.label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         layout.addWidget(self.label, 1)
         # Line Edit
         self.line_edit = QLineEdit()
@@ -901,7 +901,7 @@ class LabelWidget(QWidget):
         self.setStyleSheet(f'background-color: {bg_color}')
 
 
-class LabelValueWidget(QWidget):
+class LabelValueWidget(ModuleWidget):
 
     def __init__(self, title='', value='', unit='', parent=None,
                  size='', ratio=0.5, tooltip=''):
@@ -913,17 +913,17 @@ class LabelValueWidget(QWidget):
         :param ratio: ratio between label and value
         :param tooltip: tooltip to display
         """
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         layout = QHBoxLayout()
-        self.general_display_mode, self.general_theme = get_disp_mode(parent)
         self.label = QLabel(title)
-        self.label.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.text = QLabel(value)
-        self.text.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.text.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.unit = QLabel(unit)
-        self.text.setStyleSheet(f'background-color: white')
+        print(f'BG = {LABEL_BG[self.global_theme]}')
+        self.text.setStyleSheet(f'background-color: {LABEL_BG[self.global_theme]}')
         layout.addWidget(self.label, int(ratio*100))
         layout.addWidget(self.text, int((1-ratio)*100))
         if unit != '':
