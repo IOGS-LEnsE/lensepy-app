@@ -204,6 +204,8 @@ class ZygoAberrationsController(TemplateController):
         image1 = self.data_set.get_image_from_set(1, 1)
         mask = self.data_set.get_global_mask()  # TO CHANGE WITH AUTO MASK
         self.top_left.set_surface(image1 * mask)
+        # Display wavefront
+        self.bot_left.set_surface(results['surface'])
 
         ## Zernike Coefficients
         coeffs = self.zernike_coeffs.get_coeffs()

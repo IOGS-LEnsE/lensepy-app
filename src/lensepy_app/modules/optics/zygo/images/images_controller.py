@@ -10,6 +10,8 @@ from lensepy_app.appli._app.template_controller import TemplateController
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget
 from lensepy.optics.zygo.utils import generate_images_grid
 from lensepy.optics.zygo.dataset import DataSet
+from lensepy_app import *
+
 
 class ZygoImagesController(TemplateController):
     """
@@ -22,16 +24,16 @@ class ZygoImagesController(TemplateController):
         """
 
         """
-        super().__init__(parent)
+        super().__init__(parent=parent)
         self.manager = parent
         self.name = 'ZygoImagesController'
         self.mask_displayed = 0
-
+        theme = self.manager.controller.get_config('global_theme')
         # Graphical layout
-        self.top_left = ImageDisplayWidget(self)
+        self.top_left = ImageDisplayWidget(self, bg_color=IMAGE_BG[theme])
         self.bot_left = ImagesChoiceView(self)
         self.bot_right = ImagesOpeningWidget(self)
-        self.top_right = ImageDisplayWidget(self)
+        self.top_right = ImageDisplayWidget(self, bg_color=IMAGE_BG[theme])
 
         # Setup widgets
 
