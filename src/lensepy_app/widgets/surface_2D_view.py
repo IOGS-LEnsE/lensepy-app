@@ -22,9 +22,8 @@ from PyQt6.QtCore import Qt
 import pyqtgraph as pg
 import pyqtgraph.exporters
 from pyqtgraph.Qt import QtWidgets
-from pyqtgraph import ColorMap
-from matplotlib import colormaps as cm
-from matplotlib import pyplot as plt
+from lensepy_app import *
+from lensepy_app.appli import *
 
 pg.setConfigOptions(imageAxisOrder='row-major')
 
@@ -38,18 +37,19 @@ class ColoredAxis(pg.AxisItem):
         return [f'<span style="color:{self.font_color}; font-size:{self.font_size}pt">{v:g}</span>' for v in values]
 
 
-class Surface2DView(QWidget):
+class Surface2DView(ModuleWidget):
     """
     Class Surface 2D allowing to display a 2D array in a widget.
     """
 
-    def __init__(self, title: str='', colormap_2D='cividis', adapt_size=14):
+    def __init__(self, title: str='', colormap_2D='cividis',
+                 adapt_size=14, parent=None):
         """
         Default constructor.
         :param title: Title of the image to display.
         :param colormap_2D: Colormap to use in the 2D display
         """
-        super().__init__()
+        super().__init__(parent=parent)
         # Data
         self.array_2D = np.random.rand(20, 20)
         self.title = title
@@ -61,7 +61,7 @@ class Surface2DView(QWidget):
         layout = QHBoxLayout()
         self.setLayout(layout)
         self.plot = pg.PlotWidget()
-        self.plot.setBackground('lightgray')
+        self.plot.setBackground(IMAGE_BG[self.global_theme])
         self.plot.invertY(True)
         self.color_bar = None
         layout.addWidget(self.plot)
@@ -96,7 +96,8 @@ class Surface2DView(QWidget):
         self.plot.setAspectLocked(True)
         pen = QPen(QColor('black'))
         pg_cmap = pg.colormap.getFromMatplotlib(self.colormap_2D)
-        self.color_bar = self.plot.addColorBar(self.imv, colorMap=pg_cmap, interactive=False, pen=pen)
+        self.color_bar = self.plot.addColorBar(self.imv, colorMap=pg_cmap,
+                                               interactive=False, pen=pen)
         self.imv.setColorMap(pg_cmap)
         self.plot.setMouseEnabled(x=False, y=False)
         self.plot.hideButtons()

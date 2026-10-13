@@ -18,7 +18,7 @@ class TemplateController(QObject):
 
         """
         super().__init__(None)
-        self.parent = parent   # MainManager
+        self.manager = parent   # MainManager
         self.top_left = QWidget()
         self.top_right = QWidget()
         self.bot_left = QWidget()
@@ -27,65 +27,65 @@ class TemplateController(QObject):
         self.destroyed.connect(self.on_destroy)
 
     def init_view(self):
-        if self.parent.main_window.top_left_container is not None:
-            self.parent.main_window.top_left_container.deleteLater()
-        if self.parent.main_window.top_right_container is not None:
-            self.parent.main_window.top_right_container.deleteLater()
-        if self.parent.main_window.bot_left_container is not None:
-            self.parent.main_window.bot_left_container.deleteLater()
-        if self.parent.main_window.bot_right_container is not None:
-            self.parent.main_window.bot_right_container.deleteLater()
-        if self.parent.main_window.bot_zernike_container is not None:
-            self.parent.main_window.bot_zernike_container.deleteLater()
+        if self.manager.main_window.top_left_container is not None:
+            self.manager.main_window.top_left_container.deleteLater()
+        if self.manager.main_window.top_right_container is not None:
+            self.manager.main_window.top_right_container.deleteLater()
+        if self.manager.main_window.bot_left_container is not None:
+            self.manager.main_window.bot_left_container.deleteLater()
+        if self.manager.main_window.bot_right_container is not None:
+            self.manager.main_window.bot_right_container.deleteLater()
+        if self.manager.main_window.bot_zernike_container is not None:
+            self.manager.main_window.bot_zernike_container.deleteLater()
         # Update new containers
-        self.parent.main_window.top_left_container = self.top_left
-        self.parent.main_window.bot_left_container = self.bot_left
-        self.parent.main_window.top_right_container = self.top_right
-        self.parent.main_window.bot_right_container = self.bot_right
-        self.parent.main_window.bot_zernike_container = self.bot_zernike
+        self.manager.main_window.top_left_container = self.top_left
+        self.manager.main_window.bot_left_container = self.bot_left
+        self.manager.main_window.top_right_container = self.top_right
+        self.manager.main_window.bot_right_container = self.bot_right
+        self.manager.main_window.bot_zernike_container = self.bot_zernike
         self.update_view()
 
     def update_view(self):
         # Display mode value in XML
-        mode = self.parent.xml_module.get_parameter_xml('display')
+        mode = self.manager.xml_module.get_parameter_xml('display')
         if mode == 'MODE2':
-            self.parent.main_window.set_mode2()
+            self.manager.main_window.set_mode2()
         elif mode == 'MODE1':
-            self.parent.main_window.set_mode1()
+            self.manager.main_window.set_mode1()
         elif mode == 'ZERNIKE':
-            self.parent.main_window.set_mode_zernike()
+            self.manager.main_window.set_mode_zernike()
         else:
-            self.parent.main_window.set_mode3()
+            self.manager.main_window.set_mode3()
         # Update display mode
-        self.parent.main_window.update_containers()
+        self.manager.main_window.update_containers()
 
     def update(self):
-        self.parent.main_window.repaint()
+        self.manager.main_window.repaint()
         QApplication.processEvents()
 
     def _replace_top_left_widget(self, new_widget):
         self.top_left = new_widget
-        self.parent.main_window.top_left_container = self.top_left
+        self.manager.main_window.top_left_container = self.top_left
         self.update_view()
 
     def _replace_bot_left_widget(self, new_widget):
         self.bot_left = new_widget
-        self.parent.main_window.bot_left_container = self.bot_left
+        self.manager.main_window.bot_left_container = self.bot_left
         self.update_view()
 
     def _replace_top_right_widget(self, new_widget):
         self.top_right = new_widget
-        self.parent.main_window.top_right_container = self.top_right
+        self.manager.main_window.top_right_container = self.top_right
         self.update_view()
 
     def _replace_bot_right_widget(self, new_widget):
         self.bot_right = new_widget
-        self.parent.main_window.bot_right_container = self.bot_right
+        self.manager.main_window.bot_right_container = self.bot_right
         self.update_view()
 
     def _replace_zernike_widget(self, new_widget):
         self.bot_zernike = new_widget
-        self.parent.main_window.bot_zernike_container = self.bot_zernike
+        self.manager.main_window.bot_zernike_container = self.bot_zernike
         self.update_view()
 
     def handle_controller(self, event):
@@ -101,31 +101,31 @@ class TemplateController(QObject):
         :return:
         """
         if index == '':
-            return self.parent.get_variables()
+            return self.manager.get_variables()
         else:
-            return self.parent.get_variable(index)
+            return self.manager.get_variable(index)
 
     def is_variable(self, var_name):
         """
         Check if variable name exists.
         """
-        return var_name in self.parent.variables
+        return var_name in self.manager.variables
 
     def set_variables(self, var_name, value):
         """Update a variable in the variables' dictionary.
         :param var_name:    Key of the variable.
         :param value:       Value of the variable.
         """
-        self.parent.variables[var_name] = value
+        self.manager.variables[var_name] = value
 
     def get_config(self, name=''):
         """Return the config dictionary from the main manager."""
-        return self.parent.get_config(name)
+        return self.manager.get_config(name)
 
     def get_initial_params(self, name=''):
         """Return the initial value of the parameters from
         the main manager init_params dictionary."""
-        return self.parent.get_initial_params(name)
+        return self.manager.get_initial_params(name)
 
     def _get_image_dir(self, filepath):
         if filepath is None:

@@ -1,10 +1,12 @@
 import numpy as np
+from lensepy_app import *
+from lensepy_app.appli import *
 
 from PyQt6.QtWidgets import QApplication, QWidget, QGridLayout
 import pyqtgraph as pg
 
 
-class ImageCrossSections(QWidget):
+class ImageCrossSections(ModuleWidget):
     """
     Widget PyQtGraph affichant :
 
@@ -29,7 +31,7 @@ class ImageCrossSections(QWidget):
     """
 
     def __init__(self, data=None, cmap="viridis", parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         self.data = None
 
@@ -54,7 +56,7 @@ class ImageCrossSections(QWidget):
 
         # X slice
         self.plot_x = pg.PlotWidget()
-        self.plot_x.setBackground("k")
+        self.plot_x.setBackground(IMAGE_BG[self.global_theme])
         self.plot_x.showGrid(x=True, y=True, alpha=0.15)
         self.plot_x.setLabel("bottom", "X")
         self.plot_x.setLabel("left", "Value")
@@ -64,7 +66,7 @@ class ImageCrossSections(QWidget):
 
         # Y slice
         self.plot_y = pg.PlotWidget()
-        self.plot_y.setBackground("k")
+        self.plot_y.setBackground(IMAGE_BG[self.global_theme])
         self.plot_y.showGrid(x=True, y=True, alpha=0.15)
         self.plot_y.setLabel("bottom", "Value")
         self.plot_y.setLabel("left", "Y")
@@ -74,7 +76,7 @@ class ImageCrossSections(QWidget):
 
         # Image plot
         self.plot_image = pg.PlotWidget()
-        self.plot_image.setBackground("k")
+        self.plot_image.setBackground(IMAGE_BG[self.global_theme])
         self.plot_image.showGrid(x=False, y=False, alpha=0.15)
         self.plot_image.setLabel("bottom", "X")
         self.plot_image.setLabel("left", "Y")
@@ -121,7 +123,9 @@ class ImageCrossSections(QWidget):
 
     @staticmethod
     def _get_colormap(cmap):
+        print(f'CMAP = {cmap}')
         if isinstance(cmap, pg.ColorMap):
+            print(f'CMAP OK')
             return cmap
         # Colormaps PyQtGraph intégrées
         try:

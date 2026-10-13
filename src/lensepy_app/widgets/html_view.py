@@ -9,8 +9,9 @@
 Creation : march/2025
 """
 import sys, os
+
+from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
-    QWidget, QTextEdit,
     QHBoxLayout
 )
 from PyQt6.QtCore import Qt, QUrl
@@ -35,11 +36,16 @@ class HTMLView(ModuleWidget):
         super().__init__(parent=parent)
         self.url = url
         self.view = QWebEngineView()
+        self.view.setStyleSheet(f"background-color: {IMAGE_BG[self.global_theme]};")
+        self.view.page().setBackgroundColor(QColor(IMAGE_BG[self.global_theme]))
+
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.view)
         self.setLayout(self.layout)
         if url != '':
             self.set_url(self.url)
+
+        self.view.loadFinished.connect(self.on_load_finished)
 
     def set_url(self, url: str):
         """
@@ -79,6 +85,20 @@ class HTMLView(ModuleWidget):
 
                 self.html_page.setHtml(full_html_content)
         '''
+
+    def on_load_finished(self, ok):
+        if not ok:
+            return
+
+        self.view.page().runJavaScript("""
+            document.documentElement.style.setProperty(
+                'background-color', '#2b2b2b', 'important'
+            );
+    
+            document.body.style.setProperty(
+                'background-color', '#2b2b2b', 'important'
+            );
+        """)
 
 if __name__ == "__main__":
     from PyQt6.QtWidgets import QApplication

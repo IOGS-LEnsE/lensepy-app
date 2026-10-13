@@ -22,11 +22,12 @@ class DefaultController(TemplateController):
         """
 
         """
-        super().__init__(None)
+        super().__init__(parent=parent)
         self.parent = parent # main manager
+        theme = self.parent.get_config('global_theme')
         self.name = 'DefaultController'
         self.top_left = HTMLView(parent=self)
-        self.top_right = ImageDisplayWidget(self)
+        self.top_right = ImageDisplayWidget(self, bg_color=IMAGE_INTRO_BG[theme])
         self.bot_left = DefaultTopLeftWidget(self)
         self.bot_right = DefaultBotRightWidget(self)
         self.display()
@@ -45,6 +46,7 @@ class DefaultController(TemplateController):
             if config['img_desc'] is not None:
                 self.top_right.show()
                 image = cv2.imread(config['img_desc'])
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 self.top_right.set_image_from_array(image)
                 self.top_right.update()
         self.update_view()

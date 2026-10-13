@@ -41,21 +41,21 @@ Date   : 2025-10-09
 import numpy as np
 from PyQt6 import sip
 
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 from PyQt6.QtCore import Qt, QTimer, QRectF, pyqtSignal, QPointF
-from PyQt6.QtGui import QImage, QPixmap, QColor, QFont, QPainter, QPen
+from PyQt6.QtGui import QImage, QPixmap, QColor, QFont, QPainter, QPen, QBrush
 from PyQt6.QtWidgets import (
     QGraphicsScene, QGraphicsView,
     QVBoxLayout, QGraphicsTextItem, QWidget, QGraphicsLineItem, QGraphicsEllipseItem, QGraphicsRectItem
 )
 
 
-class ImageDisplayWidget(QWidget):
+class ImageDisplayWidget(ModuleWidget):
     """Widget d'affichage d'image depuis un array NumPy, avec ajustement automatique à la vue."""
 
     def __init__(self, parent=None, bg_color='white', zoom: bool = True):
-        super().__init__(None)
-        self.parent = parent
+        super().__init__(parent=parent)
         self.bits_depth = 8
         self.zoom = zoom
         self.pixmap_item = None
@@ -68,7 +68,8 @@ class ImageDisplayWidget(QWidget):
                                  QPainter.RenderHint.SmoothPixmapTransform)
         self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.scene.setBackgroundBrush(QColor(bg_color))
+        self.scene.setBackgroundBrush(QBrush(QColor(bg_color)))
+        self.view.setBackgroundBrush(QBrush(QColor(bg_color)))
 
         # Layout
         layout = QVBoxLayout(self)

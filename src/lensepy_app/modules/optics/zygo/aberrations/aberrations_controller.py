@@ -12,10 +12,10 @@ from lensepy_app.modules.optics.zygo.aberrations.aberrations_coeff_view import *
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_surface_view import *
 from lensepy.optics.zygo import *
 from lensepy.utils import downsample_array
-from lensepy_app import *
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_params_view import ParamsView
 from lensepy_app.widgets.image_cross_sections import *
 from .aberrations_models import *
+from lensepy_app import *
 
 
 class ZygoAberrationsController(TemplateController):
@@ -28,6 +28,7 @@ class ZygoAberrationsController(TemplateController):
 
         """
         super().__init__(parent)
+        self.manager = parent
         self.psf_processing = False
         self.psf_processed = False
         '''
@@ -37,13 +38,13 @@ class ZygoAberrationsController(TemplateController):
         data_set = DataSet()
         data_set.load_images_set_from_file(file_path)
         data_set.load_masks_from_file(file_path)
-        self.parent.variables['dataset'] = data_set
+        self.manager.variables['dataset'] = data_set
         '''
         END DELETE
         '''
 
         self.nb_coeff = nb_coeff
-        self.data_set : DataSet = self.parent.variables['dataset']
+        self.data_set : DataSet = self.manager.variables['dataset']
         self.number_of_repetition = 1
         self.phase = None
         self.zernike_coeffs = None
@@ -55,7 +56,7 @@ class ZygoAberrationsController(TemplateController):
         # Threads
         self.thread = QThread()
         self.worker = None
-        self.parent.variables['pad_factor'] = self.params_window.get_padding_value()
+        self.manager.variables['pad_factor'] = self.params_window.get_padding_value()
 
         # Graphical layout
         ### TO DO  - default colormap in default_parameters
@@ -70,10 +71,10 @@ class ZygoAberrationsController(TemplateController):
         self.coeffs_window.window_closed.connect(self.handle_coeffs_window_closed)
 
         # Start surface processing
-        if self.parent.variables['phase_results'] is None:
+        if self.manager.variables['phase_results'] is None:
             self.process_surface()
         else:
-            results = self.parent.variables['phase_results']
+            results = self.manager.variables['phase_results']
             self.display_results(results, first=False)
             self.process_PSF()
 
@@ -82,7 +83,7 @@ class ZygoAberrationsController(TemplateController):
 
     def process_surface(self):
         self.thread = QThread()
-        self.worker = ProcessDataWorker(self.parent, self.nb_coeff)
+        self.worker = ProcessDataWorker(self.manager, self.nb_coeff)
         # Déplacement du worker dans le thread
         self.worker.moveToThread(self.thread)
         # Démarrage du traitement
@@ -123,7 +124,7 @@ class ZygoAberrationsController(TemplateController):
     def process_PSF(self):
         self.psf_processing = True
         self.thread = QThread()
-        self.worker = ProcessPSFWorker(self.parent)
+        self.worker = ProcessPSFWorker(self.manager)
         # Déplacement du worker dans le thread
         self.worker.moveToThread(self.thread)
         # Démarrage du traitement
@@ -169,10 +170,10 @@ class ZygoAberrationsController(TemplateController):
         print(f'PSF step = {step}')
 
     def display_results(self, results, first=True):
-        self.parent.variables['phase_results'] = results
+        self.manager.variables['phase_results'] = results
         ## Update Local Variables / Results
         self.zernike_coeffs = results['zernike_coeffs']
-        self.params_window.set_phase(self.parent.variables['phase'])
+        self.params_window.set_phase(self.manager.variables['phase'])
 
         if first:
             self._replace_top_left_widget(SurfaceOptionsView())
@@ -183,7 +184,8 @@ class ZygoAberrationsController(TemplateController):
             self._replace_top_right_widget(QWidget())
             self._replace_zernike_widget(CoefficientsView(parent=self, number=self.nb_coeff))
         else:
-            self.top_left = Surface2DView(translate('interferogram'), colormap_2D='gray')
+            self.top_left = Surface2DView(translate('interferogram'),
+                                          colormap_2D='gray', parent=self)
             self.bot_left = Surface2D3DView(translate('unwrapped_surface'), parent=self,
                 colormap=self.colormap_2D)
             self.bot_zernike = CoefficientsView(parent=self, number=self.nb_coeff)
@@ -211,13 +213,13 @@ class ZygoAberrationsController(TemplateController):
 
     def display_results_psf(self, results):
         self.psf_processing = False
-        self.parent.variables['psf_results'] = results
+        self.manager.variables['psf_results'] = results
         ## Update Local Variables / Results
         self.psf = results['psf']
         ## Display
-        self._replace_top_right_widget(ImageCrossSections())
-        self.top_right.set_data(self.psf)
-        self.top_right.set_color_map(self.colormap_2D)
+        self._replace_top_right_widget(ImageCrossSections(parent=self, cmap='gray'))
+        self.top_right.set_data(np.log(self.psf+0.01))
+        self.top_right.set_color_map('gray')
         print('FINISHED')
 
     def init_view(self):
@@ -236,9 +238,9 @@ class ZygoAberrationsController(TemplateController):
         """
         if index == 'top':
             if value == translate('psf_and_slice'):
-                widget = ImageCrossSections()
+                widget = ImageCrossSections(parent=self, cmap='gray')
                 widget.set_data(self.psf)
-                widget.set_color_map(self.colormap_2D)
+                widget.set_color_map('gray')
                 self.top_right.deleteLater()
                 self._replace_top_right_widget(widget)
             else:
@@ -248,9 +250,9 @@ class ZygoAberrationsController(TemplateController):
 
         if index == 'bot':
             if value == translate('psf_and_slice'):
-                widget = ImageCrossSections()
+                widget = ImageCrossSections(parent=self, cmap='gray')
                 widget.set_data(self.psf)
-                widget.set_color_map(self.colormap_2D)
+                widget.set_color_map('gray')
                 self.bot_right.deleteLater()
                 self._replace_bot_right_widget(widget)
             else:
@@ -276,7 +278,7 @@ class ZygoAberrationsController(TemplateController):
         if isinstance(self.bot_zernike, CoefficientsView):
             self.bot_zernike.reactivate_params_button()
         # Restart process of PSF
-        print(f'New PAD = {self.parent.get_variable("pad_factor")}')
+        print(f'New PAD = {self.manager.get_variable("pad_factor")}')
 
 
     def handle_coeffs_windowed(self, value):
@@ -322,9 +324,9 @@ class ProcessDataWorker(Worker):
 
     def __init__(self, parent, nb_coeff):
         super().__init__()
-        self.parent = parent # Manager
+        self.manager = parent # Manager
         self.nb_coeff = nb_coeff
-        self.data_set = self.parent.variables['dataset']
+        self.data_set = self.manager.variables['dataset']
         self.phase = None
         self.surface, self.mask = None, None
         self.mask_center, self.mask_radius = None, None
@@ -354,11 +356,11 @@ class ProcessDataWorker(Worker):
         match index:
             case 1:
                 ## GET PHASE
-                if self.parent.variables['phase'] is None:
+                if self.manager.variables['phase'] is None:
                     self.phase = PhaseModel(data_set=self.data_set)
-                    self.parent.variables['phase'] = self.phase
+                    self.manager.variables['phase'] = self.phase
                 else:
-                    self.phase = self.parent.variables['phase']
+                    self.phase = self.manager.variables['phase']
                 return
             case 2:
                 ## PROCESS AUTO-MASK
@@ -383,13 +385,13 @@ class ProcessPSFWorker(Worker):
 
     def __init__(self, parent):
         super().__init__()
-        self.parent = parent # Manager
+        self.manager = parent
         self.phase = None
         self.surface, self.mask = None, None
         self.psf = None
         self.psf_perfect = None
         self.center_x = 0
-        self.pad_factor = self.parent.controller.get_variables('pad_factor')
+        self.pad_factor = self.manager.controller.get_variables('pad_factor')
         print(f'Padding = {self.pad_factor}')
 
     def run(self):
@@ -413,7 +415,7 @@ class ProcessPSFWorker(Worker):
         match index:
             case 1:
                 ## GET PHASE
-                self.phase = self.parent.variables['phase']
+                self.phase = self.manager.variables['phase']
                 surface, size_s = self.phase.get_surface()
                 mask = self.phase.get_mask()
                 ## PROCESS PSF

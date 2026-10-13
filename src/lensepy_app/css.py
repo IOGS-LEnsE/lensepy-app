@@ -1,7 +1,7 @@
 __all__ = [
     'LAMBDA', 'BLUE_IOGS', 'ORANGE_IOGS',
     'STYLE_H1', 'STYLE_H2', 'STYLE_H3', 'NO_STYLE',
-    'STYLE_CHECKBOX', 'GAUGE_BG', 'LABEL_BG',
+    'STYLE_CHECKBOX', 'GAUGE_BG', 'LABEL_BG', 'IMAGE_BG', 'IMAGE_INTRO_BG',
     'styleL', 'styleT', 'styleL_s', 'styleT_s',
     'INACTIVATED_BUTTON', 'ACTIVATED_BUTTON', 'DISABLED_BUTTON',
     'BUTTON_HEIGHT', 'OPTIONS_BUTTON_HEIGHT'
@@ -122,6 +122,14 @@ GAUGE_BG = {
 LABEL_BG = {
     'WHITE': 'white',
     'BLACK': '#1d2327',
+}
+IMAGE_BG = {
+    'WHITE': 'white',
+    'BLACK': '#1d2327',
+}
+IMAGE_INTRO_BG = {
+    'WHITE': 'white',
+    'BLACK': 'black',
 }
 
 STYLE_CHECKBOX = {
