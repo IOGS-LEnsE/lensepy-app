@@ -192,6 +192,12 @@ class CoefficientsView(ModuleWidget):
         self.sliders[0].setEnabled(False)
         self.update()
 
+    def set_enabled(self, value=True):
+        for gauge in self.sliders:
+            gauge.setEnabled(value)
+        self.tilt_button.setEnabled(value)
+        self.focus_button.setEnabled(value)
+
     def _update_checked(self):
         self.coeffs_correction = []
         # Update check boxes

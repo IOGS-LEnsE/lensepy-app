@@ -123,9 +123,7 @@ class ImageCrossSections(ModuleWidget):
 
     @staticmethod
     def _get_colormap(cmap):
-        print(f'CMAP = {cmap}')
         if isinstance(cmap, pg.ColorMap):
-            print(f'CMAP OK')
             return cmap
         # Colormaps PyQtGraph intégrées
         try:

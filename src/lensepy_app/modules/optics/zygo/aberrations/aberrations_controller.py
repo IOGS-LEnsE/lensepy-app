@@ -31,6 +31,7 @@ class ZygoAberrationsController(TemplateController):
         self.manager = parent
         self.psf_processing = False
         self.psf_processed = False
+        self.psf_update_pending = False
         '''
         TO DELETE
         '''
@@ -53,6 +54,7 @@ class ZygoAberrationsController(TemplateController):
         self.focus = False
         self.params_window = ParamsView(self)
         self.coeffs_window = CoefficientsValueView(self)
+        self.wavefront_disp = None
         # Threads
         self.thread = QThread()
         self.worker = None
@@ -80,6 +82,14 @@ class ZygoAberrationsController(TemplateController):
 
     def init_view(self):
         super().init_view()
+
+    def _start_psf_if_needed(self):
+        if self.psf_processing:
+            return
+        if not self.psf_update_pending:
+            return
+        self.psf_update_pending = False
+        self.process_PSF()
 
     def process_surface(self):
         self.thread = QThread()
@@ -122,6 +132,8 @@ class ZygoAberrationsController(TemplateController):
         self.thread.start()
 
     def process_PSF(self):
+        if self.psf_processing:
+            return
         self.psf_processing = True
         self.thread = QThread()
         self.worker = ProcessPSFWorker(self.manager)
@@ -130,42 +142,32 @@ class ZygoAberrationsController(TemplateController):
         # Démarrage du traitement
         self.thread.started.connect(self.worker.run)
         # Progression
-        self.worker.progress.connect(
-            self.update_progress_psf
-        )
+        self.worker.progress.connect(self.update_progress_psf)
         # End of processes
-        self.worker.finished.connect(
-            self.display_results_psf
-        )
+        self.worker.finished.connect(self.display_results_psf)
         # Errors management
-        self.worker.error.connect(
-            self.worker_calculation_error
-        )
+        self.worker.error.connect(self.worker_calculation_error)
         # Arrêt propre du thread
-        self.worker.finished.connect(
-            self.thread.quit
-        )
-        self.worker.error.connect(
-            self.thread.quit
-        )
-        self.worker.finished.connect(
-            self.worker.deleteLater
-        )
-        self.worker.error.connect(
-            self.worker.deleteLater
-        )
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.error.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.error.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self._on_psf_thread_finished)
         self.thread.finished.connect(
             self.thread.deleteLater
         )
         self.thread.start()
 
+    def _on_psf_thread_finished(self):
+        self.psf_processing = False
+        self._start_psf_if_needed()
+
     def update_progress(self, step):
         self.top_left.update_text(step)
 
     def update_progress_psf(self, step):
-        if step == 1:
-            self.top_left.set_visible('top')
         if step == 2:
+            self.top_left.set_visible('top')
             self.top_left.set_visible('bot')
         print(f'PSF step = {step}')
 
@@ -190,8 +192,8 @@ class ZygoAberrationsController(TemplateController):
                 colormap=self.colormap_2D)
             self.bot_zernike = CoefficientsView(parent=self, number=self.nb_coeff)
 
+        self.bot_zernike.set_enabled(False)
         # Signals
-        self.bot_zernike.correction_changed.connect(self.handle_correction_changed)
         self.bot_zernike.tilt_changed.connect(self.handle_tilt_changed)
         self.bot_zernike.focus_changed.connect(self.handle_focus_changed)
         self.bot_zernike.params_windowed.connect(self.handle_params_windowed)
@@ -218,9 +220,10 @@ class ZygoAberrationsController(TemplateController):
         self.psf = results['psf']
         ## Display
         self._replace_top_right_widget(ImageCrossSections(parent=self, cmap='gray'))
-        self.top_right.set_data(np.log(self.psf+0.01))
+        self.top_right.set_data(self.psf)
         self.top_right.set_color_map('gray')
-        print('FINISHED')
+        self.bot_zernike.set_enabled(True)
+        self.bot_zernike.correction_changed.connect(self.handle_correction_changed)
 
     def init_view(self):
         super().init_view()
@@ -231,6 +234,7 @@ class ZygoAberrationsController(TemplateController):
         :param value:
                 translate('psf_and_slice'),
                 translate('psf_only'),
+                translate('psf_log'),
                 translate('psf_slice'),
                 translate('ftm_and_slice'),
                 translate('ftm_only'),
@@ -240,6 +244,12 @@ class ZygoAberrationsController(TemplateController):
             if value == translate('psf_and_slice'):
                 widget = ImageCrossSections(parent=self, cmap='gray')
                 widget.set_data(self.psf)
+                widget.set_color_map('gray')
+                self.top_right.deleteLater()
+                self._replace_top_right_widget(widget)
+            elif value == translate('psf_log'):
+                widget = ImageCrossSections(parent=self, cmap='gray')
+                widget.set_data(np.log(self.psf+0.001))
                 widget.set_color_map('gray')
                 self.top_right.deleteLater()
                 self._replace_top_right_widget(widget)
@@ -255,12 +265,16 @@ class ZygoAberrationsController(TemplateController):
                 widget.set_color_map('gray')
                 self.bot_right.deleteLater()
                 self._replace_bot_right_widget(widget)
+            elif value == translate('psf_log'):
+                widget = ImageCrossSections(parent=self, cmap='gray')
+                widget.set_data(np.log(self.psf+0.001))
+                widget.set_color_map('gray')
+                self.bot_right.deleteLater()
+                self._replace_bot_right_widget(widget)
             else:
                 widget = QWidget()
                 self.bot_right.deleteLater()
                 self._replace_bot_right_widget(widget)
-
-        print(f'Index = {index}, value = {value}')
 
     def handle_tilt_changed(self, value):
         self.tilt = value
@@ -301,16 +315,25 @@ class ZygoAberrationsController(TemplateController):
 
         if coeffs is not None:
             _, corrected_phase = self.zernike_coeffs.process_surface_correction_by_coeff(coeffs)
-            self.bot_left.set_surface(corrected_phase)
-            pv, rms = process_statistics_surface(corrected_phase)
+            self.wavefront_disp = corrected_phase
         else:
             _, unwrapped_phase = self.zernike_coeffs.process_surface_correction_by_coeff(coeff_list)
-            self.bot_left.set_surface(unwrapped_phase)
-            pv, rms = process_statistics_surface(unwrapped_phase)
-        self.bot_zernike.set_pv_rms(pv, rms, units=LAMBDA)
+            self.wavefront_disp = unwrapped_phase
 
     def handle_correction_changed(self, coeffs):
+        # BLOCK INTERFACE - Especially PSF/FTM display
+        self.top_left.set_visible('top', value=False)
+        self.top_left.set_visible('bot', value=False)
+        self.bot_zernike.set_enabled(False)
+        # Process correction - new wavefront
         self._process_correction_coeff(coeffs)
+        # Display Wavefront
+        pv, rms = process_statistics_surface(self.wavefront_disp)
+        self.bot_left.set_surface(self.wavefront_disp)
+        self.bot_zernike.set_pv_rms(pv, rms, units=LAMBDA)
+        # Process new PSF
+        self.psf_update_pending = True
+        self._start_psf_if_needed()
 
     def handle_wavelength_changed(self, value):
         print(f'Value = {value}')
@@ -396,6 +419,7 @@ class ProcessPSFWorker(Worker):
 
     def run(self):
         try:
+            print(f'PSF Worker - RUNNING')
             for i in range(2):
                 self.process_step(i+1)
                 self.emit_progress(i+1)
@@ -406,6 +430,7 @@ class ProcessPSFWorker(Worker):
                 'psf': self.psf,
                 'psf_perfect': self.psf_perfect
             }
+            print(f'PSF Worker - STOPPING')
             self.finished.emit(results)
 
         except Exception as e:
@@ -415,8 +440,13 @@ class ProcessPSFWorker(Worker):
         match index:
             case 1:
                 ## GET PHASE
+                # Corrected phase :
+                wavefront = self.manager.controller.wavefront_disp
                 self.phase = self.manager.variables['phase']
-                surface, size_s = self.phase.get_surface()
+                if wavefront is not None:
+                    surface, size_s = wavefront, wavefront.shape[0]
+                else:
+                    surface, size_s = self.phase.get_surface()
                 mask = self.phase.get_mask()
                 ## PROCESS PSF
                 psf = PSFModel(wavefront=surface, mask=mask)

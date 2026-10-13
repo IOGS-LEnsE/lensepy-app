@@ -31,6 +31,7 @@ from urllib3.connection import VerifiedHTTPSConnection
 display_options_values = [
     translate('psf_and_slice'),
     translate('psf_only'),
+    translate('psf_log'),
     translate('psf_slice'),
     translate('ftm_and_slice'),
     translate('ftm_only'),
@@ -113,8 +114,8 @@ class SurfaceOptionsView(QWidget):
     def set_surface(self, surface):
         self.surface.set_array(surface)
 
-    def set_visible(self, index):
-        self.options.set_visible(index)
+    def set_visible(self, index, value=True):
+        self.options.set_visible(index, value)
 
     def handle_selection_changed(self, index, value):
         self.selection_changed.emit(index, value)
@@ -154,11 +155,18 @@ class OptionsView(QWidget):
         self.top_right_option.selection_changed.connect(self.handle_selection_changed)
         self.bot_right_option.selection_changed.connect(self.handle_selection_changed)
 
-    def set_visible(self, index):
-        if index == 'top':
-            self.top_right_option.show()
-        if index == 'bot':
-            self.bot_right_option.show()
+    def set_visible(self, index, value=True):
+        if value:
+            if index == 'top':
+                self.top_right_option.show()
+            if index == 'bot':
+                self.bot_right_option.show()
+        else:
+            if index == 'top':
+                self.top_right_option.hide()
+            if index == 'bot':
+                self.bot_right_option.hide()
+
 
     def handle_selection_changed(self):
         sender = self.sender()
