@@ -21,7 +21,7 @@ from lensepy_app.appli import *
 
 class ParamsView(ModuleWidget):
 
-    window_closed = pyqtSignal()
+    window_closed = pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -31,6 +31,7 @@ class ParamsView(ModuleWidget):
         self.size_phase = 0
         self.padding_value = ['2', '4', '8', '16', '32']
         self.padding_selection = 2
+        self.changing_request = False
 
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -82,6 +83,8 @@ class ParamsView(ModuleWidget):
 
         # Signals
         self.padding_selector.selection_changed.connect(self.handle_padding_changed)
+        self.wavelength.edit_changed.connect(self.handle_values_changed)
+        self.f_number.edit_changed.connect(self.handle_values_changed)
 
     def set_phase(self, phase):
         self.phase = phase
@@ -107,17 +110,27 @@ class ParamsView(ModuleWidget):
         pad_factor = int(self.padding_value[self.padding_selection - 1])
         self.label_padding_size.set_value(str(pad_factor * self.size_phase), 'pixels')
 
+    def handle_values_changed(self):
+        self.changing_request = True
+
     def closeEvent(self, event):
         ## Update all the processes !!!
-        w_length = self.wavelength.get_value()
+        w_length = float(self.wavelength.get_value())
+        if w_length != float(self.controller.get_variables('wavelength')):
+            self.changing_request = True
         self.controller.set_variables('wavelength', w_length)
-        f_number = self.f_number.get_value()
+        f_number = float(self.f_number.get_value())
+        if f_number != float(self.controller.get_variables('f_number')):
+            self.changing_request = True
         self.controller.set_variables('f_number', f_number)
         pad_factor = int(self.padding_value[self.padding_selection - 1])
+        if pad_factor != self.controller.get_variables('pad_factor'):
+            self.changing_request = True
         self.controller.set_variables('pad_factor', pad_factor)
 
         # Send signal to controller
-        self.window_closed.emit()
+        self.window_closed.emit(self.changing_request)
+        self.changing_request = False
         event.accept()
 
 

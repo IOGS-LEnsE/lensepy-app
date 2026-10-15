@@ -7,6 +7,9 @@ from PyQt6.QtCore import Qt, QRectF, QPoint
 import pyqtgraph as pg
 
 
+
+
+
 class ImageCrossSections(ModuleWidget):
     """
     Widget PyQtGraph displaying :

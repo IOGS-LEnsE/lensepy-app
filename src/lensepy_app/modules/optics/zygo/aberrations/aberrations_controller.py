@@ -1,17 +1,12 @@
 __all__ = ["ZygoAberrationsController"]
 
-import numpy as np
-from PyQt6.QtWidgets import QWidget, QDialog
 from PyQt6.QtCore import QThread
-from lensepy import translate, is_float
 from lensepy.optics.zygo.phase import process_statistics_surface
 from lensepy_app.appli._app.template_controller import TemplateController, Worker
 
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_view import *
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_coeff_view import *
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_surface_view import *
-from lensepy.optics.zygo import *
-from lensepy.utils import downsample_array
 from lensepy.utils.images import zoom_image_square, crop_square_radius
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_params_view import ParamsView
 from lensepy_app.widgets.image_cross_sections import *
@@ -93,6 +88,7 @@ class ZygoAberrationsController(TemplateController):
             return
         if not self.psf_update_pending:
             return
+        print(f'STARTING PSF Process')
         self.psf_update_pending = False
         self.process_PSF()
 
@@ -234,6 +230,13 @@ class ZygoAberrationsController(TemplateController):
     def init_view(self):
         super().init_view()
 
+    def processing(self, value=True):
+        # BLOCK INTERFACE - Especially PSF/FTM display
+        self.top_left.set_visible('top', value=not value)
+        self.top_left.set_visible('bot', value=not value)
+        self.bot_zernike.set_enabled(not value)
+
+
     def handle_right_selection_changed(self, index, value):
         """
         :param index:   'top' or 'bot'
@@ -259,10 +262,14 @@ class ZygoAberrationsController(TemplateController):
         # Process depending on top/bot and data to display
         if value == translate('psf_and_slice'):
             widget = self._display_psf_and_slice(x_ax_surface)
+        elif value == translate('psf_only'):
+            widget = self._display_psf_only(x_ax_surface)
         elif value == translate('psf_log'):
-            widget = self._display_psf_log()
+            widget = self._display_psf_log(x_ax_surface)
+        elif value == translate('psf_slice'):
+            widget = self._display_psf_slice(x_ax_surface)
         elif value == translate('ftm_and_slice'):
-            widget = self._display_ftm_and_slice()
+            widget = self._display_ftm_and_slice(x_ax_surface)
         else:
             widget = QWidget()
 
@@ -285,12 +292,16 @@ class ZygoAberrationsController(TemplateController):
         if value:
             self.params_window.show()
 
-    def handle_params_window_closed(self):
+    def handle_params_window_closed(self, value):
         if isinstance(self.bot_zernike, CoefficientsView):
             self.bot_zernike.reactivate_params_button()
         # Restart process of PSF
         print(f'New PAD = {self.manager.get_variable("pad_factor")}')
-        self.process_PSF()
+        if value:
+
+            # Process new PSF
+            self.psf_update_pending = True
+            self._start_psf_if_needed()
 
 
     def handle_coeffs_windowed(self, value):
@@ -341,6 +352,53 @@ class ZygoAberrationsController(TemplateController):
         self.coeffs_window.deleteLater()
 
     def _display_psf_and_slice(self, axis=None):
+        psf = self.manager.variables['psf_results']['psf']
+        # Zoom In ?
+        psf_c, size_z = zoom_image_square(psf, threshold=0.001)
+        # Axis construction (with zoom)
+        N_size = psf.shape[0]
+        N_zoom = psf_c.shape[0]
+        borne_x1 = (N_size - N_zoom) // 2
+        borne_x2 = borne_x1 + N_zoom
+        if axis is not None:
+            x_axis = axis[borne_x1:borne_x2]
+        else:
+            x_axis = np.linspace(0, N_size-1, N_size)
+        # Display
+        widget = ImageCrossSections(parent=self, cmap='gray',
+                                    title=translate('psf_and_slice_title'))
+        widget.set_data(psf_c)
+        widget.set_x_axis(x_axis, label=translate('x_axis_in_um'))
+        widget.set_y_axis(x_axis)
+        widget.set_color_map('gray')
+        return widget
+
+    def _display_psf_slice(self, axis=None):
+        psf = self.manager.variables['psf_results']['psf']
+        psf_p = self.manager.variables['psf_results']['psf_perfect']
+        # Zoom In ?
+        psf_c, size_z = zoom_image_square(psf, threshold=0.001)
+        psf_p = crop_square_radius(psf_p, size_z)
+        # Axis construction (with zoom)
+        N_size = psf.shape[0]
+        N_zoom = psf_c.shape[0]
+        borne_x1 = (N_size - N_zoom) // 2
+        borne_x2 = borne_x1 + N_zoom
+        if axis is not None:
+            x_axis = axis[borne_x1:borne_x2]
+        else:
+            x_axis = np.linspace(0, N_size-1, N_size)
+        psf_c_line = psf_c[N_zoom//2, :]
+        psf_p_line = psf_p[N_zoom//2, :]
+        print(f'psf_c_line = {psf_c_line.shape} / psf_p_line = {psf_p_line.shape}'
+              f' / x_axis = {x_axis.shape}')
+        data = [psf_p_line, psf_c_line]
+        # Display
+        widget = XYChartWidget(parent=self, title=translate('psf_and_slice_title'))
+        widget.set_data(x_axis, data)
+        return widget
+
+    def _display_psf_only(self, axis=None):
         psf = self.manager.variables['psf_results']['psf']
         # Zoom In ?
         psf_c, size_z = zoom_image_square(psf, threshold=0.001)

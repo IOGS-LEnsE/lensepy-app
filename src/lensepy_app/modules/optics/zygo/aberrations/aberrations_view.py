@@ -128,6 +128,7 @@ class OptionsView(ModuleWidget):
                                              parent=self.controller,
                                              default=False,
                                              vertical=True)
+        self.info_option = PSFInProgressView(parent=self.controller)
 
         layout.addWidget(self.top_right_option)
         self.top_right_option.hide()
@@ -135,6 +136,7 @@ class OptionsView(ModuleWidget):
         layout.addWidget(self.bot_right_option)
         self.bot_right_option.hide()
         layout.addStretch()
+        layout.addWidget(self.info_option)
 
         # Signals
         self.top_right_option.selection_changed.connect(self.handle_selection_changed)
@@ -146,12 +148,18 @@ class OptionsView(ModuleWidget):
                 self.top_right_option.show()
             if index == 'bot':
                 self.bot_right_option.show()
+            if index == 'info':
+                self.info_option.hide()
         else:
             if index == 'top':
                 self.top_right_option.hide()
             if index == 'bot':
                 self.bot_right_option.hide()
+            if index == 'info':
+                self.info_option.show()
 
+    def update_info(self, index):
+        self.info_option.update_text(index)
 
     def handle_selection_changed(self):
         sender = self.sender()

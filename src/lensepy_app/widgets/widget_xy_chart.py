@@ -14,13 +14,14 @@ import sys
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QLabel
 from PyQt6.QtCore import Qt, QSizeF
 from pyqtgraph import PlotWidget, mkPen, mkBrush
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 
 
 LINES = [Qt.PenStyle.DashLine, Qt.PenStyle.DashDotLine,
          Qt.PenStyle.SolidLine,  Qt.PenStyle.DashDotDotLine]
 
-class XYChartWidget(QWidget):
+class XYChartWidget(ModuleWidget):
     """
     Widget used to display data in a 2D chart - X and Y axis.
     Children of QWidget - QWidget can be put in another widget and / or window
@@ -53,31 +54,24 @@ class XYChartWidget(QWidget):
         Modify the background color of the widget.
     """
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, title=''):
         """
         Initialisation of the time-dependent chart.
         """
         super().__init__(parent=parent)
-        self.parent = parent
-        self.title = ''  # Title of the chart
+        self.title = title  # Title of the chart
         self.layout = QVBoxLayout()  # Main layout of the QWidget
         self.nb_data = 0
 
         # Title label
         self.title_label = QLabel(self.title)
-        style = "background-color: darkgray;"
-        style += "font-weight:bold;"
-        style += "color:white;"
-        style += "font-size:16px;"
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.title_label.setStyleSheet(style)
+        self.title_label.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
 
         # Option label
         self.info_label = QLabel('')
-        style = "background-color: lightgray;"
-        style += "font-size:10px;"
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.info_label.setStyleSheet(style)
+        self.info_label.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
 
         self.plot_chart_widget = PlotWidget()  # pyQtGraph widget
         # Create Numpy array for X and Y data
@@ -116,6 +110,7 @@ class XYChartWidget(QWidget):
         self.y_label = y_label
         self.y_name = ''
         self.legend_position = 'top_right'
+        self.refresh_chart()
 
     def set_legend(self, y_legend, position="top_right"):
         """Add a legend to the graph with predefined positions."""
