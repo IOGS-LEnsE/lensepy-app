@@ -27,3 +27,17 @@ ftm_and_slice;FTM et coupes
 ftm_only;FTM
 ftm_slice;Coupes de la FTM
 circled_energy;Energie Encerclée
+psf_and_slice_title;PSF et coupes
+psf_only_title;PSF
+psf_log_title;PSF (échelle log)
+psf_slice_title;Coupes de la PSF
+ftm_and_slice_title;FTM et coupes
+ftm_only_title;FTM
+ftm_slice_title;Coupes de la FTM
+circled_energy_title;Energie Encerclée
+# Analyses en cours
+analysis_in_progress;Analyses en cours...
+analysis_phase_ok;Données chargées ... OK
+analysis_auto_mask_ok_ok;Auto masque ... OK
+analysis_surface_ok;Phase-shift ... OK
+analysis_zernike_ok;Zernike ... OK

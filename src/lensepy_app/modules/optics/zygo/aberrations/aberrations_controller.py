@@ -174,7 +174,6 @@ class ZygoAberrationsController(TemplateController):
         if step == 2:
             self.top_left.set_visible('top')
             self.top_left.set_visible('bot')
-        print(f'PSF step = {step}')
 
     def display_results(self, results, first=True):
         self.manager.variables['phase_results'] = results
@@ -255,11 +254,11 @@ class ZygoAberrationsController(TemplateController):
         # Axis construction
         pupil_ratio = 1
         image_radius = wavelength * f_number * pupil_ratio
-        x_ax_surface = np.linspace(-N_size // 2, N_size // 2 - 1, N_size) * image_radius * 1e3  # mm
+        x_ax_surface = np.linspace(-N_size // 2, N_size // 2 - 1, N_size) * image_radius * 1e6  # um
 
         # Process depending on top/bot and data to display
         if value == translate('psf_and_slice'):
-            widget = self._display_psf_and_slice()
+            widget = self._display_psf_and_slice(x_ax_surface)
         elif value == translate('psf_log'):
             widget = self._display_psf_log()
         elif value == translate('ftm_and_slice'):
@@ -343,25 +342,46 @@ class ZygoAberrationsController(TemplateController):
 
     def _display_psf_and_slice(self, axis=None):
         psf = self.manager.variables['psf_results']['psf']
-
         # Zoom In ?
         psf_c, size_z = zoom_image_square(psf, threshold=0.001)
-        psf_c = psf
         # Axis construction (with zoom)
-        x_axis = axis if not None else np.linspace(0, psf_c.shape[0]-1, psf_c.shape[0])
+        N_size = psf.shape[0]
+        N_zoom = psf_c.shape[0]
+        borne_x1 = (N_size - N_zoom) // 2
+        borne_x2 = borne_x1 + N_zoom
+        if axis is not None:
+            x_axis = axis[borne_x1:borne_x2]
+        else:
+            x_axis = np.linspace(0, N_size-1, N_size)
         # Display
         widget = ImageCrossSections(parent=self, cmap='gray',
                                     title=translate('psf_and_slice_title'))
         widget.set_data(psf_c)
-        widget.set_x_axis(x_axis)
+        widget.set_x_axis(x_axis, label=translate('x_axis_in_um'))
+        widget.set_y_axis(x_axis)
         widget.set_color_map('gray')
         return widget
 
     def _display_psf_log(self, axis=None):
         psf = self.manager.variables['psf_results']['psf']
+        # Zoom In ?
+        psf_c, size_z = zoom_image_square(psf, threshold=-5)
+        # Axis construction (with zoom)
+        N_size = psf.shape[0]
+        N_zoom = psf_c.shape[0]
+        borne_x1 = (N_size - N_zoom) // 2
+        borne_x2 = borne_x1 + N_zoom
+        print(f'Borne_X1 = {borne_x1} / Borne_X2 = {borne_x2}')
+        if axis is not None:
+            x_axis = axis[borne_x1:borne_x2]
+        else:
+            x_axis = np.linspace(0, N_size-1, N_size)
+
         widget = ImageCrossSections(parent=self, cmap='gray',
                                     title=translate('psf_log_title'))
-        widget.set_data(np.log(psf + 0.001))
+        widget.set_data(np.log(psf_c + 0.001))
+        widget.set_x_axis(x_axis, label=translate('x_axis_in_um'))
+        widget.set_y_axis(x_axis)
         widget.set_color_map('gray')
         return widget
 
