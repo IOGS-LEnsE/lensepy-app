@@ -7,9 +7,9 @@ Creation : march/2025
 """
 import sys
 from lensepy import translate
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.widgets import Wavefront2D, Wavefront3D, ViewLink
-from lensepy_app.widgets.objects import *
 from lensepy_app.widgets.objects import *
 from lensepy_app.appli._app.main_view import get_disp_mode
 from PyQt6.QtWidgets import (
@@ -20,26 +20,26 @@ from PyQt6.QtWidgets import (
 )
 
 
-class Surface2D3DView(QWidget):
+class Surface2D3DView(ModuleWidget):
     def __init__(self, title, parent=None, colormap='plasma'):
-        super().__init__(None)
-        self.parent = parent # controller
+        super().__init__(parent=parent)
         self.title = title
-        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
         self.surface = None
 
         layout = QHBoxLayout()
         self.setLayout(layout)
 
         self.left_view = Wavefront2D(translate('unwrapped_2D_surface'),
-                                     parent=self.parent, colormap=colormap)
+                                     parent=self.controller, colormap=colormap)
         self.right_view = Wavefront3D(translate('unwrapped_3D_surface'),
-                                      parent=self.parent,
-                                      disp_cmap=False, colormap=colormap)
+                                      parent=self.controller,
+                                      disp_cmap=False, colormap=colormap,
+                                      initial_distance=3)
 
         layout.addWidget(self.left_view, 1)
         layout.addWidget(self.right_view, 1)
-        self.viewlink = ViewLink(self.left_view, self.right_view)
+        self.viewlink = ViewLink(self.left_view, self.right_view,
+                                 pan=True, zoom=False,)
         self.viewlink.set_enabled(True)
 
     def set_surface(self, surface, mask=None):

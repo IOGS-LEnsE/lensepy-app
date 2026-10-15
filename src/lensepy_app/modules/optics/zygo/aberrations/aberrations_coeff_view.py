@@ -117,7 +117,6 @@ class CoefficientsView(ModuleWidget):
         options_layout = QVBoxLayout()
         options_widget.setLayout(options_layout)
         self.label_zernike_coefficients = QLabel(translate("label_zernike_coefficients"))
-        print(f'Glogal : {self.global_theme} / {self.global_mode}')
         self.label_zernike_coefficients.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
         self.label_zernike_coefficients.setAlignment(Qt.AlignmentFlag.AlignCenter)
         options_layout.addWidget(self.label_zernike_coefficients)

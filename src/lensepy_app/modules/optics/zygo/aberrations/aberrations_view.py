@@ -7,13 +7,11 @@ Creation : march/2025
 """
 import sys, os, time
 from lensepy import load_dictionary, translate, dictionary, is_float
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.widgets import Surface2DView
 from lensepy_app.widgets.objects import *
-from lensepy_app import make_hline
-from lensepy_app.widgets.objects import *
 from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
-from lensepy_app.appli._app.main_view import get_disp_mode
 from PyQt6.QtWidgets import (
     QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
     QVBoxLayout, QGridLayout,
@@ -25,8 +23,6 @@ from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent,
 from lensepy.optics.zygo.fourier_manager import FourierManager
 from lensepy.images import slice_image
 
-import numpy as np
-from urllib3.connection import VerifiedHTTPSConnection
 
 display_options_values = [
     translate('psf_and_slice'),
@@ -39,16 +35,14 @@ display_options_values = [
 ]
 
 
-class AnalysisInProgressView(QWidget):
+class AnalysisInProgressView(ModuleWidget):
     """Analysis in progress."""
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent
-        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
         self.text = translate('analysis_in_progress')
         self.label = QLabel(self.text)
-        self.label.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         layout.addWidget(self.label)
         self.setLayout(layout)
 
@@ -67,16 +61,14 @@ class AnalysisInProgressView(QWidget):
         self.label.repaint()
 
 
-class PSFInProgressView(QWidget):
+class PSFInProgressView(ModuleWidget):
     """Analysis in progress."""
     def __init__(self, parent=None):
         super().__init__(None)
-        self.parent = parent
-        self.general_display_mode = get_disp_mode(self.parent)
         layout = QVBoxLayout()
         self.text = translate('psf_in_progress')
         self.label = QLabel(self.text)
-        self.label.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         layout.addWidget(self.label)
         self.setLayout(layout)
 
@@ -89,14 +81,12 @@ class PSFInProgressView(QWidget):
         self.label.repaint()
 
 
-class SurfaceOptionsView(QWidget):
+class SurfaceOptionsView(ModuleWidget):
 
     selection_changed = pyqtSignal(str, str)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self.parent = parent
-        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
+        super().__init__(parent=parent)
 
         layout = QHBoxLayout()
         self.setLayout(layout)
@@ -121,26 +111,24 @@ class SurfaceOptionsView(QWidget):
         self.selection_changed.emit(index, value)
 
 
-class OptionsView(QWidget):
+class OptionsView(ModuleWidget):
 
     selection_changed = pyqtSignal(str, str)
 
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self.parent = parent
-        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
+        super().__init__(parent=parent)
 
         layout = QVBoxLayout()
         self.setLayout(layout)
 
         self.top_right_option = ComboBoxBloc(translate('top_right_option'),
                                              display_options_values,
-                                             parent=self.parent,
+                                             parent=self.controller,
                                              default=False,
                                              vertical=True)
         self.bot_right_option = ComboBoxBloc(translate('bot_right_option'),
                                              display_options_values,
-                                             parent=self.parent,
+                                             parent=self.controller,
                                              default=False,
                                              vertical=True)
 
@@ -178,10 +166,9 @@ class OptionsView(QWidget):
             self.selection_changed.emit('bot', value)
 
 
-class TwoChartWidget(QWidget):
+class TwoChartWidget(ModuleWidget):
     def __init__(self, parent=None):
-        super().__init__(parent)
-        self.general_display_mode = get_disp_mode(self.parent)
+        super().__init__(parent=parent)
         self.chart_1 = XYChartWidget()
         self.chart_2 = XYChartWidget()
         layout = QVBoxLayout()
@@ -216,9 +203,9 @@ class TwoChartWidget(QWidget):
         self.chart_2.refresh_chart()
 
 
-class AberrationsView(QWidget):
+class AberrationsView(ModuleWidget):
     def __init__(self, parent=None, colormap='plasma'):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         m_layout = QVBoxLayout()
         widget1 = QWidget()
         layout1 = QHBoxLayout()
@@ -230,14 +217,20 @@ class AberrationsView(QWidget):
         m_layout.addWidget(widget2)
         self.setLayout(m_layout)
 
-        self.unwrapped_surface = Surface2DView(translate('unwrapped_surface_no_correction'), colormap)
+        self.unwrapped_surface = Surface2DView(
+            translate('unwrapped_surface_no_correction'), colormap,
+            parent=self.controller)
         layout1.addWidget(self.unwrapped_surface)
-        self.unwrapped_surface_corr = Surface2DView(translate('unwrapped_surface_correction'), colormap)
+        self.unwrapped_surface_corr = Surface2DView(
+            translate('unwrapped_surface_correction'), colormap,
+            parent=self.controller)
         layout1.addWidget(self.unwrapped_surface_corr)
 
-        self.psf_unwrapped = Surface2DView(translate('psf_unwrapped_surface'), colormap)
+        self.psf_unwrapped = Surface2DView(translate('psf_unwrapped_surface'),
+                                           colormap, parent=self.controller)
         layout2.addWidget(self.psf_unwrapped)
-        self.psf_corrected = Surface2DView(translate('psf_corrected_surface'), colormap)
+        self.psf_corrected = Surface2DView(translate('psf_corrected_surface'),
+                                           colormap, parent=self.controller)
         layout2.addWidget(self.psf_corrected)
 
     def set_array_uncorrect(self, image):

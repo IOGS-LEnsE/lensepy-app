@@ -110,11 +110,11 @@ class ParamsView(ModuleWidget):
     def closeEvent(self, event):
         ## Update all the processes !!!
         w_length = self.wavelength.get_value()
-        self.parent.set_variables('wavelength', w_length)
+        self.controller.set_variables('wavelength', w_length)
         f_number = self.f_number.get_value()
-        self.parent.set_variables('f_number', f_number)
+        self.controller.set_variables('f_number', f_number)
         pad_factor = int(self.padding_value[self.padding_selection - 1])
-        self.parent.set_variables('pad_factor', pad_factor)
+        self.controller.set_variables('pad_factor', pad_factor)
 
         # Send signal to controller
         self.window_closed.emit()

@@ -10,20 +10,20 @@ Optionnel   : pip install scikit-image   (meilleur déroulement de phase)
 """
 import sys
 import numpy as np
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 import pyqtgraph as pg
 import pyqtgraph.opengl as gl
 from pyqtgraph.Qt import QtWidgets, QtCore
 from pyqtgraph.Qt.QtWidgets import QApplication, QWidget, QLabel
-from lensepy_app.appli._app.main_view import get_disp_mode
 
-from pyqtgraph.Qt.QtCore import pyqtSignal, Qt
+from pyqtgraph.Qt.QtCore import pyqtSignal, Qt, QObject
 
 
 # ======================================================================
 # Classe de base : données, stats, colormap, sous-échantillonnage
 # ======================================================================
-class _WavefrontBase(QWidget):
+class _WavefrontBase(ModuleWidget):
     """
     Common class :
         set_data(W, masque=None, X=None, Y=None)
@@ -37,9 +37,7 @@ class _WavefrontBase(QWidget):
     def __init__(self, title, parent=None, colormap="viridis", subsample=1,
                  subsample_method="moyenne", disp_cmap=True,
                  disp_pvrms=False):
-        super().__init__(None)
-        self.parent = parent
-        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
+        super().__init__(parent=parent)
         self._cmap_name = colormap
         self._k = max(1, int(subsample))
         self._methode = subsample_method
@@ -52,7 +50,7 @@ class _WavefrontBase(QWidget):
         self._pv = self._rms = np.nan
 
         self.label_PV_RMS = QLabel("PV = –   RMS = –")
-        self.label_PV_RMS.setStyleSheet(STYLE_H3[self.general_display_mode])
+        self.label_PV_RMS.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         self.label_PV_RMS.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self._build_ui()
@@ -170,11 +168,12 @@ class Wavefront3D(_WavefrontBase):
 
     def __init__(self, title, parent=None, colormap="viridis", subsample=1,
                  subsample_method="moyenne", z_scale=1.0, disp_cmap=True,
-                 y_axis_inverted=False):
-        super().__init__(title, parent, colormap, subsample, subsample_method,
-                         disp_cmap=disp_cmap)
+                 y_axis_inverted=False, initial_distance=10):
         self._z_scale = z_scale
         self._y_inverted = y_axis_inverted
+        self.init_dist = initial_distance
+        super().__init__(title, parent, colormap, subsample, subsample_method,
+                         disp_cmap=disp_cmap)
 
     def _build_ui(self):
         self._surf = None
@@ -183,7 +182,7 @@ class Wavefront3D(_WavefrontBase):
         self.view = _GLView()
         self.view.cameraChanged.connect(self.view_changed)
         self.view.setBackgroundColor("k")
-        self.view.setCameraPosition(distance=6.5, elevation=60, azimuth=-90)
+        self.view.setCameraPosition(distance=self.init_dist, elevation=60, azimuth=-90)
 
         grille = gl.GLGridItem()
         grille.setSize(2, 2)
@@ -211,7 +210,7 @@ class Wavefront3D(_WavefrontBase):
         # Title
         self._title_label = QtWidgets.QLabel(self.title)
         self._title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._title_label.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self._title_label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
 
         haut = QtWidgets.QHBoxLayout()
         haut.addWidget(self.view, stretch=1)
@@ -234,19 +233,25 @@ class Wavefront3D(_WavefrontBase):
         cy = -c.y() if self._y_inverted else c.y()
         return c.x(), cy, largeur
 
-    def set_view_state(self, largeur, cx=None, cy=None):
+    def set_view_state(self, largeur=None, cx=None, cy=None):
         o = self.view.opts
-        o["distance"] = largeur / (
-                2 * np.tan(np.radians(o["fov"]) / 2)
-        )
         c = o["center"]
+
+        # Modifier la distance uniquement si le zoom est synchronisé
+        if largeur is not None:
+            o["distance"] = largeur / (
+                    2 * np.tan(np.radians(o["fov"]) / 2)
+            )
+
         if cy is not None and self._y_inverted:
             cy = -cy
+
         o["center"] = pg.Vector(
             c.x() if cx is None else cx,
             c.y() if cy is None else cy,
             c.z()
         )
+
         self.view.update()
 
     def set_z_scale(self, z_scale):
@@ -365,7 +370,7 @@ class Wavefront2D(_WavefrontBase):
         # Title
         self._title_label = QtWidgets.QLabel(self.title)
         self._title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._title_label.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self._title_label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
 
         lay = QtWidgets.QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
@@ -380,16 +385,29 @@ class Wavefront2D(_WavefrontBase):
         r = self.plot.getViewBox().viewRect()
         return r.center().x(), r.center().y(), r.width()
 
-    def set_view_state(self, largeur, cx=None, cy=None):
+    def set_view_state(self, largeur=None, cx=None, cy=None):
         vb = self.plot.getViewBox()
         r = vb.viewRect()
+
         if r.width() <= 0:
             return
+
+        # Si largeur=None, conserver le zoom 2D actuel
+        largeur_dst = r.width() if largeur is None else largeur
+
         cx = r.center().x() if cx is None else cx
         cy = r.center().y() if cy is None else cy
-        h = r.height() * largeur / r.width()          # garde le rapport d'aspect
-        vb.setRange(xRange=(cx - largeur / 2, cx + largeur / 2),
-                    yRange=(cy - h / 2, cy + h / 2), padding=0)
+
+        h = r.height() * largeur_dst / r.width()
+
+        vb.setRange(
+            xRange=(
+                cx - largeur_dst / 2,
+                cx + largeur_dst / 2
+            ),
+            yRange=(cy - h / 2, cy + h / 2),
+            padding=0
+        )
 
     def _refresh(self):
         W, masque, X, Y, cmap, vmin, vmax = self._donnees_affichage()
@@ -409,7 +427,7 @@ class Wavefront2D(_WavefrontBase):
         self.plot.autoRange()
 
 
-class ViewLink(QtCore.QObject):
+class ViewLink(QObject):
     """
     Synchronizes zoom between deux widgets Wavefront2D / Wavefront3D,
     in both direction.
@@ -417,15 +435,24 @@ class ViewLink(QtCore.QObject):
         link = ViewLink(w2d, w3d)
         link.set_enabled(False)
     """
-
-    def __init__(self, a, b, pan=True, parent=None):
+    def __init__(
+            self, a, b, pan=True, zoom=True,
+            sync_initial=True, parent=None
+    ):
         super().__init__(parent)
-        self._a, self._b, self._pan = a, b, pan
+
+        self._a = a
+        self._b = b
+        self._pan = pan
+        self._zoom = zoom
         self._busy = False
         self._enabled = True
+
         a.view_changed.connect(lambda: self._sync(a, b))
         b.view_changed.connect(lambda: self._sync(b, a))
-        self._sync(a, b)                      # alignement initial sur a
+
+        if sync_initial:
+            self._sync(a, b)
 
     def set_enabled(self, on):
         self._enabled = bool(on)
@@ -435,16 +462,23 @@ class ViewLink(QtCore.QObject):
     def _sync(self, src, dst):
         if self._busy or not self._enabled:
             return
-        self._busy = True                     # évite les rebonds a -> b -> a
+
+        self._busy = True
         try:
             cx, cy, largeur = src.view_state()
-            if largeur > 0:
-                if self._pan:
-                    dst.set_view_state(largeur, cx, cy)
-                else:
-                    dst.set_view_state(largeur)
+
+            # Si zoom=False, largeur=None :
+            # la destination conserve son propre zoom.
+            largeur_dst = largeur if self._zoom else None
+
+            if self._pan:
+                dst.set_view_state(largeur_dst, cx, cy)
+            elif self._zoom:
+                dst.set_view_state(largeur_dst)
+
         finally:
             self._busy = False
+
 
 
 # ======================================================================

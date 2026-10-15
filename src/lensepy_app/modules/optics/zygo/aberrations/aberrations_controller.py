@@ -12,6 +12,7 @@ from lensepy_app.modules.optics.zygo.aberrations.aberrations_coeff_view import *
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_surface_view import *
 from lensepy.optics.zygo import *
 from lensepy.utils import downsample_array
+from lensepy.utils.images import zoom_image_square, crop_square_radius
 from lensepy_app.modules.optics.zygo.aberrations.aberrations_params_view import ParamsView
 from lensepy_app.widgets.image_cross_sections import *
 from .aberrations_models import *
@@ -52,17 +53,21 @@ class ZygoAberrationsController(TemplateController):
         self.colormap_2D = 'plasma'
         self.tilt = False
         self.focus = False
-        self.params_window = ParamsView(self)
-        self.coeffs_window = CoefficientsValueView(self)
+        self.params_window = ParamsView(parent=self)
+        self.coeffs_window = CoefficientsValueView(parent=self)
         self.wavefront_disp = None
+        self.top_right_disp = translate('psf_and_slice')
+        self.bot_right_disp = ''
         # Threads
         self.thread = QThread()
         self.worker = None
         self.manager.variables['pad_factor'] = self.params_window.get_padding_value()
+        self.manager.variables['wavelength'] = self.params_window.get_wavelength()
+        self.manager.variables['f_number'] = self.params_window.get_f_number()
 
         # Graphical layout
         ### TO DO  - default colormap in default_parameters
-        self.top_left = AnalysisInProgressView(self)
+        self.top_left = AnalysisInProgressView(parent=self)
         self.bot_left = QWidget()
         self.bot_right = QWidget()
         self.top_right = QWidget()  # SimulationChoiceView()
@@ -178,7 +183,8 @@ class ZygoAberrationsController(TemplateController):
         self.params_window.set_phase(self.manager.variables['phase'])
 
         if first:
-            self._replace_top_left_widget(SurfaceOptionsView())
+            self.top_left.deleteLater()
+            self._replace_top_left_widget(SurfaceOptionsView(parent=self))
             self._replace_bot_left_widget(Surface2D3DView(
                 translate('unwrapped_surface'), parent=self,
                 colormap=self.colormap_2D))
@@ -188,9 +194,11 @@ class ZygoAberrationsController(TemplateController):
         else:
             self.top_left = Surface2DView(translate('interferogram'),
                                           colormap_2D='gray', parent=self)
-            self.bot_left = Surface2D3DView(translate('unwrapped_surface'), parent=self,
-                colormap=self.colormap_2D)
+            self.bot_left = Surface2D3DView(translate('unwrapped_surface'),
+                                            parent=self,
+                                            colormap=self.colormap_2D)
             self.bot_zernike = CoefficientsView(parent=self, number=self.nb_coeff)
+            self.update()
 
         self.bot_zernike.set_enabled(False)
         # Signals
@@ -218,14 +226,12 @@ class ZygoAberrationsController(TemplateController):
     def display_results_psf(self, results):
         self.psf_processing = False
         self.manager.variables['psf_results'] = results
-        ## Update Local Variables / Results
-        self.psf = results['psf']
         ## Display
         self._replace_top_right_widget(ImageCrossSections(parent=self, cmap='gray'))
-        self.top_right.set_data(self.psf)
-        self.top_right.set_color_map('gray')
-        self.bot_zernike.set_enabled(True)
+        self.handle_right_selection_changed('top', self.top_right_disp)
+        self.handle_right_selection_changed('bot', self.bot_right_disp)
         self.bot_zernike.correction_changed.connect(self.handle_correction_changed)
+        self.bot_zernike.set_enabled(True)
 
     def init_view(self):
         super().init_view()
@@ -242,16 +248,48 @@ class ZygoAberrationsController(TemplateController):
                 translate('ftm_only'),
                 translate('ftm_slice')
         """
+        wavelength = float(self.manager.variables['wavelength']) * 1e-9
+        pad_factor = float(self.manager.variables['pad_factor'])
+        f_number = float(self.manager.variables['f_number'])
+        N_size = self.manager.variables['psf_results']['psf'].shape[0]
+        # Axis construction
+        pupil_ratio = 1
+        image_radius = wavelength * f_number * pupil_ratio
+        x_ax_surface = np.linspace(-N_size // 2, N_size // 2 - 1, N_size) * image_radius * 1e3  # mm
+
+        # Process depending on top/bot and data to display
         if index == 'top':
+            self.top_right_disp = value
             if value == translate('psf_and_slice'):
-                widget = ImageCrossSections(parent=self, cmap='gray')
-                widget.set_data(self.psf)
+                psf = self.manager.variables['psf_results']['psf']
+
+                # Zoom In ?
+                psf_c, size_z = zoom_image_square(psf, threshold=0.001)
+                psf_c = psf
+                # Axis construction (with zoom)
+
+                # Display
+                widget = ImageCrossSections(parent=self, cmap='gray',
+                                            title=translate('psf_and_slice_title'))
+                widget.set_data(psf_c)
+                widget.set_x_axis(x_ax_surface)
+                widget.set_y_axis(x_ax_surface)
                 widget.set_color_map('gray')
                 self.top_right.deleteLater()
                 self._replace_top_right_widget(widget)
             elif value == translate('psf_log'):
-                widget = ImageCrossSections(parent=self, cmap='gray')
-                widget.set_data(np.log(self.psf+0.001))
+                psf = self.manager.variables['psf_results']['psf']
+                widget = ImageCrossSections(parent=self, cmap='gray',
+                                            title=translate('psf_log_title'))
+                widget.set_data(np.log(psf+0.001))
+                widget.set_color_map('gray')
+                self.top_right.deleteLater()
+                self._replace_top_right_widget(widget)
+            elif value == translate('ftm_and_slice'):
+                ftm = self.manager.variables['psf_results']['ftm']
+                widget = ImageCrossSections(parent=self, cmap='gray',
+                                            title=translate('ftm_and_slice_title'))
+                widget.set_data(ftm)
                 widget.set_color_map('gray')
                 self.top_right.deleteLater()
                 self._replace_top_right_widget(widget)
@@ -261,15 +299,20 @@ class ZygoAberrationsController(TemplateController):
                 self._replace_top_right_widget(widget)
 
         if index == 'bot':
+            self.bot_right_disp = value
             if value == translate('psf_and_slice'):
-                widget = ImageCrossSections(parent=self, cmap='gray')
-                widget.set_data(self.psf)
+                psf = self.manager.variables['psf_results']['psf']
+                widget = ImageCrossSections(parent=self, cmap='gray',
+                                            title=translate('psf_and_slice_title'))
+                widget.set_data(psf)
                 widget.set_color_map('gray')
                 self.bot_right.deleteLater()
                 self._replace_bot_right_widget(widget)
             elif value == translate('psf_log'):
-                widget = ImageCrossSections(parent=self, cmap='gray')
-                widget.set_data(np.log(self.psf+0.001))
+                psf = self.manager.variables['psf_results']['psf']
+                widget = ImageCrossSections(parent=self, cmap='gray',
+                                            title=translate('psf_log_title'))
+                widget.set_data(np.log(psf+0.001))
                 widget.set_color_map('gray')
                 self.bot_right.deleteLater()
                 self._replace_bot_right_widget(widget)
@@ -338,7 +381,7 @@ class ZygoAberrationsController(TemplateController):
         self._start_psf_if_needed()
 
     def handle_wavelength_changed(self, value):
-        print(f'Value = {value}')
+        self.manager.variables['wavelength'] = value
 
     def cleanup(self):
         self.params_window.deleteLater()
@@ -413,11 +456,14 @@ class ProcessPSFWorker(Worker):
         self.manager = parent
         self.phase = None
         self.surface, self.mask = None, None
+        self.psf_model = None
         self.psf = None
         self.psf_perfect = None
         self.center_x = 0
         self.pad_factor = self.manager.controller.get_variables('pad_factor')
-        print(f'Padding = {self.pad_factor}')
+        self.ftm = None
+        self.ftm_perfect = None
+        self.strehl_ratio = 1
 
     def run(self):
         try:
@@ -430,7 +476,10 @@ class ProcessPSFWorker(Worker):
             ## Create all data then send in a dict ??
             results = {
                 'psf': self.psf,
-                'psf_perfect': self.psf_perfect
+                'psf_perfect': self.psf_perfect,
+                'ftm': self.ftm,
+                'ftm_perfect': self.ftm_perfect,
+                'strehl': self.strehl_ratio
             }
             print(f'PSF Worker - STOPPING')
             self.finished.emit(results)
@@ -451,10 +500,14 @@ class ProcessPSFWorker(Worker):
                     surface, size_s = self.phase.get_surface()
                 mask = self.phase.get_mask()
                 ## PROCESS PSF
-                psf = PSFModel(wavefront=surface, mask=mask)
+                self.psf_model = PSFModel(wavefront=surface, mask=mask)
                 self.psf, self.psf_perfect, self.center_x, self.pad_factor = (
-                    psf.get_psf(normalized=True, pad_factor=self.pad_factor))
+                    self.psf_model.get_psf(normalized=True,
+                                           pad_factor=self.pad_factor))
                 return
             case 2:
                 ## PROCESS FTM
-                pass
+                self.ftm, self.ftm_perfect = self.psf_model.get_ftm(normalized=True)
+
+                self.strehl_ratio = self.psf_model.get_strehl_ratio()
+                # line_slice = self.center_x // self.pad_factor

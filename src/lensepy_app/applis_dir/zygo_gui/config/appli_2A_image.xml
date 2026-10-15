@@ -39,6 +39,8 @@
 	<variable name="phase_results"/>
 	<variable name="psf_results"/>
     <variable name="pad_factor"/>
+    <variable name="wavelength"/>
+    <variable name="f_number"/>
     <init_params>
         <f_number>1</f_number>
         <wavelength>632.8</wavelength>
