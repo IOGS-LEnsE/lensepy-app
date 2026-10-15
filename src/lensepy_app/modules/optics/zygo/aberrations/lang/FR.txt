@@ -5,9 +5,25 @@ surface_choice_interfer;Surface à afficher
 label_zernike_coefficients;Coefficients de Zernike (RMS)
 label_aberrations_options;Données à afficher
 wavelength_label;Longueur d'onde
+label_pv_rms_uncorrected;Statistiques de la surface
 label_PV;Pic-Vallée
 label_RMS;RMS
+strehl_ratio;Rapport de Strehl
 tilt_button;Corriger le tilt (C1 et C2)
 focus_button;Corriger le focus (C3)
 coeffs_button;Afficher les coefficients
 parameters_button;Paramètres
+interferogram;Interferogramme
+unwrapped_2D_surface;Surface 2D
+unwrapped_3D_surface;Surface 3D
+# Right display
+top_right_option;Figure à afficher (haut)
+bot_right_option;Figure à afficher (bas)
+psf_and_slice;PSF et coupes
+psf_only;PSF
+psf_log;PSF (log)
+psf_slice;Coupes de la PSF
+ftm_and_slice;FTM et coupes
+ftm_only;FTM
+ftm_slice;Coupes de la FTM
+circled_energy;Energie Encerclée

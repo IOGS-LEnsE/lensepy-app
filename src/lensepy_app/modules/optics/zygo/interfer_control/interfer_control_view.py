@@ -9,19 +9,15 @@
 Creation : march/2025
 """
 import sys, os, time
-from lensepy import load_dictionary, translate, dictionary, is_float
+from lensepy import translate, is_float
 from lensepy_app import *
 from lensepy_app.appli import *
 from lensepy_app.widgets.widget_editline import LineEditView
-from lensepy.images.conversion import resize_image_ratio
 from PyQt6.QtWidgets import (
-    QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
-    QVBoxLayout,
-    QApplication,
-    QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox
+    QLabel, QCheckBox, QPushButton, QHBoxLayout, QVBoxLayout,
+    QApplication, QFileDialog, QMessageBox
 )
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent, QResizeEvent, QFont
+from PyQt6.QtCore import Qt, pyqtSignal
 
 class InterferControlView(ModuleWidget):
     """Images Choice."""
@@ -147,8 +143,10 @@ class PVRMSView(ModuleWidget):
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
 
-        self.pv_label = LabelWidget(translate('label_PV'), size=size)
-        self.rms_label = LabelWidget(translate('label_RMS'), size=size)
+        self.pv_label = LabelWidget(translate('label_PV'), size=size,
+                                    parent=self.controller)
+        self.rms_label = LabelWidget(translate('label_RMS'), size=size,
+                                     parent=self.controller)
 
         #self.layout.addStretch()
         self.layout.addWidget(self.pv_label)
@@ -199,9 +197,9 @@ class LabelWidget(ModuleWidget):
         layout = QHBoxLayout()
 
         self.label = QLabel(title)
-        self.label.setStyleSheet(style_L)
+        self.label.setStyleSheet(STYLE_L[self.global_theme][self.global_mode])
         self.text = QLabel(value)
-        self.text.setStyleSheet(style_T)
+        self.text.setStyleSheet(STYLE_T[self.global_theme][self.global_mode])
         self.text.setMinimumWidth(MINIMUM_WIDTH)
         self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.unit = QLabel(unit)

@@ -245,5 +245,4 @@ class ModuleWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(None)
         self.controller = parent
-        print(f'MODULE WIDGET {self.controller}')
         self.global_mode, self.global_theme = get_disp_mode(self.controller)

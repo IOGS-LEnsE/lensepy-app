@@ -64,26 +64,36 @@ class TemplateController(QObject):
         QApplication.processEvents()
 
     def _replace_top_left_widget(self, new_widget):
+        if self.top_left is not None and not sip.isdeleted(self.top_left):
+            self.top_left.deleteLater()
         self.top_left = new_widget
         self.manager.main_window.top_left_container = self.top_left
         self.update_view()
 
     def _replace_bot_left_widget(self, new_widget):
+        if self.bot_left is not None and not sip.isdeleted(self.bot_left):
+            self.bot_left.deleteLater()
         self.bot_left = new_widget
         self.manager.main_window.bot_left_container = self.bot_left
         self.update_view()
 
     def _replace_top_right_widget(self, new_widget):
+        if self.top_right is not None and not sip.isdeleted(self.top_right):
+            self.top_right.deleteLater()
         self.top_right = new_widget
         self.manager.main_window.top_right_container = self.top_right
         self.update_view()
 
     def _replace_bot_right_widget(self, new_widget):
+        if self.bot_right is not None and not sip.isdeleted(self.bot_right):
+            self.bot_right.deleteLater()
         self.bot_right = new_widget
         self.manager.main_window.bot_right_container = self.bot_right
         self.update_view()
 
     def _replace_zernike_widget(self, new_widget):
+        if self.bot_zernike is not None and not sip.isdeleted(self.bot_zernike):
+            self.bot_zernike.deleteLater()
         self.bot_zernike = new_widget
         self.manager.main_window.bot_zernike_container = self.bot_zernike
         self.update_view()

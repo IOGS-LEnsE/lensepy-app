@@ -2,3 +2,12 @@
 # ZYGO Aberrations - module - ENGLISH
 zygo;Zygo
 surface_choice_interfer;Surface to display
+# Right display
+psf_and_slice;PSF et coupes
+psf_only;PSF
+psf_log;PSF (log)
+psf_slice;Coupes de la PSF
+ftm_and_slice;FTM et coupes
+ftm_only;FTM
+ftm_slice;Coupes de la FTM
+circled_energy;Energie Encerclée

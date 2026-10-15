@@ -20,19 +20,17 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import pyqtSignal, QTimer, Qt
 import numpy as np
 from lensepy import load_dictionary, translate
-from lensepy.css import *
-from lensepy_app.appli._app.main_view import get_disp_mode
+from lensepy_app import *
+from lensepy_app.appli import *
 
 # %% Widget
-class ComboBoxBloc(QWidget):
+class ComboBoxBloc(ModuleWidget):
     selection_changed = pyqtSignal(str)
 
     def __init__(self, title: str, list_options: list,
                  default: bool = True, current=0, parent=None,
                  vertical=False) -> None:
-        super().__init__(parent=None)
-        self.parent = parent
-        self.general_display_mode, self.general_theme = get_disp_mode(self.parent)
+        super().__init__(parent=parent)
 
         if vertical:
             self.layout = QVBoxLayout()
@@ -40,14 +38,15 @@ class ComboBoxBloc(QWidget):
             self.layout = QHBoxLayout()
 
         self.label = QLabel(translate(title))
-        self.label.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
 
         self.combobox = QComboBox()
-        if default:
+        self.default = default
+        if self.default:
             self.combobox.addItem(translate('select_option_default'))
         self.combobox.addItems(list_options)
         self.combobox.setCurrentIndex(current)
-        self.combobox.setStyleSheet(STYLE_H3[self.general_display_mode])
+        self.combobox.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
 
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.combobox)
@@ -76,7 +75,8 @@ class ComboBoxBloc(QWidget):
 
     def update_options(self, list_options):
         self.combobox.clear()
-        self.combobox.addItem(translate('select_option_default'))
+        if self.default:
+            self.combobox.addItem(translate('select_option_default'))
         self.combobox.setCurrentIndex(0)
         self.combobox.addItems(list_options)
 
@@ -87,7 +87,7 @@ class ComboBoxBloc(QWidget):
         return self.combobox.currentIndex()
 
 
-class ButtonSelectionWidget(QWidget):
+class ButtonSelectionWidget(ModuleWidget):
 
     clicked = pyqtSignal(str)
 
@@ -97,7 +97,6 @@ class ButtonSelectionWidget(QWidget):
         :param parent: Parent window of the main widget.
         """
         super().__init__(parent=parent)
-        self.parent = parent
         self.select_layout = QGridLayout()
         self.setLayout(self.select_layout)
         self.label_select = QLabel(translate(name))
@@ -110,8 +109,8 @@ class ButtonSelectionWidget(QWidget):
         self.select_layout.addWidget(self.label_select)
         for i, element in enumerate(self.list_options):
             button = QPushButton(element)
-            button.setStyleSheet(styleH2)
-            button.setStyleSheet(unactived_button)
+            button.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
+            button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
             button.clicked.connect(self.action_clicked)
             self.list_buttons.append(button)
             self.select_layout.addWidget(button, 0, i+1)
@@ -131,10 +130,10 @@ class ButtonSelectionWidget(QWidget):
         for i in range(len(self.list_options)):
             if sender == self.list_buttons[i]:
                 self.selected = i
-                self.list_buttons[i].setStyleSheet(actived_button)
+                self.list_buttons[i].setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
                 self.clicked.emit(f'select_{i}')
             else:
-                self.list_buttons[i].setStyleSheet(unactived_button)
+                self.list_buttons[i].setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def get_selection(self):
         """Return the selected object value."""
@@ -149,7 +148,7 @@ class ButtonSelectionWidget(QWidget):
         :param index: Index of the object to activate.
         """
         self.selected = index-1
-        self.list_buttons[index-1].setStyleSheet(actived_button)
+        self.list_buttons[index-1].setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
 
 # %% Example

@@ -192,8 +192,7 @@ class ZygoAberrationsController(TemplateController):
             self._replace_top_right_widget(QWidget())
             self._replace_zernike_widget(CoefficientsView(parent=self, number=self.nb_coeff))
         else:
-            self.top_left = Surface2DView(translate('interferogram'),
-                                          colormap_2D='gray', parent=self)
+            self.top_left = SurfaceOptionsView(parent=self)
             self.bot_left = Surface2D3DView(translate('unwrapped_surface'),
                                             parent=self,
                                             colormap=self.colormap_2D)
@@ -246,7 +245,8 @@ class ZygoAberrationsController(TemplateController):
                 translate('psf_slice'),
                 translate('ftm_and_slice'),
                 translate('ftm_only'),
-                translate('ftm_slice')
+                translate('ftm_slice'),
+                translate('circled_energy')
         """
         wavelength = float(self.manager.variables['wavelength']) * 1e-9
         pad_factor = float(self.manager.variables['pad_factor'])
@@ -258,68 +258,21 @@ class ZygoAberrationsController(TemplateController):
         x_ax_surface = np.linspace(-N_size // 2, N_size // 2 - 1, N_size) * image_radius * 1e3  # mm
 
         # Process depending on top/bot and data to display
+        if value == translate('psf_and_slice'):
+            widget = self._display_psf_and_slice()
+        elif value == translate('psf_log'):
+            widget = self._display_psf_log()
+        elif value == translate('ftm_and_slice'):
+            widget = self._display_ftm_and_slice()
+        else:
+            widget = QWidget()
+
         if index == 'top':
             self.top_right_disp = value
-            if value == translate('psf_and_slice'):
-                psf = self.manager.variables['psf_results']['psf']
-
-                # Zoom In ?
-                psf_c, size_z = zoom_image_square(psf, threshold=0.001)
-                psf_c = psf
-                # Axis construction (with zoom)
-
-                # Display
-                widget = ImageCrossSections(parent=self, cmap='gray',
-                                            title=translate('psf_and_slice_title'))
-                widget.set_data(psf_c)
-                widget.set_x_axis(x_ax_surface)
-                widget.set_y_axis(x_ax_surface)
-                widget.set_color_map('gray')
-                self.top_right.deleteLater()
-                self._replace_top_right_widget(widget)
-            elif value == translate('psf_log'):
-                psf = self.manager.variables['psf_results']['psf']
-                widget = ImageCrossSections(parent=self, cmap='gray',
-                                            title=translate('psf_log_title'))
-                widget.set_data(np.log(psf+0.001))
-                widget.set_color_map('gray')
-                self.top_right.deleteLater()
-                self._replace_top_right_widget(widget)
-            elif value == translate('ftm_and_slice'):
-                ftm = self.manager.variables['psf_results']['ftm']
-                widget = ImageCrossSections(parent=self, cmap='gray',
-                                            title=translate('ftm_and_slice_title'))
-                widget.set_data(ftm)
-                widget.set_color_map('gray')
-                self.top_right.deleteLater()
-                self._replace_top_right_widget(widget)
-            else:
-                widget = QWidget()
-                self.top_right.deleteLater()
-                self._replace_top_right_widget(widget)
-
-        if index == 'bot':
+            self._replace_top_right_widget(widget)
+        elif index == 'bot':
             self.bot_right_disp = value
-            if value == translate('psf_and_slice'):
-                psf = self.manager.variables['psf_results']['psf']
-                widget = ImageCrossSections(parent=self, cmap='gray',
-                                            title=translate('psf_and_slice_title'))
-                widget.set_data(psf)
-                widget.set_color_map('gray')
-                self.bot_right.deleteLater()
-                self._replace_bot_right_widget(widget)
-            elif value == translate('psf_log'):
-                psf = self.manager.variables['psf_results']['psf']
-                widget = ImageCrossSections(parent=self, cmap='gray',
-                                            title=translate('psf_log_title'))
-                widget.set_data(np.log(psf+0.001))
-                widget.set_color_map('gray')
-                self.bot_right.deleteLater()
-                self._replace_bot_right_widget(widget)
-            else:
-                widget = QWidget()
-                self.bot_right.deleteLater()
-                self._replace_bot_right_widget(widget)
+            self._replace_bot_right_widget(widget)
 
     def handle_tilt_changed(self, value):
         self.tilt = value
@@ -338,6 +291,7 @@ class ZygoAberrationsController(TemplateController):
             self.bot_zernike.reactivate_params_button()
         # Restart process of PSF
         print(f'New PAD = {self.manager.get_variable("pad_factor")}')
+        self.process_PSF()
 
 
     def handle_coeffs_windowed(self, value):
@@ -386,6 +340,39 @@ class ZygoAberrationsController(TemplateController):
     def cleanup(self):
         self.params_window.deleteLater()
         self.coeffs_window.deleteLater()
+
+    def _display_psf_and_slice(self, axis=None):
+        psf = self.manager.variables['psf_results']['psf']
+
+        # Zoom In ?
+        psf_c, size_z = zoom_image_square(psf, threshold=0.001)
+        psf_c = psf
+        # Axis construction (with zoom)
+        x_axis = axis if not None else np.linspace(0, psf_c.shape[0]-1, psf_c.shape[0])
+        # Display
+        widget = ImageCrossSections(parent=self, cmap='gray',
+                                    title=translate('psf_and_slice_title'))
+        widget.set_data(psf_c)
+        widget.set_x_axis(x_axis)
+        widget.set_color_map('gray')
+        return widget
+
+    def _display_psf_log(self, axis=None):
+        psf = self.manager.variables['psf_results']['psf']
+        widget = ImageCrossSections(parent=self, cmap='gray',
+                                    title=translate('psf_log_title'))
+        widget.set_data(np.log(psf + 0.001))
+        widget.set_color_map('gray')
+        return widget
+
+    def _display_ftm_and_slice(self, axis=None):
+        ftm = self.manager.variables['psf_results']['ftm']
+        widget = ImageCrossSections(parent=self, cmap='gray',
+                                    title=translate('ftm_and_slice_title'))
+        widget.set_data(ftm)
+        widget.set_color_map('gray')
+        return widget
+
 
 
 class ProcessDataWorker(Worker):
@@ -467,7 +454,6 @@ class ProcessPSFWorker(Worker):
 
     def run(self):
         try:
-            print(f'PSF Worker - RUNNING')
             for i in range(2):
                 self.process_step(i+1)
                 self.emit_progress(i+1)
@@ -481,7 +467,6 @@ class ProcessPSFWorker(Worker):
                 'ftm_perfect': self.ftm_perfect,
                 'strehl': self.strehl_ratio
             }
-            print(f'PSF Worker - STOPPING')
             self.finished.emit(results)
 
         except Exception as e:

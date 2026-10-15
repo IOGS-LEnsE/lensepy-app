@@ -1,6 +1,7 @@
 __all__ = [
     'LAMBDA', 'BLUE_IOGS', 'ORANGE_IOGS',
     'STYLE_H1', 'STYLE_H2', 'STYLE_H3', 'NO_STYLE',
+    'STYLE_L', 'STYLE_T',
     'STYLE_CHECKBOX', 'GAUGE_BG', 'LABEL_BG', 'IMAGE_BG', 'IMAGE_INTRO_BG',
     'styleL', 'styleT', 'styleL_s', 'styleT_s',
     'INACTIVATED_BUTTON', 'ACTIVATED_BUTTON', 'DISABLED_BUTTON',
@@ -59,12 +60,32 @@ NO_STYLE = {
     'LITE': f"background-color:{GRAY}; color:{BLACK}; font-size:12px;"
 }
 STYLE_L = {
-    'CLASSIC': f"font-size:14px; padding:0px; color:{ORANGE_IOGS}; font-weight: bold;",
-    'LITE': f"font-size:10px; padding:0px; color:{ORANGE_IOGS}; font-weight: bold;"
+    'WHITE': {
+        'CLASSIC': f"font-size:14px; padding:0px; color:{ORANGE_IOGS}; "
+                   f"font-weight: bold;",
+        'LITE': f"font-size:10px; padding:0px; color:{ORANGE_IOGS}; "
+                f"font-weight: bold;"
+    },
+    'BLACK': {
+        'CLASSIC': f"font-size:14px; padding:0px; color:{ORANGE_IOGS}; "
+                   f"font-weight: bold;",
+        'LITE': f"font-size:10px; padding:0px; color:{ORANGE_IOGS}; "
+                f"font-weight: bold;"
+    },
 }
 STYLE_T = {
-    'CLASSIC': f"font-size:14px; padding:5px; font-weight: bold; background-color: white;",
-    'LITE': f"font-size:10px; padding:2px; font-weight: bold; background-color: white;"
+    'WHITE': {
+        'CLASSIC': f"font-size:14px; padding:5px; font-weight: bold; "
+                   f"background-color: white;",
+        'LITE': f"font-size:10px; padding:2px; font-weight: bold; "
+                f"background-color: white;"
+    },
+    'BLACK': {
+        'CLASSIC': f"font-size:14px; padding:5px; font-weight: bold; "
+                   f"background-color: #1d2327; color:white;",
+        'LITE': f"font-size:10px; padding:2px; font-weight: bold; "
+                f"background-color: #1d2327; color:white;"
+    },
 }
 
 style_checkbox_white = ("""

@@ -922,7 +922,6 @@ class LabelValueWidget(ModuleWidget):
         self.text.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.unit = QLabel(unit)
-        print(f'BG = {LABEL_BG[self.global_theme]}')
         self.text.setStyleSheet(f'background-color: {LABEL_BG[self.global_theme]}')
         layout.addWidget(self.label, int(ratio*100))
         layout.addWidget(self.text, int((1-ratio)*100))

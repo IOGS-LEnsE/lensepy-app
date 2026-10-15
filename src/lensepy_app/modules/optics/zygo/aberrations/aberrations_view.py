@@ -5,33 +5,28 @@
 .. moduleauthor:: Julien VILLEMEJANE (PRAG LEnsE) <julien.villemejane@institutoptique.fr>
 Creation : march/2025
 """
-import sys, os, time
-from lensepy import load_dictionary, translate, dictionary, is_float
+import sys
+from lensepy import translate
 from lensepy_app import *
 from lensepy_app.appli import *
 from lensepy_app.widgets import Surface2DView
 from lensepy_app.widgets.objects import *
-from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view import PVRMSView
 from PyQt6.QtWidgets import (
-    QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
-    QVBoxLayout, QGridLayout,
-    QApplication,
-    QTableWidget, QTableWidgetItem, QFileDialog, QMessageBox, QSlider
+    QLabel, QHBoxLayout, QWidget,
+    QVBoxLayout, QApplication
 )
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent, QResizeEvent, QFont
-from lensepy.optics.zygo.fourier_manager import FourierManager
-from lensepy.images import slice_image
+from PyQt6.QtCore import pyqtSignal
 
 
 display_options_values = [
-    translate('psf_and_slice'),
-    translate('psf_only'),
-    translate('psf_log'),
-    translate('psf_slice'),
-    translate('ftm_and_slice'),
-    translate('ftm_only'),
-    translate('ftm_slice')
+    'psf_and_slice',
+    'psf_only',
+    'psf_log',
+    'psf_slice',
+    'ftm_and_slice',
+    'ftm_only',
+    'ftm_slice',
+    'circled_energy'
 ]
 
 
@@ -91,9 +86,9 @@ class SurfaceOptionsView(ModuleWidget):
         layout = QHBoxLayout()
         self.setLayout(layout)
 
-        self.surface = Surface2DView(
-                translate('interferogram'), colormap_2D='gray')
-        self.options = OptionsView()
+        self.surface = Surface2DView(translate('interferogram'),
+                                     colormap_2D='gray', parent=self.controller)
+        self.options = OptionsView(parent=self.controller)
 
         layout.addWidget(self.surface, 4)
         layout.addWidget(self.options, 1)
@@ -120,14 +115,16 @@ class OptionsView(ModuleWidget):
 
         layout = QVBoxLayout()
         self.setLayout(layout)
+        display_options_values_tr = [translate(x)
+                                     for x in display_options_values]
 
         self.top_right_option = ComboBoxBloc(translate('top_right_option'),
-                                             display_options_values,
+                                             display_options_values_tr,
                                              parent=self.controller,
                                              default=False,
                                              vertical=True)
         self.bot_right_option = ComboBoxBloc(translate('bot_right_option'),
-                                             display_options_values,
+                                             display_options_values_tr,
                                              parent=self.controller,
                                              default=False,
                                              vertical=True)
