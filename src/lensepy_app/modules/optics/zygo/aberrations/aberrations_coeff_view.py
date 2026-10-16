@@ -84,7 +84,9 @@ class ZernikeCoeffBar(ModuleWidget):
         return self.checkbox.isChecked()
 
     def set_checked(self, checked=True):
+        self.checkbox.blockSignals(True)
         self.checkbox.setChecked(checked)
+        self.checkbox.blockSignals(False)
 
 
 class CoefficientsView(ModuleWidget):
@@ -183,9 +185,9 @@ class CoefficientsView(ModuleWidget):
             t_color = coeff_text_colors[coeff_order[k] // 2]
             gauge.set_colors(GAUGE_BG[self.global_theme], color)
             self.sliders.append(gauge)
+            self.sliders[k].set_value(0)
             if k != 0:
                 gauge.correction_changed.connect(self.handle_correction_changed)
-            self.sliders[k].set_value(0)
             self.slider_layout.addWidget(self.sliders[k])
         self.sliders[0].set_value(0)
         self.sliders[0].set_checked(False)
@@ -198,16 +200,8 @@ class CoefficientsView(ModuleWidget):
         self.tilt_button.setEnabled(value)
         self.focus_button.setEnabled(value)
 
-    def connect_gauges(self, value=True):
-        for gauge in self.sliders:
-            if value:
-                gauge.correction_changed.connect(self.handle_correction_changed)
-            else:
-                gauge.correction_changed.disconnect(self.handle_correction_changed)
-
     def _update_checked(self):
         self.coeffs_correction = []
-        #self.connect_gauges(False)
         # Update check boxes
         for k in range(self.number+1):
             self.coeffs_correction_bool[k] = False
@@ -224,9 +218,9 @@ class CoefficientsView(ModuleWidget):
             else:
                 self.sliders[k].set_value(self.coeffs[k])
         self.update()
-        #self.connect_gauges(True)
 
     def handle_tilt_changed(self):
+        print(f'TILT CHANGED _ CoeffView')
         # Specific correction for tilt and focus
         if self.tilt_button.isChecked():
             self.sliders[1].set_checked(False)
@@ -239,6 +233,7 @@ class CoefficientsView(ModuleWidget):
             self.sliders[1].setEnabled(True)
             self.sliders[2].setEnabled(True)
         self.tilt_changed.emit(self.tilt_button.isChecked())
+        self.handle_correction_changed()    # LAST ADDED
 
     def handle_focus_changed(self):
         # Specific correction for tilt and focus
@@ -249,6 +244,7 @@ class CoefficientsView(ModuleWidget):
             self.sliders[3].set_checked(True)
             self.sliders[3].setEnabled(True)
         self.focus_changed.emit(self.focus_button.isChecked())
+        self.handle_correction_changed()    # LAST ADDED
 
     def handle_correction_changed(self):
         # Action performed when a coefficient is clicked for correction.

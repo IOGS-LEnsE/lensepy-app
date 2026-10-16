@@ -90,6 +90,7 @@ class ZygoAberrationsController(TemplateController):
         return widget
 
     def handle_tilt_changed(self, value):
+        print(f'TILT CHANGED: {value}')
         self.tilt = value
         self._process_correction_coeff()
 

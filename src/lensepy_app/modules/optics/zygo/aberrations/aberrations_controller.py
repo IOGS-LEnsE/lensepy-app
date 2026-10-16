@@ -184,6 +184,7 @@ class ZygoAberrationsController(TemplateController):
             self._replace_bot_right_widget(QWidget())
             self._replace_top_right_widget(QWidget())
             self._replace_zernike_widget(CoefficientsView(parent=self, number=self.nb_coeff))
+            self.update()
         else:
             self.top_left = SurfaceOptionsView(parent=self)
             self.bot_left = Surface2D3DView(translate('unwrapped_surface'),
@@ -199,6 +200,7 @@ class ZygoAberrationsController(TemplateController):
         self.bot_zernike.params_windowed.connect(self.handle_params_windowed)
         self.bot_zernike.coeffs_windowed.connect(self.handle_coeffs_windowed)
         self.top_left.selection_changed.connect(self.handle_right_selection_changed)
+        self.bot_zernike.correction_changed.connect(self.handle_correction_changed)
 
         ## Interferogram
         image1 = self.data_set.get_image_from_set(1, 1)
@@ -216,11 +218,8 @@ class ZygoAberrationsController(TemplateController):
         coeffs = self.zernike_coeffs.get_coeffs()
         self.bot_zernike.set_coeffs(coeffs)
 
-        # Process zernike coefficients correction from phase
-        self._process_correction_coeff()
-        coeffs = self.zernike_coeffs.get_coeffs()
-
     def display_results_psf(self, results):
+        print("DISPLAY RESULTS PSF")
         self.psf_processing = False
         self.manager.variables['psf_results'] = results
         ## Display
@@ -228,9 +227,9 @@ class ZygoAberrationsController(TemplateController):
         self._replace_top_right_widget(ImageCrossSections(parent=self, cmap='gray'))
         self.handle_right_selection_changed('top', self.top_right_disp)
         self.handle_right_selection_changed('bot', self.bot_right_disp)
-        self.bot_zernike.correction_changed.connect(self.handle_correction_changed)
         self.bot_zernike.set_enabled(True)
         strehl_ratio = results['strehl']
+        print(f'Strehl ratio: {strehl_ratio}')
         self.bot_zernike.set_strehl(strehl_ratio)
 
     def init_view(self):
@@ -285,6 +284,7 @@ class ZygoAberrationsController(TemplateController):
             self._replace_bot_right_widget(widget)
 
     def handle_tilt_changed(self, value):
+        print(f'TITL CHANGED Controller')
         self.tilt = value
         self._process_correction_coeff()
 
@@ -334,6 +334,7 @@ class ZygoAberrationsController(TemplateController):
             self.wavefront_disp = unwrapped_phase
 
     def handle_correction_changed(self, coeffs):
+        print("HANDLE CORRECTION", id(self), id(self.bot_zernike))
         self.processing()
         # Process correction - new wavefront
         self._process_correction_coeff(coeffs)
@@ -342,7 +343,6 @@ class ZygoAberrationsController(TemplateController):
         self.bot_left.set_surface(self.wavefront_disp)
         self.bot_zernike.set_pv_rms(pv, rms, units=LAMBDA)
         # Process new PSF
-        print(f'HANDLE CORRECTION')
         self.psf_update_pending = True
         self._start_psf_if_needed()
 
