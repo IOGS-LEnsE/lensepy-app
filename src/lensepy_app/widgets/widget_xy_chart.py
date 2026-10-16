@@ -16,10 +16,11 @@ from PyQt6.QtCore import Qt, QSizeF
 from pyqtgraph import PlotWidget, mkPen, mkBrush
 from lensepy_app import *
 from lensepy_app.appli import *
+import pyqtgraph as pg
 
 
-LINES = [Qt.PenStyle.DashLine, Qt.PenStyle.DashDotLine,
-         Qt.PenStyle.SolidLine,  Qt.PenStyle.DashDotDotLine]
+LINES = [Qt.PenStyle.SolidLine, Qt.PenStyle.DashLine,
+         Qt.PenStyle.DashDotLine, Qt.PenStyle.DashDotDotLine]
 
 class XYChartWidget(ModuleWidget):
     """
@@ -116,10 +117,12 @@ class XYChartWidget(ModuleWidget):
         """Add a legend to the graph with predefined positions."""
         self.y_name = y_legend
         self.legend_position = position
+        self.refresh_chart()
 
     def set_y_range(self, min_val, max_val):
         """Set Y axis range."""
         self.plot_chart_widget.setYRange(min_val, max_val)
+        self.refresh_chart()
 
     def refresh_chart(self, last: int = 0):
         """
@@ -130,6 +133,9 @@ class XYChartWidget(ModuleWidget):
         self.plot_chart_widget.clear()
         if self.y_name != '':
             legend = self.plot_chart_widget.addLegend()
+
+            legend.setBrush(pg.mkBrush(127, 127, 127, 255))
+            legend.setPen(pg.mkPen('#FFFFFF'))
 
             # Positions prédéfinies
             positions = {
@@ -241,7 +247,7 @@ class XYChartWidget(ModuleWidget):
         if self.y_name != '':
             for sample, label in legend.items:
                 text = label.text
-                label.setText(f'<span style="color:black; font-size:12pt;">{text}</span>')
+                label.setText(f'<span style="color:white;font-size:12pt;">{text}</span>')
 
     def update_infos(self, value: bool = True):
         """

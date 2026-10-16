@@ -59,7 +59,7 @@ class AnalysisInProgressView(ModuleWidget):
 class PSFInProgressView(ModuleWidget):
     """Analysis in progress."""
     def __init__(self, parent=None):
-        super().__init__(None)
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
         self.text = translate('psf_in_progress')
         self.label = QLabel(self.text)
@@ -71,6 +71,8 @@ class PSFInProgressView(ModuleWidget):
         self.text = translate('psf_in_progress')
         if step >= 1:
             self.text += '\n'+translate('psf_phase_ok')
+        if step >= 2:
+            self.text += '\n'+translate('ftm_strehl_ok')
 
         self.label.setText(self.text)
         self.label.repaint()
@@ -99,8 +101,8 @@ class SurfaceOptionsView(ModuleWidget):
     def set_surface(self, surface):
         self.surface.set_array(surface)
 
-    def set_visible(self, index, value=True):
-        self.options.set_visible(index, value)
+    def set_visible(self, step, value=True):
+        self.options.set_visible(step, value)
 
     def handle_selection_changed(self, index, value):
         self.selection_changed.emit(index, value)
@@ -142,24 +144,19 @@ class OptionsView(ModuleWidget):
         self.top_right_option.selection_changed.connect(self.handle_selection_changed)
         self.bot_right_option.selection_changed.connect(self.handle_selection_changed)
 
-    def set_visible(self, index, value=True):
+    def set_visible(self, step, value=True):
         if value:
-            if index == 'top':
-                self.top_right_option.show()
-            if index == 'bot':
-                self.bot_right_option.show()
-            if index == 'info':
-                self.info_option.hide()
+            self.top_right_option.show()
+            self.bot_right_option.show()
+            self.info_option.hide()
         else:
-            if index == 'top':
-                self.top_right_option.hide()
-            if index == 'bot':
-                self.bot_right_option.hide()
-            if index == 'info':
-                self.info_option.show()
+            self.top_right_option.hide()
+            self.bot_right_option.hide()
+            self.update_info(step)
 
-    def update_info(self, index):
-        self.info_option.update_text(index)
+    def update_info(self, step):
+        self.info_option.show()
+        self.info_option.update_text(step)
 
     def handle_selection_changed(self):
         sender = self.sender()

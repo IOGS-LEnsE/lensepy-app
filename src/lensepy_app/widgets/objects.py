@@ -870,12 +870,8 @@ class LabelWidget(QWidget):
         super().__init__(parent)
 
         if size == '':
-            style_L = styleL
-            style_T = styleT
             MINIMUM_WIDTH = 75
         else:
-            style_L = styleL_s
-            style_T = styleT_s
             MINIMUM_WIDTH = 40
 
         layout = QHBoxLayout()

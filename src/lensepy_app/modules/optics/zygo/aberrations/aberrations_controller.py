@@ -167,9 +167,7 @@ class ZygoAberrationsController(TemplateController):
         self.top_left.update_text(step)
 
     def update_progress_psf(self, step):
-        if step == 2:
-            self.top_left.set_visible('top')
-            self.top_left.set_visible('bot')
+        self.top_left.set_visible(step, value=False)
 
     def display_results(self, results, first=True):
         self.manager.variables['phase_results'] = results
@@ -206,8 +204,13 @@ class ZygoAberrationsController(TemplateController):
         image1 = self.data_set.get_image_from_set(1, 1)
         mask = self.data_set.get_global_mask()  # TO CHANGE WITH AUTO MASK
         self.top_left.set_surface(image1 * mask)
+
+        # Process correction - new wavefront
+        self._process_correction_coeff()
         # Display wavefront
-        self.bot_left.set_surface(results['surface'])
+        self.bot_left.set_surface(self.wavefront_disp)
+        pv, rms = process_statistics_surface(self.wavefront_disp)
+        self.bot_zernike.set_pv_rms(pv, rms, units=LAMBDA)
 
         ## Zernike Coefficients
         coeffs = self.zernike_coeffs.get_coeffs()
@@ -221,21 +224,22 @@ class ZygoAberrationsController(TemplateController):
         self.psf_processing = False
         self.manager.variables['psf_results'] = results
         ## Display
+        self.processing(False)
         self._replace_top_right_widget(ImageCrossSections(parent=self, cmap='gray'))
         self.handle_right_selection_changed('top', self.top_right_disp)
         self.handle_right_selection_changed('bot', self.bot_right_disp)
         self.bot_zernike.correction_changed.connect(self.handle_correction_changed)
         self.bot_zernike.set_enabled(True)
+        strehl_ratio = results['strehl']
+        self.bot_zernike.set_strehl(strehl_ratio)
 
     def init_view(self):
         super().init_view()
 
     def processing(self, value=True):
         # BLOCK INTERFACE - Especially PSF/FTM display
-        self.top_left.set_visible('top', value=not value)
-        self.top_left.set_visible('bot', value=not value)
+        self.top_left.set_visible(0, value=not value)
         self.bot_zernike.set_enabled(not value)
-
 
     def handle_right_selection_changed(self, index, value):
         """
@@ -296,10 +300,10 @@ class ZygoAberrationsController(TemplateController):
         if isinstance(self.bot_zernike, CoefficientsView):
             self.bot_zernike.reactivate_params_button()
         # Restart process of PSF
-        print(f'New PAD = {self.manager.get_variable("pad_factor")}')
         if value:
-
+            self.processing()
             # Process new PSF
+            print(f'PARAMS WINDOW')
             self.psf_update_pending = True
             self._start_psf_if_needed()
 
@@ -330,10 +334,7 @@ class ZygoAberrationsController(TemplateController):
             self.wavefront_disp = unwrapped_phase
 
     def handle_correction_changed(self, coeffs):
-        # BLOCK INTERFACE - Especially PSF/FTM display
-        self.top_left.set_visible('top', value=False)
-        self.top_left.set_visible('bot', value=False)
-        self.bot_zernike.set_enabled(False)
+        self.processing()
         # Process correction - new wavefront
         self._process_correction_coeff(coeffs)
         # Display Wavefront
@@ -341,6 +342,7 @@ class ZygoAberrationsController(TemplateController):
         self.bot_left.set_surface(self.wavefront_disp)
         self.bot_zernike.set_pv_rms(pv, rms, units=LAMBDA)
         # Process new PSF
+        print(f'HANDLE CORRECTION')
         self.psf_update_pending = True
         self._start_psf_if_needed()
 
@@ -390,12 +392,17 @@ class ZygoAberrationsController(TemplateController):
             x_axis = np.linspace(0, N_size-1, N_size)
         psf_c_line = psf_c[N_zoom//2, :]
         psf_p_line = psf_p[N_zoom//2, :]
-        print(f'psf_c_line = {psf_c_line.shape} / psf_p_line = {psf_p_line.shape}'
-              f' / x_axis = {x_axis.shape}')
-        data = [psf_p_line, psf_c_line]
+        strehl_ratio = self.manager.variables['psf_results']['strehl']
+        data = [strehl_ratio*psf_c_line, psf_p_line]
         # Display
-        widget = XYChartWidget(parent=self, title=translate('psf_and_slice_title'))
-        widget.set_data(x_axis, data)
+        widget = XYChartWidget(parent=self, title=translate('psf_slice_title'))
+        theme = self.get_config('global_theme')
+        widget.set_background(IMAGE_BG[theme])
+        x_label = translate('x_axis_in_um')
+        widget.set_data(x_axis, data, x_label=x_label, y_label=translate('y_axis_norm'))
+        legends = [translate('real_psf_slice_label'),
+                   translate('perfect_psf_slice_label')]
+        widget.set_legend(legends)
         return widget
 
     def _display_psf_only(self, axis=None):
@@ -543,7 +550,7 @@ class ProcessPSFWorker(Worker):
                 'psf_perfect': self.psf_perfect,
                 'ftm': self.ftm,
                 'ftm_perfect': self.ftm_perfect,
-                'strehl': self.strehl_ratio
+                'strehl': np.round(self.strehl_ratio, 3)
             }
             self.finished.emit(results)
 

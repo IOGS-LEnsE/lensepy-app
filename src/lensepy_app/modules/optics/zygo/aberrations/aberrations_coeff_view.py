@@ -167,12 +167,13 @@ class CoefficientsView(ModuleWidget):
         layout.addWidget(make_vline())
         layout.addWidget(self.slider_widget)
 
+        # Setup
+        self.init_view()
+
         # Signals
         self.params_button.clicked.connect(self.handle_parameters_view)
         self.coeffs_button.clicked.connect(self.handle_coefficients_view)
 
-        # Setup
-        self.init_view()
 
     def init_view(self):
         for k in range(self.number+1):
@@ -197,8 +198,16 @@ class CoefficientsView(ModuleWidget):
         self.tilt_button.setEnabled(value)
         self.focus_button.setEnabled(value)
 
+    def connect_gauges(self, value=True):
+        for gauge in self.sliders:
+            if value:
+                gauge.correction_changed.connect(self.handle_correction_changed)
+            else:
+                gauge.correction_changed.disconnect(self.handle_correction_changed)
+
     def _update_checked(self):
         self.coeffs_correction = []
+        #self.connect_gauges(False)
         # Update check boxes
         for k in range(self.number+1):
             self.coeffs_correction_bool[k] = False
@@ -215,6 +224,7 @@ class CoefficientsView(ModuleWidget):
             else:
                 self.sliders[k].set_value(self.coeffs[k])
         self.update()
+        #self.connect_gauges(True)
 
     def handle_tilt_changed(self):
         # Specific correction for tilt and focus
@@ -307,6 +317,9 @@ class CoefficientsView(ModuleWidget):
     def set_pv_rms(self, pv, rms, units=''):
         self.pv_rms.set_pv(value=pv, unit=units)
         self.pv_rms.set_rms(value=rms, unit=units)
+
+    def set_strehl(self, value):
+        self.strehl_ratio.set_value(value)
 
 
 class CoefficientsValueView(ModuleWidget):

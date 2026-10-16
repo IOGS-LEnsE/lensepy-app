@@ -3,6 +3,7 @@ __all__ = [
     'STYLE_H1', 'STYLE_H2', 'STYLE_H3', 'NO_STYLE',
     'STYLE_L', 'STYLE_T',
     'STYLE_CHECKBOX', 'GAUGE_BG', 'LABEL_BG', 'IMAGE_BG', 'IMAGE_INTRO_BG',
+    'IMAGE_TEXT',
     'styleL', 'styleT', 'styleL_s', 'styleT_s',
     'INACTIVATED_BUTTON', 'ACTIVATED_BUTTON', 'DISABLED_BUTTON',
     'BUTTON_HEIGHT', 'OPTIONS_BUTTON_HEIGHT'
@@ -147,6 +148,10 @@ LABEL_BG = {
 IMAGE_BG = {
     'WHITE': 'white',
     'BLACK': '#1d2327',
+}
+IMAGE_TEXT = {
+    'WHITE': '#1d2327',
+    'BLACK': 'white',
 }
 IMAGE_INTRO_BG = {
     'WHITE': 'white',

@@ -111,7 +111,7 @@ class ImageCrossSections(ModuleWidget):
         layout.addWidget(self.plot_image, 1, 1)
         # Title
         self.title_label = QLabel(self.title)
-        self.title_label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
+        self.title_label.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         layout.addWidget(self.title_label, 0, 0)
