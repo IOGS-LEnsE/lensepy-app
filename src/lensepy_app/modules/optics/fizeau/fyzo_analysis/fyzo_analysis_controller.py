@@ -8,7 +8,10 @@ from PyQt6.QtCore import QThread
 from PyQt6.QtWidgets import QWidget
 
 from lensepy import translate
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
+from lensepy_app.widgets import Wavefront2D, Wavefront3D, ViewLink
+
 from lensepy.images.masks import *
 from lensepy.images.conversion import *
 from lensepy.optics.zygo import process_statistics_surface
@@ -27,12 +30,12 @@ class FyzoAnalysisController(TemplateController):
     """Controller for camera acquisition."""
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         # Attributes initialization
         self.x_cross = None
         self.y_cross = None
         self.contrast_enabled = False       # Enhance contrast
-        self.img_dir = self._get_image_dir(self.parent.parent.config['img_dir'])
+        self.img_dir = self._get_image_dir(self.manager.get_config('img_dir'))
         self.disp_mode = 'surface'
         self.image_disp = None
         self.fft_raw = None
@@ -45,7 +48,9 @@ class FyzoAnalysisController(TemplateController):
         self.view_3D = None
 
         # Widgets
-        self.top_left = Surface2DView(self)
+        self.view_2D = Wavefront2D(translate('unwrapped_2D_surface'),
+                                     parent=self, colormap='magma')
+        self.top_left = self.view_2D
         self.bot_left = QWidget()
         self.bot_right = ImageDisplayWidget(self)
         self.top_right = FyzoAnalysisOptionsView(self)
@@ -55,17 +60,18 @@ class FyzoAnalysisController(TemplateController):
         self.top_right.display_changed.connect(self.handle_display_changed)
         self.top_right.view_saved.connect(self.handle_png_saved)
         # Crop size / mask
-        mask = self.parent.variables['mask']
+        mask = self.get_variables('masks').get_global_mask()
         top_left, bottom_right = find_mask_limits(mask)
         self.img_height, self.img_width = bottom_right[1] - top_left[1], bottom_right[0] - top_left[0]
         self.img_pos_x, self.img_pos_y = top_left[1], top_left[0]
         self.mask = crop_images([mask], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
         # Initial Image
-        self.initial_image = self.parent.variables.get('image')
+        self.initial_image = self.get_variables('image')
         if self.initial_image is not None:
             self.bot_right.set_image_from_array(self.initial_image)
             self.process_data()
-            self.top_left.set_array2(self.surface)
+            #self.top_left.set_array2(self.surface)
+            self.top_left.set_data(self.surface)
             self.top_left.update()
             self.update_view()
 
@@ -74,21 +80,22 @@ class FyzoAnalysisController(TemplateController):
         # Crop image
         image_raw = crop_images([image_raw], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
         # Post Image
-        bits_depth = self.parent.variables["bits_depth"]
+        bits_depth = self.get_variables("bits_depth")
+        bits_depth = 8  # REMOVE IN LIVE VERSION
         pow = bits_depth - 8
         if pow > 0:
             image_8bits = image_raw // (2**pow)
         else:
             image_8bits = image_raw
 
-        if self.parent.variables["mask"] is not None:
-            # mask = self.parent.variables["mask"]
+        if self.get_variables("mask") is not None:
+            # mask = self.get_variables("mask")
             self.image_disp = np.ma.masked_where(np.logical_not(self.mask), image_8bits)
         else:
             self.image_disp = image_8bits
         self.bot_right.set_image_from_array(self.image_disp)
         # Store new image.
-        self.parent.variables['image_crop'] = image_raw
+        self.set_variables('image_crop', image_raw)
         # 3 modes
         self.fft_raw = self._process_fft(image_raw)
         self.fft_masked, idx_X, idx_Y = self._get_masked_fft(self.fft_raw)
@@ -132,7 +139,7 @@ class FyzoAnalysisController(TemplateController):
         :param image:   Numpy array containing new image.
         """
         # default display
-        widget = ImageDisplayWidget()
+        widget = ImageDisplayWidget(parent=self)
         self.replace_top_left_widget(widget)
         # Display mode
         if self.disp_mode == 'interfer':
@@ -145,22 +152,28 @@ class FyzoAnalysisController(TemplateController):
         elif self.disp_mode == 'fft_centered':
             self.top_left.set_image_from_array(self._disp_fft(self.fft_center))
         elif self.disp_mode == 'phase':
-            self.view_2D = Surface2DView()
-            self.view_2D.set_array2(self.unwrapped_phase)
-            self.view_2D.update()
+            self.view_2D = Wavefront2D(translate('unwrapped_2D_surface'),
+                                       parent=self, colormap='magma')
+            self.view_2D.set_data(self.unwrapped_phase)
             # TO UPDATE
             self.replace_top_left_widget(self.view_2D)
         elif self.disp_mode == 'surface':
-            self.view_2D = Surface2DView()
-            self.view_2D.set_array2(self.surface)
-            self.view_2D.update()
+            self.view_2D = Wavefront2D(translate('unwrapped_2D_surface'),
+                                       parent=self, colormap='magma')
+            self.view_2D.set_data(self.surface)
             self.replace_top_left_widget(self.view_2D)
             # TO UPDATE
         elif self.disp_mode == 'surface_3D':
-            self.view_3D = Surface3DView(parent=self)
+            self.view_3D = Wavefront3D(translate('unwrapped_3D_surface'),
+                        parent=self,
+                        disp_cmap=False, colormap='magma',
+                        initial_distance=3)
             self.replace_top_left_widget(self.view_3D)
+            '''
             x, y, w_s = self.view_3D.prepare_data_for_mesh(self.surface, undersampling=1) # TO CHANGE
             self.view_3D.create_mesh_surface(x, y, w_s)
+            '''
+            self.view_3D.set_data(self.surface)
         else:
             self.top_left.set_image_from_array(self.image_disp)
 
@@ -177,7 +190,7 @@ class FyzoAnalysisController(TemplateController):
         """
         Stop the camera cleanly and release resources.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             if getattr(camera, "is_open", False):
                 camera.close()
@@ -223,7 +236,7 @@ class FyzoAnalysisController(TemplateController):
 
     def replace_top_left_widget(self, new_widget):
         self.top_left = new_widget
-        self.parent.main_window.top_left_container = self.top_left
+        self.manager.main_window.top_left_container = self.top_left
         self.update_view()
 
     def handle_png_saved(self, filepath):

@@ -22,58 +22,58 @@ class FyzoAnalysisOptionsView(ModuleWidget):
         layout.addWidget(make_hline())
 
         label = QLabel(translate('fyzo_analysis_parameter_label'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
 
         # different display
         self.interfer_button = QPushButton(translate('interfer_display_button'))
-        self.interfer_button.setStyleSheet(unactived_button)
-        self.interfer_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.interfer_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.interfer_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.interfer_button.clicked.connect(self.handle_display_changed)
         layout.addWidget(self.interfer_button)
 
         self.fft_button = QPushButton(translate('fft_display_button'))
-        self.fft_button.setStyleSheet(unactived_button)
-        self.fft_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.fft_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.fft_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.fft_button.clicked.connect(self.handle_display_changed)
         layout.addWidget(self.fft_button)
 
         self.fft_masked_button = QPushButton(translate('fft_masked_display_button'))
-        self.fft_masked_button.setStyleSheet(unactived_button)
-        self.fft_masked_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.fft_masked_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.fft_masked_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.fft_masked_button.clicked.connect(self.handle_display_changed)
         layout.addWidget(self.fft_masked_button)
 
         self.fft_centered_button = QPushButton(translate('fft_centered_display_button'))
-        self.fft_centered_button.setStyleSheet(unactived_button)
-        self.fft_centered_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.fft_centered_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.fft_centered_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.fft_centered_button.clicked.connect(self.handle_display_changed)
         layout.addWidget(self.fft_centered_button)
 
         self.phase_button = QPushButton(translate('phase_display_button'))
-        self.phase_button.setStyleSheet(unactived_button)
-        self.phase_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.phase_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.phase_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.phase_button.clicked.connect(self.handle_display_changed)
         layout.addWidget(self.phase_button)
         layout.addWidget(make_hline())
         self.surface_button = QPushButton(translate('surface_display_button'))
-        self.surface_button.setStyleSheet(unactived_button)
-        self.surface_button.setFixedHeight(BUTTON_HEIGHT)
+        self.surface_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.surface_button.setFixedHeight(BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.surface_button.clicked.connect(self.handle_display_changed)
         layout.addWidget(self.surface_button)
         layout.addWidget(make_hline())
 
         self.surface_3D_button = QPushButton(translate('surface_3D_display_button'))
-        self.surface_3D_button.setStyleSheet(unactived_button)
-        self.surface_3D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.surface_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.surface_3D_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.surface_3D_button.clicked.connect(self.handle_display_changed)
         layout.addWidget(self.surface_3D_button)
         layout.addWidget(make_hline())
         layout.addStretch()
         self.saving_button = QPushButton(translate('saving_png_button'))
-        self.saving_button.setStyleSheet(unactived_button)
-        self.saving_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.saving_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.saving_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.saving_button.clicked.connect(self.handle_saving_png)
         layout.addWidget(self.saving_button)
         layout.addStretch()
@@ -89,33 +89,33 @@ class FyzoAnalysisOptionsView(ModuleWidget):
 
     def activate_mode(self, value):
         if value == 'surface':
-            self.surface_button.setStyleSheet(actived_button)
+            self.surface_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         if value == 'surface_3D':
-            self.surface_3D_button.setStyleSheet(actived_button)
+            self.surface_3D_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         elif value == 'interfer':
-            self.interfer_button.setStyleSheet(actived_button)
+            self.interfer_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         elif value == 'fft':
-            self.fft_button.setStyleSheet(actived_button)
+            self.fft_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         elif value == 'fft_masked':
-            self.fft_masked_button.setStyleSheet(actived_button)
+            self.fft_masked_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         elif value == 'fft_centered':
-            self.fft_centered_button.setStyleSheet(actived_button)
+            self.fft_centered_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         elif value == 'phase':
-            self.phase_button.setStyleSheet(actived_button)
+            self.phase_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def _inactivate_buttons(self):
-        self.fft_button.setStyleSheet(unactived_button)
-        self.interfer_button.setStyleSheet(unactived_button)
-        self.fft_masked_button.setStyleSheet(unactived_button)
-        self.fft_centered_button.setStyleSheet(unactived_button)
-        self.phase_button.setStyleSheet(unactived_button)
-        self.surface_button.setStyleSheet(unactived_button)
-        self.surface_3D_button.setStyleSheet(unactived_button)
+        self.fft_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.interfer_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.fft_masked_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.fft_centered_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.phase_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.surface_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.surface_3D_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def handle_display_changed(self):
         sender = self.sender()
         self._inactivate_buttons()
-        sender.setStyleSheet(actived_button)
+        sender.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         if sender == self.interfer_button:
             self.display_changed.emit('interfer')
         elif sender == self.fft_button:
@@ -160,7 +160,6 @@ class Fyzo3DSurfaceView(ModuleWidget):
 
     def __init__(self, parent=None, surface=None):
         super().__init__(parent=parent)
-        self.parent = parent    # Controller
         layout = QVBoxLayout()
 
         view_3D = Surface3DView(parent=self.controller)
@@ -173,8 +172,8 @@ class Fyzo3DSurfaceView(ModuleWidget):
 
         # Saving button
         self.save_button = QPushButton(translate('save_png_button'))
-        self.save_button.setStyleSheet(unactived_button)
-        self.save_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.save_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.save_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.save_button.clicked.connect(self.handle_saving_png)
         layout.addWidget(self.save_button)
 

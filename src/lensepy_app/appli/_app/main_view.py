@@ -78,7 +78,6 @@ class MainWindow(QMainWindow):
             button.clicked.connect(self.handle_main_menu)
             theme = self.manager.get_config('global_theme')
             mode = self.manager.get_config('global_mode')
-            print(f'theme = {theme} / mode = {mode}')
             button.setFixedHeight(BUTTON_HEIGHT[theme][mode])
             self.menu_button_name_list.append(f'{element}')
             self.menu_button_list.append(button)

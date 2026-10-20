@@ -28,10 +28,9 @@ class CameraParamsWidget(ModuleWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.parent = parent     # IDSController or equivalent
         layout = QVBoxLayout()
         # Attributes
-        self.camera = self.parent.get_variables()['camera']
+        self.camera = self.controller.get_variables('camera')
         # Graphical objects
         layout.addWidget(make_hline())
         label = QLabel(translate('ids_params_title'))
@@ -59,7 +58,7 @@ class CameraParamsWidget(ModuleWidget):
 
         else:
             nocam = QLabel(translate('no_ids_camera'))
-            nocam.setStyleSheet(styleH3)
+            nocam.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
             nocam.setAlignment(Qt.AlignmentFlag.AlignCenter)
             layout.addWidget(nocam)
 

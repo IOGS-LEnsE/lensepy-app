@@ -8,6 +8,7 @@
     <img_dir>%USERPROFILE%\Documents</img_dir>
     <mode>CLASSIC</mode>
     <theme>BLACK</theme>
+    <open_gl>1</open_gl>
     <contributors>
         <contributor type="main_dev">
             <name>Julien VILLEMEJANE</name>

@@ -207,6 +207,7 @@ class MasksTableList(QTableWidget):
             if sender == select_check:
                 if i == 0:
                     self.masks.invert_global_mask(sender.isChecked())
+                    print(f'Global Inversion : {sender.isChecked()}')
                 else:
                     self.masks.invert_mask(i, sender.isChecked())
                 self.masks_changed.emit()
@@ -762,7 +763,9 @@ class AddMaskView(ModuleWidget):
         self.check_display_mask.setEnabled(value)
 
     def set_checked_check(self, value=True):
+        self.check_display_mask.blockSignals(True)
         self.check_display_mask.setChecked(value)
+        self.check_display_mask.blockSignals(False)
 
     def is_mask_displayed(self):
         return self.check_display_mask.isChecked()

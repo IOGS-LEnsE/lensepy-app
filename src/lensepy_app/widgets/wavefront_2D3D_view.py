@@ -10,6 +10,8 @@ Optionnel   : pip install scikit-image   (meilleur déroulement de phase)
 """
 import sys
 import numpy as np
+from PyQt6.QtGui import QPixmap, QColor, QPainter
+
 from lensepy_app import *
 from lensepy_app.appli import *
 import pyqtgraph as pg
@@ -80,6 +82,7 @@ class _WavefrontBase(ModuleWidget):
         self._rms = float(vals.std())
         self.label_PV_RMS.setText("PV = %.3f λ     RMS = %.3f λ" % (self._pv, self._rms))
         self.stats_changed.emit(self._pv, self._rms)
+        print(f'Title = {self.title}')
 
         self._refresh()
 
@@ -102,6 +105,30 @@ class _WavefrontBase(ModuleWidget):
     @property
     def rms(self):
         return self._rms
+
+    def save_image(self, path, background='white'):
+        '''
+        path = str(path)
+        pixmap = self.grab()
+        return pixmap.save(path, "PNG")
+        '''
+        """Sauvegarde le widget en PNG avec un fond temporaire."""
+        self._set_export_background(background)
+
+        try:
+            QtWidgets.QApplication.processEvents()
+            pixmap = self.grab()
+            return pixmap.save(str(path), "PNG")
+        finally:
+            self._restore_export_background()
+
+    def _set_export_background(self, background):
+        """À implémenter dans les sous-classes."""
+        pass
+
+    def _restore_export_background(self):
+        """À implémenter dans les sous-classes."""
+        pass
 
     # --- utilitaires internes ----------------------------------------
     def _get_cmap(self):
@@ -343,6 +370,13 @@ class Wavefront3D(_WavefrontBase):
         self._cb_plot.setXRange(0, 1, padding=0)
         self._cb_plot.setYRange(vmin, vmax, padding=0)
 
+    def _set_export_background(self, background):
+        self._old_export_background = self.view.opts["bgcolor"]
+        self.view.setBackgroundColor(background)
+        self.view.repaint()
+
+    def _restore_export_background(self):
+        self.view.setBackgroundColor(self._old_export_background)
 
 # ======================================================================
 # Affichage 2D (image)
@@ -425,6 +459,13 @@ class Wavefront2D(_WavefrontBase):
         self.img.setRect(QtCore.QRectF(X.min() - dx / 2, Y.min() - dy / 2,
                                        dx * nx, dy * ny))
         self.plot.autoRange()
+
+    def _set_export_background(self, background):
+        self._old_export_background = self.glw.backgroundBrush()
+        self.glw.setBackground(background)
+
+    def _restore_export_background(self):
+        self.glw.setBackground(self._old_export_background)
 
 
 class ViewLink(QObject):

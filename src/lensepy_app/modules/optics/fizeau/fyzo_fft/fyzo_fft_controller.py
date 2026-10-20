@@ -11,6 +11,8 @@ from lensepy import translate
 from lensepy.css import *
 from lensepy.images.masks import *
 from lensepy.images.conversion import *
+from matplotlib import pyplot as plt
+
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets import ImageDisplayWidget
 from lensepy_app.modules.optics.fizeau.fyzo_fft.fyzo_fft_views import *
@@ -62,37 +64,46 @@ class FyzoAnalysisController(TemplateController):
         self.x_cross = None
         self.y_cross = None
         self.contrast_enabled = False       # Enhance contrast
-        self.img_dir = self._get_image_dir(self.parent.parent.config['img_dir'])
+        self.img_dir = self._get_image_dir(self.manager.get_config('img_dir'))
         self.disp_mode = 'fft_circled'
         self.thread = None
         self.worker = None
 
         # Widgets
-        self.top_left = ImageDisplayWidget()
+        self.top_left = ImageDisplayWidget(self)
         self.bot_left = QWidget()
-        self.bot_right = ImageDisplayWidget()
-        self.top_right = FyzoFFTOptionsView()
+        self.bot_right = ImageDisplayWidget(self)
+        self.top_right = FyzoFFTOptionsView(self)
         # Set Up widgets
         self.top_right.activate_mode(self.disp_mode)
         # Initial Image
-        initial_image = self.parent.variables.get('image')
+        initial_image = self.get_variables('image')
         if initial_image is not None:
             self.bot_right.set_image_from_array(initial_image)
-        camera = self.parent.variables["camera"]
+        '''
+        COMMENT !
+        camera = self.get_variables("camera")
         camera.set_parameter("AcquisitionFrameRate", FPS_FFT)
+        END COMMENT !
+        '''
         # Signals
         self.top_right.display_changed.connect(self.handle_display_changed)
         # Crop size / mask
-        mask = self.parent.variables['mask']
+        mask = self.get_variables('masks').get_global_mask()
         top_left, bottom_right = find_mask_limits(mask)
-        self.img_height, self.img_width = bottom_right[1] - top_left[1], bottom_right[0] - top_left[0]
+        self.img_height, self.img_width = bottom_right[0] - top_left[0], bottom_right[1] - top_left[1]
         self.img_height_fft, self.img_width_fft = self.img_height//4, self.img_width//4
         self.img_pos_x, self.img_pos_y = top_left[1], top_left[0]
         self.mask = crop_images([mask], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
         self.mask_fft = crop_images([mask], (self.img_height_fft, self.img_width_fft), (self.img_pos_x, self.img_pos_y))[0]
+        '''
+        COMMENT !!
         camera.start_acquisition()
         # Start live acquisition
         self.start_live()
+        END COMMENT !!
+        '''
+        self.handle_image_ready(initial_image)  # TO TEST / REMOVE IN LIVE MODE
 
     def start_live(self):
         """Start live acquisition with camera."""
@@ -126,18 +137,19 @@ class FyzoAnalysisController(TemplateController):
         # Crop image
         image_crop = crop_images([image_raw], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
         # Post Image
-        bits_depth = self.parent.variables["bits_depth"]
+        bits_depth = self.get_variables("bits_depth")
+        bits_depth = 8  # TO REMOVE IN LIVE VERSION
         pow = bits_depth - 8
         if pow > 0:
             image_8bits = image_crop // (2**pow)
         else:
             image_8bits = image_crop
 
-        if self.parent.variables["mask"] is not None:
+        if self.get_variables("mask") is not None:
             image_disp = np.ma.masked_where(np.logical_not(self.mask), image_8bits)
         self.bot_right.set_image_from_array(image_disp)
         # Store new image.
-        self.parent.variables['image'] = image_raw
+        self.set_variables('image', image_raw)
         # Different display
         fft_raw = self._process_fft(image_8bits)
         if self.disp_mode == 'interfer':
@@ -163,7 +175,7 @@ class FyzoAnalysisController(TemplateController):
         Stop the camera cleanly and release resources.
         """
         self.stop_live()
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             camera.stop_acquisition()
             if getattr(camera, "is_open", False):

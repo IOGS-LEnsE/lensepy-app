@@ -1,6 +1,7 @@
 __all__ = ["ZygoMasksController"]
 
 from PyQt6.QtWidgets import QWidget, QDialog
+
 from lensepy_app.appli._app.template_controller import TemplateController
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget
 from lensepy_app.modules.optics.fizeau.maskslite.maskslite_view import (
@@ -19,6 +20,7 @@ class ZygoMasksController(TemplateController):
 
         """
         super().__init__(parent)
+        self.check_first_mask = True
         if self.get_variables('masks') is not None:
             self.masks = self.get_variables('masks')
         else:
@@ -52,9 +54,14 @@ class ZygoMasksController(TemplateController):
         self.top_left.set_image_from_array(self.first_image)
         if self.masks is not None :
             if self.masks.get_masks_number() != 0:
-                #self.parent.variables['mask_loaded'] = True
-                self.parent.update_menu()
-        self.bot_left.set_enabled_check(False)
+                #self.set_variables('mask_loaded', True)
+                self.manager.update_menu()
+        if self.masks.get_masks_number() == 0 :
+            self.bot_left.set_enabled_check(False)
+        else:
+            self.bot_left.set_enabled_check(True)
+            self.bot_left.set_checked_check(True)
+            self.handle_mask_changed()
         # Signals
         self.bot_left.mask_added.connect(self.handle_mask_added)
         self.top_right.masks_changed.connect(self.handle_mask_changed)
@@ -62,6 +69,7 @@ class ZygoMasksController(TemplateController):
     def handle_mask_added(self, event):
         if 'update' in event:
             self.handle_mask_changed()
+            self.set_variables("masks", self.masks)
         elif '_masks' in event:
             if 'circular' in event:
                 type = 'circular'
@@ -93,17 +101,29 @@ class ZygoMasksController(TemplateController):
                 # Add mask to the data_set
                 self.masks.add_mask(mask, type_m)
                 self.set_variables("mask", self.masks.get_global_mask())
+                self.set_variables("masks", self.masks)
                 self.manager.update_menu()
 
                 # Refresh list
                 self.top_right.masks_list.update_display()
-            self.handle_mask_changed()
+                self.handle_mask_changed()
 
     def handle_mask_changed(self):
-        mask_disp = self.bot_left.is_mask_displayed()
         mask = self.masks.get_global_mask()
-        self.bot_left.set_enabled_check(mask is not None)
-        self.bot_left.set_checked_check(mask is not None)
+        mask_disp = False
+        if mask is None:
+            self.check_first_mask = True
+            self.bot_left.set_checked_check(False)
+            self.bot_left.set_enabled_check(False)
+        elif self.check_first_mask and mask is not None:
+            self.check_first_mask = False
+            self.bot_left.set_checked_check(True)
+            self.bot_left.set_enabled_check(True)
+            mask_disp = True
+        else:
+            mask_disp = self.bot_left.is_mask_displayed()
+            self.bot_left.set_enabled_check(True)
+        #
         if mask is not None and mask_disp:
             image_disp = self.first_image * mask
         else:
@@ -111,3 +131,4 @@ class ZygoMasksController(TemplateController):
             self.manager.update_menu()
             image_disp = self.first_image
         self.top_left.set_image_from_array(image_disp)
+        self.top_left.repaint()

@@ -41,9 +41,10 @@ class IDSController(TemplateController):
         self.bot_right = CameraParamsWidget(self)
 
 
-
     def init_view(self):
         camera = self.get_variables('camera')
+        theme = self.manager.get_config('global_theme')
+        mode = self.manager.get_config('global_mode')
         if camera is not None:
             exposure = camera.get_exposure()
             self.bot_right.set_exposure_time(exposure)
@@ -65,7 +66,7 @@ class IDSController(TemplateController):
             self.top_left = QLabel('No Camera is connected. \n'
                                    'Connect a camera first.\n'
                                    'Then restart the application.')
-            self.top_left.setStyleSheet(styleH2)
+            self.top_left.setStyleSheet(STYLE_H2[theme][mode])
             self.bot_left = QWidget()
             self.bot_right = QWidget()
             self.top_right = QWidget()
