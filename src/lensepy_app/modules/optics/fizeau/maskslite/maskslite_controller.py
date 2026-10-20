@@ -19,13 +19,13 @@ class ZygoMasksController(TemplateController):
 
         """
         super().__init__(parent)
-        if self.parent.variables['masks'] is not None:
-            self.masks = self.parent.variables['masks']
+        if self.get_variables('masks') is not None:
+            self.masks = self.get_variables('masks')
         else:
             self.masks = MasksSet()
             self.masks.reset_masks()
-            self.parent.variables['masks'] = self.masks
-        self.first_image = self.parent.variables['image']
+            self.set_variables('masks', self.masks)
+        self.first_image = self.get_variables('image')
         print(f'First Image = {self.first_image.shape}')
 
         # Graphical layout
@@ -35,13 +35,14 @@ class ZygoMasksController(TemplateController):
         self.top_right = MasksOptionsView(self)
 
         # Setup widgets
-        if self.parent.variables['bits_depth'] is not None:
-            self.top_left.set_bits_depth(self.parent.variables['bits_depth'])
+        if self.get_variables('bits_depth') is not None:
+            self.top_left.set_bits_depth(self.get_variables('bits_depth'))
         self.top_left.set_image_from_array(self.first_image)
         if self.masks is not None :
             if self.masks.get_masks_number() != 0:
                 #self.parent.variables['mask_loaded'] = True
                 self.parent.update_menu()
+        self.bot_left.set_enabled_check(False)
         # Signals
         self.bot_left.mask_added.connect(self.handle_mask_added)
         self.top_right.masks_changed.connect(self.handle_mask_changed)
@@ -64,14 +65,14 @@ class ZygoMasksController(TemplateController):
                         ' as the first one and then Click Enter')
                 type_m = 'poly'
 
-            if self.parent.variables['bits_depth'] == 12:
+            if self.get_variables('bits_depth') == 12:
                 image = self.first_image // 16
             else:
                 image = self.first_image
             if self.bot_left.is_mask_displayed():
                 mask = self.masks.get_global_mask()
                 image = image * mask
-            dialog = MasksView(image, type, help)
+            dialog = MasksView(image, type, help, parent=self)
             result = dialog.exec()
             if result == QDialog.DialogCode.Rejected:
                 message_box('No mask added', 'No mask will be added to the list of masks.')
@@ -79,8 +80,8 @@ class ZygoMasksController(TemplateController):
                 mask = dialog.mask.copy()
                 # Add mask to the data_set
                 self.masks.add_mask(mask, type_m)
-                self.parent.variables["mask"] = self.masks.get_global_mask()
-                self.parent.update_menu()
+                self.set_variables("mask", self.masks.get_global_mask())
+                self.manager.update_menu()
 
                 # Refresh list
                 self.top_right.masks_list.update_display()
@@ -89,10 +90,12 @@ class ZygoMasksController(TemplateController):
     def handle_mask_changed(self):
         mask_disp = self.bot_left.is_mask_displayed()
         mask = self.masks.get_global_mask()
+        self.bot_left.set_enabled_check(mask is not None)
+        self.bot_left.set_checked_check(mask is not None)
         if mask is not None and mask_disp:
             image_disp = self.first_image * mask
         else:
             #self.parent.variables['mask_loaded'] = None
-            self.parent.update_menu()
+            self.manager.update_menu()
             image_disp = self.first_image
         self.top_left.set_image_from_array(image_disp)

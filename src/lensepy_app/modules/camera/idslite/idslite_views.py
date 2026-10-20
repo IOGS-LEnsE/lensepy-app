@@ -1,13 +1,10 @@
-from xmlrpc.client import boolean
-
 from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.QtWidgets import (
-    QLineEdit, QGridLayout, QPushButton, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QCheckBox)
+from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QLabel)
 
 from lensepy import translate
-from lensepy.css import *
-from lensepy.utils import *
-from scipy.ndimage import value_indices
+from lensepy_app import *
+from lensepy_app.appli import *
+import numpy as np
 
 from lensepy_app import *
 from lensepy_app.widgets import *
@@ -22,7 +19,7 @@ if TYPE_CHECKING:
 
 MIN_EXPO_TIME = 0.1 # ms
 
-class CameraParamsWidget(QWidget):
+class CameraParamsWidget(ModuleWidget):
     """
     Widget to display image infos.
     """
@@ -30,7 +27,7 @@ class CameraParamsWidget(QWidget):
     black_level_changed = pyqtSignal(int)
 
     def __init__(self, parent=None):
-        super().__init__(None)
+        super().__init__(parent=parent)
         self.parent = parent     # IDSController or equivalent
         layout = QVBoxLayout()
         # Attributes
@@ -38,7 +35,7 @@ class CameraParamsWidget(QWidget):
         # Graphical objects
         layout.addWidget(make_hline())
         label = QLabel(translate('ids_params_title'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
         layout.addWidget(make_hline())
@@ -47,12 +44,12 @@ class CameraParamsWidget(QWidget):
             self.label_fps = LabelWidget(translate('ids_params_fps'), '')
             layout.addWidget(self.label_fps)
             self.slider_expo = SliderBloc(translate('ids_params_slider_expo'), unit='ms',
-                                          min_value=MIN_EXPO_TIME, max_value=1000)
+                                          min_value=MIN_EXPO_TIME, max_value=1000, parent=parent)
             #self.slider_expo.slider.setEnabled(False)
             layout.addWidget(self.slider_expo)
             layout.addWidget(make_hline())
             self.slider_black_level = SliderBloc(translate('ids_params_slider_black'), unit='ADU',
-                                          min_value=0, max_value=255, integer=True)
+                                          min_value=0, max_value=255, integer=True, parent=parent)
             #self.slider_black_level.slider.setEnabled(False)
             layout.addWidget(self.slider_black_level)
             layout.addWidget(make_hline())
@@ -102,7 +99,7 @@ class CameraParamsWidget(QWidget):
         self.slider_expo.set_value(value)
 
 
-class CameraInfosWidget(QWidget):
+class CameraInfosWidget(ModuleWidget):
     """
     Widget to display image infos.
     """
@@ -111,15 +108,14 @@ class CameraInfosWidget(QWidget):
     mask_applied = pyqtSignal(bool)
 
     def __init__(self, parent=None):
-        super().__init__(None)
+        super().__init__(parent=parent)
         # Attributes
-        self.parent: IDSController = parent  # IDSController or any CameraController
-        self.camera = self.parent.get_variables()['camera']
+        self.camera = self.controller.get_variables('camera')
         # Graphical objects
         layout = QVBoxLayout()
 
         label = QLabel(translate('ids_infos_title'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
         layout.addWidget(make_hline())
@@ -132,7 +128,7 @@ class CameraInfosWidget(QWidget):
 
         self.label_size = LabelWidget(translate('ids_infos_size'), '', 'pixels')
         layout.addWidget(self.label_size)
-        self.color_choice = self.parent.colormode
+        self.color_choice = self.controller.colormode
         self.label_color_mode = LabelWidget(translate('ids_infos_color_mode'), '', '')
         layout.addWidget(self.label_color_mode)
         layout.addWidget(make_hline())
@@ -152,8 +148,8 @@ class CameraInfosWidget(QWidget):
         """
         Update information from camera.
         """
-        self.camera: CameraIDS = self.parent.get_variables()['camera']
-        if self.parent.camera_connected:
+        self.camera: CameraIDS = self.controller.get_variables('camera')
+        if self.controller.camera_connected:
             self.camera.open()
             serial_no, camera_name = self.camera.get_cam_info()
             self.label_name.set_value(camera_name)

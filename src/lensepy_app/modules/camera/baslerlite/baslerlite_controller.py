@@ -2,7 +2,8 @@ import time
 from PyQt6.QtCore import QObject, QThread
 from PyQt6.QtWidgets import QDialog
 from pathlib import Path
-import lensepy_app
+from lensepy_app import *
+from lensepy_app.appli import *
 
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.modules.camera.baslerlite.baslerlite_views import *
@@ -33,15 +34,15 @@ class BaslerController(TemplateController):
         # Check if camera is connected
         self.init_camera()
         # Widgets
-        self.top_left = ImageDisplayWidget()
-        self.bot_left = HistogramWidget()
+        self.top_left = ImageDisplayWidget(self)
+        self.bot_left = HistogramWidget(self)
         self.top_right = CameraInfosWidget(self)
         self.bot_right = CameraParamsWidget(self)
         # Widgets setup and signals
         self.bot_left.set_labels(translate('histo_xlabel'), translate('histo_ylabel'))
 
         # Camera infos
-        camera = self.parent.variables['camera']
+        camera = self.get_variables("camera")
         if camera is not None:
             expo_init = camera.get_parameter('ExposureTime')
             self.bot_right.slider_expo.set_value(expo_init)
@@ -54,7 +55,7 @@ class BaslerController(TemplateController):
         Update graphical objects of the interface.
         """
         # Update view
-        if self.parent.variables['camera'] is not None:
+        if self.get_variables('camera') is not None:
             super().init_view()
             self.set_color_mode()
             self.set_max_exposure_time()
@@ -81,7 +82,9 @@ class BaslerController(TemplateController):
             self.top_left = QLabel('No Camera is connected. \n'
                                    'Connect a camera first.\n'
                                    'Then restart the application.')
-            self.top_left.setStyleSheet(styleH2)
+            theme = self.manager.get_config('global_theme')
+            mode = self.manager.get_config('global_mode')
+            self.top_left.setStyleSheet(STYLE_H2[theme][mode])
             self.bot_left = QWidget()
             self.top_right = QWidget()
             self.bot_right = QWidget()
@@ -92,19 +95,19 @@ class BaslerController(TemplateController):
         Initialize the camera.
         """
         print('Init CAMERA -- 00')
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         # Check if a camera is already connected
         if camera is None:
             # Init Camera
-            self.parent.variables["camera"] = BaslerCamera()
-            self.camera_connected = self.parent.variables["camera"].find_first_camera()
+            self.set_variables("camera", BaslerCamera())
+            self.camera_connected = self.get_variables("camera").find_first_camera()
             if self.camera_connected is False:
-                self.parent.variables["camera"] = None
+                self.set_variables("camera", None)
             else:
-                camera = self.parent.variables["camera"]
-                self.parent.variables["first_connexion"] = 'Yes'
+                camera = self.get_variables("camera")
+                self.set_variables("first_connexion", 'Yes')
                 # Initial parameters
-                camera_ini_file = self.parent.parent.config.get('camera_ini')
+                camera_ini_file = self.controller.get_config('camera_ini')
                 if camera_ini_file is not None:
                     if camera_ini_file.startswith('.'):
                         base_path = Path(lensepy_app.__file__).parent
@@ -114,16 +117,15 @@ class BaslerController(TemplateController):
                     if os.path.isfile(file_path):
                         camera.init_camera_parameters(file_path)
                 default_fps = camera.get_parameter("BslResultingAcquisitionFrameRate")
-                self.parent.variables["disp_fps"] = default_fps
+                self.set_variables("disp_fps", default_fps)
                 '''
                 init_exposure = camera.get_parameter("ExposureTime")
                 camera.set_parameter("ExposureTime", init_exposure)
                 '''
-                print('Init CAMERA EXPO')
         else:
             self.camera_connected = True
-            self.parent.variables["first_connexion"] = 'No'
-            default_fps = self.parent.variables["disp_fps"]
+            self.set_variables("first_connexion", 'No')
+            default_fps = self.get_variables["disp_fps"]
             camera.set_parameter("AcquisitionFrameRate", default_fps)
 
 
@@ -137,11 +139,11 @@ class BaslerController(TemplateController):
             self.colormode_bits_depth.append(int(colormode_v[1]))
 
     def set_max_exposure_time(self):
-        exposuretime_get = self.parent.xml_app.get_sub_parameter('camera', 'exposuretime')
+        exposuretime_get = self.manager.xml_app.get_sub_parameter('camera', 'exposuretime')
         self.bot_right.set_max_exposure_time(exposuretime_get)
 
     def update_color_mode(self):
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables["camera"]
         # Update to first mode if first connection
         first_mode_color = self.colormode[0]
         camera.open()
@@ -149,7 +151,7 @@ class BaslerController(TemplateController):
         camera.initial_params["PixelFormat"] = first_mode_color
         camera.close()
         first_bits_depth = self.colormode_bits_depth[0]
-        self.parent.variables["bits_depth"] = first_bits_depth
+        self.set_variables("bits_depth", first_bits_depth)
         pix_format = camera.get_parameter('PixelFormat')
         self.top_right.label_color_mode.set_value(pix_format)
 
@@ -194,21 +196,21 @@ class BaslerController(TemplateController):
         :param image:   Numpy array containing new image.
         """
         image_disp = image.copy()
-        if self.masked and self.parent.variables["mask"] is not None:
-            mask = self.parent.variables["mask"]
+        if self.masked and self.get_variables("mask") is not None:
+            mask = self.get_variables("mask")
             image_disp = np.ma.masked_where(np.logical_not(mask), image_disp)
         # Update Image
         self.top_left.set_image_from_array(image_disp)
         # Update Histo
         self.bot_left.set_image(image_disp)
         # Store new image.
-        self.parent.variables['image'] = image.copy()
+        self.set_variables('image', image.copy())
 
     def handle_exposure_time_changed(self, value):
         """
         Action performed when the exposure time changed.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             # Stop live safely
             self.stop_live()
@@ -218,7 +220,6 @@ class BaslerController(TemplateController):
             camera.set_parameter('ExposureTime', value)
             camera.initial_params['ExposureTime'] = value
             self.bot_right.update_infos()
-            print(f'EXPO  TIME CHANGED: {value}')
             # Restart live
             camera.open()
             self.start_live()
@@ -227,7 +228,7 @@ class BaslerController(TemplateController):
         """
         Action performed when the black level changed.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             # Stop live safely
             self.stop_live()
@@ -246,7 +247,7 @@ class BaslerController(TemplateController):
         Stop the camera cleanly and release resources.
         """
         self.stop_live()
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             if getattr(camera, "is_open", False):
                 camera.close()
@@ -270,7 +271,7 @@ class BaslerController(TemplateController):
             self.top_right.activate_mask_button(False)
         else:
             mask = dialog.mask.copy()
-            self.parent.variables["mask"] = mask
+            self.set_variables("mask", mask)
             self.top_right.activate_mask_button(False)
             self.top_right.activate_mask_check()
             self.parent.update_menu()

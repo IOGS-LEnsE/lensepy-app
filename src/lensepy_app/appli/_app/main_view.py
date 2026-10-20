@@ -1,5 +1,4 @@
 from lensepy import translate
-from lensepy_app import *
 from PyQt6.QtWidgets import (
     QMainWindow, QSizePolicy,
     QHBoxLayout, QVBoxLayout, QGridLayout,
@@ -12,6 +11,9 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from _app.main_manager import MainManager
+from lensepy_app import *
+from lensepy_app.appli import *
+
 
 def get_disp_mode(parent):
     """
@@ -76,6 +78,7 @@ class MainWindow(QMainWindow):
             button.clicked.connect(self.handle_main_menu)
             theme = self.manager.get_config('global_theme')
             mode = self.manager.get_config('global_mode')
+            print(f'theme = {theme} / mode = {mode}')
             button.setFixedHeight(BUTTON_HEIGHT[theme][mode])
             self.menu_button_name_list.append(f'{element}')
             self.menu_button_list.append(button)

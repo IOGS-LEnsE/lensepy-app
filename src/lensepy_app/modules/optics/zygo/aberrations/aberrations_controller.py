@@ -30,13 +30,11 @@ class ZygoAberrationsController(TemplateController):
         self.psf_update_pending = False
         '''
         TO DELETE
-        '''
         file_path = '../lensepy-data/optics/zygo/test3.mat'
         data_set = DataSet()
         data_set.load_images_set_from_file(file_path)
         data_set.load_masks_from_file(file_path)
         self.manager.variables['dataset'] = data_set
-        '''
         END DELETE
         '''
 

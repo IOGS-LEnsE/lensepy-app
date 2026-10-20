@@ -43,9 +43,9 @@ class IDSController(TemplateController):
 
 
     def init_view(self):
-        camera = self.parent.variables['camera']
+        camera = self.get_variables('camera')
         if camera is not None:
-            exposure = self.parent.variables["camera"].get_exposure()
+            exposure = camera.get_exposure()
             self.bot_right.set_exposure_time(exposure)
             fps_init = camera.get_frame_rate()
             fps = np.round(fps_init, 2)
@@ -75,27 +75,27 @@ class IDSController(TemplateController):
         """
         Initialize the camera.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         # Check if a camera is already connected
         if camera is None:
             # Init Camera
-            self.parent.variables["camera"] = CameraIDS()
-            self.camera_connected = self.parent.variables["camera"].find_first_camera()
+            self.set_variables("camera", CameraIDS())
+            self.camera_connected = self.get_variables("camera").find_first_camera()
             if self.camera_connected is False:
-                self.parent.variables["camera"] = None
+                self.set_variables("camera", None)
             else:
-                self.parent.variables["camera"].init_camera()
+                self.get_variables("camera").init_camera()
                 # Initial parameters
-                camera_ini_file = self.parent.parent.config.get('camera_ini')
+                camera_ini_file = self.manager.get_config('camera_ini')
                 '''
                 if os.path.isfile(camera_ini_file):
                     camera.init_camera_parameters(camera_ini_file)
                     print(f'Camera ini file {camera_ini_file} successfully initialized.')
                 '''
                 # Init ?
-                self.parent.variables["camera"].set_exposure(100)
-                self.parent.variables["camera"].set_frame_rate(4)
-                self.parent.variables["bits_depth"] = 8
+                self.get_variables("camera").set_exposure(100)
+                self.get_variables("camera").set_frame_rate(4)
+                self.set_variables("bits_depth", 8)
         else:
             self.camera_connected = True
         print(f'Connected ? {self.camera_connected}')
@@ -115,13 +115,13 @@ class IDSController(TemplateController):
         self.bot_right.set_max_exposure_time(exposuretime_get)
 
     def update_color_mode(self):
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         # Update to first mode if first connection
         first_mode_color = self.colormode[0]
         camera.set_parameter("PixelFormat", first_mode_color)
         camera.initial_params["PixelFormat"] = first_mode_color
         first_bits_depth = self.colormode_bits_depth[0]
-        self.parent.variables["bits_depth"] = first_bits_depth
+        self.set_variables("bits_depth", first_bits_depth)
         pix_format = camera.get_color_mode()
         self.top_right.label_color_mode.set_value(pix_format)
 
@@ -130,7 +130,7 @@ class IDSController(TemplateController):
         Start live acquisition from camera.
         """
         if self.camera_connected:
-            self.parent.variables["camera"].start_acquisition()
+            self.get_variables("camera").start_acquisition()
             self.thread = QThread()
             self.worker = ImageLive(self)
             self.worker.moveToThread(self.thread)
@@ -160,7 +160,7 @@ class IDSController(TemplateController):
             # Supprimer les références
             self.worker = None
             self.thread = None
-            self.parent.variables["camera"].stop_acquisition()
+            self.get_variables("camera").stop_acquisition()
 
     def handle_image_ready(self, image: np.ndarray):
         """
@@ -175,29 +175,27 @@ class IDSController(TemplateController):
         self.bot_left.set_image(image_disp)
         '''
         # Store new image.
-        self.parent.variables['image'] = image_disp
+        self.set_variables('image', image_disp)
         time.sleep(0.001)
 
     def handle_exposure_time_changed(self, value):
         """
         Action performed when the exposure time changed.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             # Stop live safely
-            #self.stop_live()
             # Read available formats
             camera.set_exposure(value)
             camera.initial_params['ExposureTime'] = value
             time.sleep(0.01)
             self.bot_right.update_infos()
-            #self.start_live()
 
     def handle_black_level_changed(self, value):
         """
         Action performed when the black level changed.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             # Stop live safely
             self.stop_live()
@@ -213,7 +211,7 @@ class IDSController(TemplateController):
         Stop the camera cleanly and release resources.
         """
         self.stop_live()
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             if getattr(camera, "is_open", False):
                 camera.close()
@@ -227,9 +225,9 @@ class IDSController(TemplateController):
         bits_depth = self.parent.variables["bits_depth"]
         pow = bits_depth - 8
         if pow > 0:
-            first_image = self.parent.variables["image"] // (2**pow)
+            first_image = self.get_variables("image") // (2**pow)
         else:
-            first_image = self.parent.variables["image"]
+            first_image = self.get_variables("image")
         dialog = MasksView(first_image, type, help, parent=self)
         result = dialog.exec()
         if result == QDialog.DialogCode.Rejected:
@@ -237,7 +235,7 @@ class IDSController(TemplateController):
             self.top_right.activate_mask_button(False)
         else:
             mask = dialog.mask.copy()
-            self.parent.variables["mask"] = mask
+            self.set_variables("mask", mask)
             self.top_right.activate_mask_button(False)
             self.top_right.activate_mask_check()
             self.parent.update_menu()

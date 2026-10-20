@@ -117,7 +117,7 @@ class BaslerController(TemplateController):
                 if camera_ini_file is not None:
                     if camera_ini_file.startswith('.'):
                         base_path = Path(lensepy_app.__file__).parent
-                        file_path = f'{base_path}/applis_dir/cmos_gui/{camera_ini_file.lstrip('./')}'
+                        file_path = f'{base_path}/applis_dir/cmos_gui/{camera_ini_file.lstrip("./")}'
                     else:
                         file_path = camera_ini_file
                     print(f'File Path = {file_path}')
