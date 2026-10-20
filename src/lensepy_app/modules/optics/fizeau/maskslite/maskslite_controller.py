@@ -25,12 +25,24 @@ class ZygoMasksController(TemplateController):
             self.masks = MasksSet()
             self.masks.reset_masks()
             self.set_variables('masks', self.masks)
+
+        '''
+        TO DELETE
+        '''
+        import cv2
+        file_path = '../lensepy-data/optics/fizeau/interference.png'
+        image = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+        self.manager.variables['image'] = image
+        '''
+        END DELETE
+        '''
+
         self.first_image = self.get_variables('image')
         print(f'First Image = {self.first_image.shape}')
 
         # Graphical layout
-        self.top_left = ImageDisplayWidget()
-        self.bot_left = AddMaskView()
+        self.top_left = ImageDisplayWidget(self)
+        self.bot_left = AddMaskView(self)
         self.bot_right = QWidget()
         self.top_right = MasksOptionsView(self)
 

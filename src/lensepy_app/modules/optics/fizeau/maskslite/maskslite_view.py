@@ -720,8 +720,8 @@ class AddMaskView(ModuleWidget):
 
     mask_added = pyqtSignal(str)
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
 
         layout = QVBoxLayout()
         layout.addWidget(make_hline())
