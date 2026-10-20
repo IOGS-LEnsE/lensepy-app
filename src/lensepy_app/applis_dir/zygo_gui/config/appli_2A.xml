@@ -40,7 +40,7 @@
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>
 	<module>
-		<name>interfer_control</name>
+		<name>masks</name>
 		<location>lensepy_app.modules.optics.zygo</location>
 	</module>
 	<module>
@@ -55,6 +55,11 @@
 	<variable name="mask_loaded"/>
 	<variable name="phase"/>
 	<variable name="phase_calculated"/>
+	<variable name="phase_results"/>
+	<variable name="psf_results"/>
+    <variable name="pad_factor"/>
+    <variable name="wavelength"/>
+    <variable name="f_number"/>
     <camera>
         <name>Basler</name>
         <colormode>Mono12:12,Mono10:10,Mono8:8,BayerRG8:8</colormode>
