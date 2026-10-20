@@ -19,7 +19,7 @@ class ZygoMasksController(TemplateController):
 
         """
         super().__init__(parent)
-        self.data_set : DataSet = self.parent.variables['dataset']
+        self.data_set : DataSet = self.get_variables('dataset')
         self.first_image = self.data_set.get_image_from_set(1, 1)
 
         # Graphical layout
@@ -31,8 +31,8 @@ class ZygoMasksController(TemplateController):
         # Setup widgets
         self.top_left.set_image_from_array(self.first_image)
         if self.data_set.has_mask():
-            self.parent.variables['mask_loaded'] = True
-            self.parent.update_menu()
+            self.set_variables('mask_loaded', True)
+            self.manager.update_menu()
         self.data_set.reset_processes()
         # Signals
         self.bot_left.mask_added.connect(self.handle_mask_added)
@@ -65,8 +65,8 @@ class ZygoMasksController(TemplateController):
                 self.data_set.set_analyzed_state(False)
                 self.data_set.set_wrapped_state(False)
                 self.data_set.set_unwrapped_state(False)
-                self.parent.variables['mask_loaded'] = True
-                self.parent.update_menu()
+                self.set_variables('mask_loaded', True)
+                self.manager.update_menu()
 
                 # Refresh list
                 self.top_right.masks_list.update_display()
@@ -77,7 +77,7 @@ class ZygoMasksController(TemplateController):
         if mask is not None:
             image_disp = self.first_image * mask
         else:
-            self.parent.variables['mask_loaded'] = None
-            self.parent.update_menu()
+            self.set_variables('mask_loaded', None)
+            self.manager.update_menu()
             image_disp = self.first_image
         self.top_left.set_image_from_array(image_disp)

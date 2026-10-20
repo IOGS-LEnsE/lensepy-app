@@ -7,19 +7,17 @@ Creation : march/2026
 """
 import sys, os, time
 from lensepy import load_dictionary, translate, dictionary, is_float
-from lensepy.css import *
-
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.widgets.objects import *
-from lensepy_app.appli._app.main_view import get_disp_mode
 from PyQt6.QtWidgets import (
-    QDialog, QLabel, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QWidget,
-    QVBoxLayout
+    QLabel, QPushButton, QHBoxLayout, QWidget,
+    QVBoxLayout, QProgressBar
 )
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QKeyEvent, QMouseEvent, QResizeEvent, QFont
+from PyQt6.QtCore import Qt, pyqtSignal
 
 
-class AcquisitionView(QWidget):
+class AcquisitionView(ModuleWidget):
     """Acquisition View."""
 
     acquisition_started = pyqtSignal()
@@ -29,41 +27,40 @@ class AcquisitionView(QWidget):
         """Default constructor of the class.
         :param parent: Parent widget or window of this widget.
         """
-        super().__init__(None)
-        self.controller = parent
-        self.general_display_mode = get_disp_mode(self.controller)
+        super().__init__(parent=parent)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
         self.layout.addWidget(make_hline())
         self.label_alignment = QLabel(translate("label_alignment"))
-        self.label_alignment.setStyleSheet(styleH2)
+        self.label_alignment.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.label_alignment.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_alignment)
         self.layout.addWidget(make_hline())
         self.zoom_button = QPushButton(translate("zoom_button"))
-        self.zoom_button.setStyleSheet(unactived_button)
+        self.zoom_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.layout.addWidget(self.zoom_button)
         self.layout.addStretch()
         self.layout.addWidget(make_hline())
         self.label_acquisition = QLabel(translate("label_acquisition"))
-        self.label_acquisition.setStyleSheet(styleH2)
+        self.label_acquisition.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.label_acquisition.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_acquisition)
         self.layout.addWidget(make_hline())
         # Start acquisition
         self.start_acq_button = QPushButton(translate('start_acq_button'))
-        self.start_acq_button.setStyleSheet(disabled_button)
+        self.start_acq_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
         self.start_acq_button.setEnabled(False)
-        self.start_acq_button.setFixedHeight(BUTTON_HEIGHT[self.general_display_mode])
+        self.start_acq_button.setFixedHeight(BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.start_acq_button.clicked.connect(self.handle_start_acquisition)
         self.layout.addWidget(self.start_acq_button)
 
         # Progression Bar
         self.label_progress_bar = QLabel(translate('label_progress_acq_bar'))
-        self.label_progress_bar.setStyleSheet(STYLE_H2[self.general_display_mode])
-        self.progress_bar = QProgressBar(self)
+        self.label_progress_bar.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
+        self.progress_bar = QProgressBar()
         self.progress_bar.setObjectName("IOGSProgressBar")
+        self.progress_bar.setRange(0, 100)
         self.progress_bar.setStyleSheet(StyleSheet)
         self.progress_bar.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_progress_bar)
@@ -75,34 +72,35 @@ class AcquisitionView(QWidget):
 
     def handle_zoom_button(self):
         self.zoom_button.setEnabled(False)
-        self.zoom_button.setStyleSheet(actived_button)
+        self.zoom_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.zoom_clicked.emit()
 
     def set_zoom_enabled(self, value=True):
         if value:
-            self.zoom_button.setStyleSheet(unactived_button)
+            self.zoom_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         else:
-            self.zoom_button.setStyleSheet(disabled_button)
+            self.zoom_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
         self.zoom_button.setEnabled(value)
 
     def handle_start_acquisition(self):
         self.start_acq_button.setEnabled(False)
-        self.start_acq_button.setStyleSheet(actived_button)
+        self.start_acq_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.acquisition_started.emit()
 
     def set_acq_enabled(self, value=True):
         """Set the acquisition button enabled."""
         if value:
-            self.start_acq_button.setStyleSheet(unactived_button)
+            self.start_acq_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         else:
-            self.start_acq_button.setStyleSheet(disabled_button)
+            self.start_acq_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
         self.start_acq_button.setEnabled(value)
 
     def update_progress_bar(self, value):
         """Update progress bar.
         :param value:   value of progression, as integer between 0 and 100.
         """
-        self.progress_bar.setValue(value)
+        pass
+        #self.progress_bar.setValue(value)
 
     def _clear_layout(self, row: int, column: int) -> None:
         """Remove widgets from a specific position in the layout.
@@ -122,7 +120,7 @@ class AcquisitionView(QWidget):
                 self.layout.removeItem(item)
 
 
-class CameraParamsView(QWidget):
+class CameraParamsView(ModuleWidget):
     """Camera Parameters View."""
 
     exposure_changed = pyqtSignal(float)
@@ -131,19 +129,17 @@ class CameraParamsView(QWidget):
         """Default constructor of the class.
         :param parent: Parent widget or window of this widget.
         """
-        super().__init__(None)
-        self.controller = parent
-        self.general_display_mode = get_disp_mode(self.controller)
+        super().__init__(parent=parent)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
         self.layout.addWidget(make_hline())
         self.label_camera_params= QLabel(translate("label_camera_params"))
-        self.label_camera_params.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.label_camera_params.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.label_camera_params.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_camera_params)
         self.layout.addWidget(make_hline())
-        self.slider_expo = SliderBloc(translate('slider_exposure'), 'ms', 100, 3000, integer=True)
+        self.slider_expo = SliderBloc(translate('slider_exposure'), 'ms', 100, 3000, integer=True, parent=self.controller)
         self.slider_expo.set_value(3000)
         self.layout.addWidget(self.slider_expo)
         self.layout.addStretch()
@@ -158,7 +154,7 @@ class CameraParamsView(QWidget):
         self.slider_expo.set_value(value)
 
 
-class PiezoControlView(QWidget):
+class PiezoControlView(ModuleWidget):
     """Piezo Control View."""
 
     voltage_changed = pyqtSignal(float)
@@ -167,9 +163,7 @@ class PiezoControlView(QWidget):
         """Default constructor of the class.
         :param parent: Parent widget or window of this widget.
         """
-        super().__init__(None)
-        self.controller = parent
-        self.general_display_mode = get_disp_mode(self.controller)
+        super().__init__(parent=parent)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
         ## Title of the widget
@@ -178,7 +172,7 @@ class PiezoControlView(QWidget):
         mini_layout = QHBoxLayout()
         mini_widget.setLayout(mini_layout)
         self.label_piezo_control = QLabel(translate("label_piezo_control"))
-        self.label_piezo_control.setStyleSheet(STYLE_H2[self.general_display_mode])
+        self.label_piezo_control.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.label_piezo_control.setAlignment(Qt.AlignmentFlag.AlignCenter)
         mini_layout.addWidget(self.label_piezo_control)
         self.circle_ok = CircleWidget(diameter=20)

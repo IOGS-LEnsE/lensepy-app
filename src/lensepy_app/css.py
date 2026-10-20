@@ -6,7 +6,7 @@ __all__ = [
     'IMAGE_TEXT',
     'styleL', 'styleT', 'styleL_s', 'styleT_s',
     'INACTIVATED_BUTTON', 'ACTIVATED_BUTTON', 'DISABLED_BUTTON',
-    'BUTTON_HEIGHT', 'OPTIONS_BUTTON_HEIGHT'
+    'BUTTON_HEIGHT', 'OPTIONS_BUTTON_HEIGHT', 'StyleSheet'
 ]
 
 #### Style Sheet for LEnsE API

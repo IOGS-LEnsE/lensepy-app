@@ -24,13 +24,13 @@ class ZygoInterferControlController(TemplateController):
 
         """
         super().__init__(parent)
-        self.data_set : DataSet = self.parent.variables['dataset']
+        self.data_set : DataSet = self.get_variables('dataset')
         self.number_of_repetition = 1
-        if self.parent.variables['phase'] is None:
+        if self.get_variables('phase') is None:
             self.phase = PhaseModel(self.data_set)
-            self.parent.variables['phase'] = self.phase
+            self.set_variables('phase', self.phase)
         else:
-            self.phase = self.parent.variables['phase']
+            self.phase = self.get_variables('phase')
         self.phase.prepare_data()
         self.zernike_coeffs = Zernike(self.phase)
         self.displayed_surface = '2D_unwrap'
@@ -82,7 +82,7 @@ class ZygoInterferControlController(TemplateController):
                 self.process_zernike_calculation(k)
             self.data_set.set_analyzed_state()
         self.set_variables('phase_calculated', True)
-        self.parent.update_menu()
+        self.manager.update_menu()
 
     def correct_surface(self):
         self.unwrapped_phase = self.phase.get_unwrapped_phase()
@@ -129,9 +129,9 @@ class ZygoInterferControlController(TemplateController):
             self.handle_surface_selected(self.displayed_surface)
 
     def replace_top_left_widget(self, new_widget):
-        self.parent.main_window.top_left_container.deleteLater()
+        self.manager.main_window.top_left_container.deleteLater()
         self.top_left = new_widget
-        self.parent.main_window.top_left_container = self.top_left
+        self.manager.main_window.top_left_container = self.top_left
         self.update_view()
 
     def display_2D_wrapped(self):

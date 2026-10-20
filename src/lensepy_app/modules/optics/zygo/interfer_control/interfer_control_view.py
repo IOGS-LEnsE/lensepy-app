@@ -281,7 +281,7 @@ class SurfaceChoiceView(ModuleWidget):
     def handle_saved(self):
         file_dialog = QFileDialog()
         # default dir ?
-        default_dir = self.parent.get_config('img_dir') or None
+        default_dir = self.controller.get_config('img_dir') or None
         # dialog box
         file_path, _ = file_dialog.getSaveFileName(self, translate('dialog_view_png_image'),
                                                    default_dir, "Images (*.png)")

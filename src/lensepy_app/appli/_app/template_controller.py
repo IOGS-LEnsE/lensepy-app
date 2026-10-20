@@ -202,7 +202,7 @@ class ImageLive(QObject):
         self._running = False
 
     def run(self):
-        camera = self.controller.parent.variables.get("camera")
+        camera = self.controller.get_variables("camera")
         if camera is None:
             return
 

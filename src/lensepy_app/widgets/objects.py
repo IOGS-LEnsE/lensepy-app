@@ -122,7 +122,7 @@ class SelectWidget(QWidget):
         self.combo_box.setEnabled(value)
 
 
-class SliderBloc(QWidget):
+class SliderBloc(ModuleWidget):
     """
     Slider block combining a numeric input and a horizontal slider.
     Emits the current value whenever it changes.
@@ -131,8 +131,8 @@ class SliderBloc(QWidget):
     slider_changed = pyqtSignal(float)
 
     def __init__(self, name: str, unit: str, min_value: float, max_value: float,
-                 integer: bool = False, ratio:int = 100) -> None:
-        super().__init__()
+                 integer: bool = False, ratio:int = 100, parent=None) -> None:
+        super().__init__(parent=parent)
 
         self.integer = integer
         self.unit = unit
@@ -163,11 +163,11 @@ class SliderBloc(QWidget):
 
     def _init_value_line(self, name: str):
         line = QHBoxLayout()
-        self.label_name = self._styled_label(f"{name}:", styleH2)
+        self.label_name = self._styled_label(f"{name}:", STYLE_H2[self.global_theme][self.global_mode])
         self.lineedit_value = QLineEdit(str(self.value))
         #self.lineedit_value.textEdited.connect(self.handle_input_changed)
         self.lineedit_value.editingFinished.connect(self.handle_input_changed_finish)
-        self.label_unit = self._styled_label(self.unit, styleH3)
+        self.label_unit = self._styled_label(self.unit, STYLE_H3[self.global_theme][self.global_mode])
 
         for widget in (self.label_name, self.lineedit_value, self.label_unit):
             line.addWidget(widget)
@@ -179,8 +179,8 @@ class SliderBloc(QWidget):
 
     def _init_slider_line(self):
         line = QHBoxLayout()
-        self.label_min_value = self._styled_label(f"{self.min_value} {self.unit}", styleH3)
-        self.label_max_value = self._styled_label(f"{self.max_value} {self.unit}", styleH3)
+        self.label_min_value = self._styled_label(f"{self.min_value} {self.unit}", STYLE_H3[self.global_theme][self.global_mode])
+        self.label_max_value = self._styled_label(f"{self.max_value} {self.unit}", STYLE_H3[self.global_theme][self.global_mode])
 
         self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(int(self.min_value * self.ratio), int(self.max_value * self.ratio))

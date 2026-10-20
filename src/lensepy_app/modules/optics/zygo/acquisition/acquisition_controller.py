@@ -5,7 +5,7 @@ from lensepy import translate
 from lensepy.drivers.ids_camera import *
 
 from PyQt6.QtWidgets import QWidget, QDialog, QLabel
-from PyQt6.QtCore import QThread, QObject
+from PyQt6.QtCore import QThread, QObject, QTimer
 from PyQt6 import sip
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets.image_display_widget import ImageDisplayWidget
@@ -25,8 +25,7 @@ class ZygoAcquisitionController(TemplateController):
         """
 
         """
-        super().__init__(None)
-        self.parent = parent
+        super().__init__(parent=parent)
         self.data_set = DataSet()
         self.acquiring = False
         self.camera_connected = False
@@ -41,11 +40,11 @@ class ZygoAcquisitionController(TemplateController):
         self.worker = None
 
         # Graphical layout
-        self.top_left = ImageDisplayWidget()
+        self.top_left = ImageDisplayWidget(self)
         self.top_right = AcquisitionView(self)
-        self.bot_left = CameraParamsView()
+        self.bot_left = CameraParamsView(parent=self)
         self.bot_right = PiezoControlView(self)
-        self.zoom_widget = ImageDisplayWidget()
+        self.zoom_widget = ImageDisplayWidget(self)
         
         # Setup widgets
 
@@ -111,41 +110,41 @@ class ZygoAcquisitionController(TemplateController):
         """
         Initialize the camera.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.manager.variables["camera"]
         # Check if a camera is already connected
         if camera is None:
             print('No Camera YET')
             # Init Camera
-            self.parent.variables["camera"] = CameraIDS()
-            self.camera_connected = self.parent.variables["camera"].find_first_camera()
+            self.set_variables("camera", CameraIDS())
+            self.camera_connected = self.get_variables("camera").find_first_camera()
             if self.camera_connected is False:
-                self.parent.variables["camera"] = None
+                self.set_variables("camera", None)
             else:
-                self.parent.variables["camera"].init_camera()
+                self.get_variables("camera").init_camera()
                 # Initial parameters
-                camera_ini_file = self.parent.parent.config.get('camera_ini')
+                camera_ini_file = self.manager.get_config('camera_ini')
                 '''
                 if os.path.isfile(camera_ini_file):
                     camera.init_camera_parameters(camera_ini_file)
                     print(f'Camera ini file {camera_ini_file} successfully initialized.')
                 '''
-                self.parent.variables["camera"].set_exposure(1000)
+                self.get_variables("camera").set_exposure(1000)
         else:
             self.camera_connected = True
         print(f'Connected ? {self.camera_connected}')
-        exposure = self.parent.variables["camera"].get_exposure()
+        exposure = self.get_variables("camera").get_exposure()
         print(f'Exp = {exposure}')
         self.bot_left.set_exposure(exposure)
 
     def init_piezo(self):
         """Initialization of the piezo wrapper."""
-        piezo = self.parent.variables["piezo"]
+        piezo = self.get_variables("piezo")
         # Check if a piezo is connected
         if piezo is None:
-            self.parent.variables["piezo"] = NIDaqPiezo()
-            self.piezo_connected = self.parent.variables["piezo"].find_first_piezo()
+            self.set_variables("piezo", NIDaqPiezo())
+            self.piezo_connected = self.get_variables("piezo").find_first_piezo()
             if self.piezo_connected is False:
-                self.parent.variables["piezo"] = None
+                self.set_variables("piezo", None)
                 return
         else:
             self.piezo_connected = True
@@ -155,7 +154,7 @@ class ZygoAcquisitionController(TemplateController):
         """
         Start live acquisition from camera.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if self.camera_connected:
             camera.start_acquisition()
             self.acquiring = True
@@ -200,10 +199,13 @@ class ZygoAcquisitionController(TemplateController):
         else:
             self.top_left.set_image_from_array(image)
         # Store new image.
-        self.parent.variables['image'] = image.copy()
+        self.set_variables('image', image.copy())
 
     def handle_acquisition_done(self, images, voltages):
         # Reinit UI
+        self.top_right.set_zoom_enabled()
+        self.bot_right.set_enabled()
+        self.bot_left.set_enabled()
         self.top_right.set_acq_enabled()
         # Store new data in data_set
         self.data_set.add_set_images(images)
@@ -218,18 +220,16 @@ class ZygoAcquisitionController(TemplateController):
             self.zoom_widget.showMaximized()
             self.zoom_widget.closeEvent = self.acquisition_closed
 
-        # Tu peux lancer ton traitement ici
-        # ex : phase reconstruction
-
     def acquisition_closed(self, event):
         self.zoom_activated = False
         self.top_right.set_zoom_enabled()
+        self.start_live()
 
     def handle_exposure_changed(self, value):
         """
         Action performed when the exposure time changed.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         try:
             if camera is not None:
                 # Read available formats
@@ -239,7 +239,12 @@ class ZygoAcquisitionController(TemplateController):
             print(f'camera_expo {e}')
 
     def handle_voltage_changed(self, value):
-        print(f'Voltage = {value} V')
+        piezo = self.get_variables("piezo")
+        if piezo is not None:
+            try:
+                piezo.write_dac(value)
+            except Exception as e:
+                print(f"Piezo error: {e}")
 
     def replace_top_left_widget(self, new_widget):
         self.parent.main_window.top_left_container.deleteLater()
@@ -254,22 +259,22 @@ class ZygoAcquisitionController(TemplateController):
         self.stop_live()
         self.stop_acquisition()
         time.sleep(0.1)
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             camera.disconnect()
             camera.camera_acquiring = False
         self.worker = None
         self.thread = None
         self.camera_connected = False
-        self.parent.variables["camera"] = None
+        self.set_variables("camera", None)
 
     def start_acquisition(self):
         self.top_right.set_zoom_enabled(False)
         self.bot_right.set_enabled(False)
         self.bot_left.set_enabled(False)
 
-        camera = self.parent.variables.get("camera")
-        piezo = self.parent.variables.get("piezo")
+        camera = self.get_variables("camera")
+        piezo = self.get_variables("piezo")
 
         if camera is None:
             return
@@ -283,6 +288,7 @@ class ZygoAcquisitionController(TemplateController):
         self.worker.acquisition_done.connect(self.handle_acquisition_done)
 
         self.worker.finished.connect(self.thread.quit)
+
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
 
@@ -296,7 +302,7 @@ class ZygoAcquisitionController(TemplateController):
             self.bot_left.set_enabled()
             self.top_right.set_acq_enabled()
 
-            # 🔥 SAFE STOP
+            # SAFE STOP
             if self.worker is not None:
                 try:
                     self.worker.stop()
@@ -403,7 +409,6 @@ class AcquisitionLive(QObject):
         self.index += 1
         self.controller.update_progress_bar(int(100*self.index / len(self.volt_list)))
         self.waiting_settle = False
-
         # Delay before next point
         self.timer.start(self.interval_ms)
 
