@@ -42,15 +42,6 @@ class BaslerController(TemplateController):
         # Widgets setup and signals
         self.bot_left.set_labels(translate('histo_xlabel'), translate('histo_ylabel'))
 
-        # Camera infos
-        camera = self.get_variables("camera")
-        if camera is not None:
-            expo_init = camera.get_parameter('ExposureTime')
-            self.bot_right.slider_expo.set_value(expo_init)
-            fps_init = camera.get_parameter('BslResultingAcquisitionFrameRate')
-            fps = np.round(fps_init, 2)
-            self.bot_right.label_fps.set_value(str(fps))
-
     def init_view(self):
         """
         Update graphical objects of the interface.
@@ -78,7 +69,6 @@ class BaslerController(TemplateController):
             # Signals
             self.bot_right.exposure_time_changed.connect(self.handle_exposure_time_changed)
             self.bot_right.black_level_changed.connect(self.handle_black_level_changed)
-            self.start_live()
         else:
             self.top_left = QLabel('No Camera is connected. \n'
                                    'Connect a camera first.\n'
@@ -90,6 +80,22 @@ class BaslerController(TemplateController):
             self.top_right = QWidget()
             self.bot_right = QWidget()
             super().init_view()
+
+        # Camera infos
+        camera = self.get_variables("camera")
+        if camera is not None:
+            range = self.bot_right.slider_expo.get_range()
+            expo_init = camera.get_parameter('ExposureTime')
+            print(f'Expo Init = {expo_init} / {range[1]}')
+            if expo_init < range[1]:
+                self.bot_right.slider_expo.set_value(expo_init)
+            else:
+                self.bot_right.slider_expo.set_value(range[1])
+                camera.set_parameter('ExposureTime', int(range[1]))
+            fps_init = camera.get_parameter('BslResultingAcquisitionFrameRate')
+            fps = np.round(fps_init, 2)
+            self.bot_right.label_fps.set_value(str(fps))
+            self.start_live()
 
     def init_camera(self):
         """
@@ -249,6 +255,7 @@ class BaslerController(TemplateController):
         self.stop_live()
         camera = self.get_variables("camera")
         if camera is not None:
+            print('camera not None')
             if getattr(camera, "is_open", False):
                 camera.close()
             camera.camera_acquiring = False

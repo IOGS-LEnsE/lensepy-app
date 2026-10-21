@@ -261,6 +261,9 @@ class SliderBloc(ModuleWidget):
         self.label_min_value.setText(f"{min_value} {self.unit}")
         self.label_max_value.setText(f"{max_value} {self.unit}")
 
+    def get_range(self):
+        return self.min_value, self.max_value
+
     def set_enabled(self, enabled: bool):
         """Enable or disable the whole block."""
         self.slider.setEnabled(enabled)
@@ -864,10 +867,10 @@ class CircleWidget(QWidget):
         painter.drawEllipse(circle_rect)
 
 
-class LabelWidget(QWidget):
+class LabelWidget(ModuleWidget):
 
     def __init__(self, title='', value='', unit='', parent=None, size=''):
-        super().__init__(parent)
+        super().__init__(parent=parent)
 
         if size == '':
             MINIMUM_WIDTH = 75

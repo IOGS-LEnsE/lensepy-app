@@ -80,12 +80,8 @@ class FyzoAnalysisController(TemplateController):
         initial_image = self.get_variables('image')
         if initial_image is not None:
             self.bot_right.set_image_from_array(initial_image)
-        '''
-        COMMENT !
         camera = self.get_variables("camera")
         camera.set_parameter("AcquisitionFrameRate", FPS_FFT)
-        END COMMENT !
-        '''
         # Signals
         self.top_right.display_changed.connect(self.handle_display_changed)
         # Crop size / mask
@@ -96,13 +92,9 @@ class FyzoAnalysisController(TemplateController):
         self.img_pos_x, self.img_pos_y = top_left[1], top_left[0]
         self.mask = crop_images([mask], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
         self.mask_fft = crop_images([mask], (self.img_height_fft, self.img_width_fft), (self.img_pos_x, self.img_pos_y))[0]
-        '''
-        COMMENT !!
         camera.start_acquisition()
         # Start live acquisition
         self.start_live()
-        END COMMENT !!
-        '''
         self.handle_image_ready(initial_image)  # TO TEST / REMOVE IN LIVE MODE
 
     def start_live(self):
@@ -138,7 +130,6 @@ class FyzoAnalysisController(TemplateController):
         image_crop = crop_images([image_raw], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
         # Post Image
         bits_depth = self.get_variables("bits_depth")
-        bits_depth = 8  # TO REMOVE IN LIVE VERSION
         pow = bits_depth - 8
         if pow > 0:
             image_8bits = image_crop // (2**pow)
@@ -175,8 +166,10 @@ class FyzoAnalysisController(TemplateController):
         Stop the camera cleanly and release resources.
         """
         self.stop_live()
+        print('CLEANUP - FFT')
         camera = self.get_variables("camera")
         if camera is not None:
+            print('camera not None')
             camera.stop_acquisition()
             if getattr(camera, "is_open", False):
                 camera.close()

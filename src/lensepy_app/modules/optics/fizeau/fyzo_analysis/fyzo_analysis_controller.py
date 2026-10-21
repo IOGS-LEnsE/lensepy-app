@@ -95,7 +95,6 @@ class FyzoAnalysisController(TemplateController):
         image_raw = crop_images([image_raw], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
         # Post Image
         bits_depth = self.get_variables("bits_depth")
-        bits_depth = 8  # REMOVE IN LIVE VERSION
         pow = bits_depth - 8
         if pow > 0:
             image_8bits = image_raw // (2**pow)
@@ -199,8 +198,10 @@ class FyzoAnalysisController(TemplateController):
         """
         Stop the camera cleanly and release resources.
         """
+        print('CLEANUP - Fyzo Analysis')
         camera = self.get_variables("camera")
         if camera is not None:
+            print('camera not None')
             if getattr(camera, "is_open", False):
                 camera.close()
             camera.camera_acquiring = False

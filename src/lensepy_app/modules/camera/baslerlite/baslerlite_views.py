@@ -48,11 +48,11 @@ class CameraInfosWidget(ModuleWidget):
         layout.addWidget(self.label_serial)
         layout.addWidget(make_hline())
 
-        self.label_size = LabelWidget(translate('basler_infos_size'), '', 'pixels')
+        self.label_size = LabelWidget(translate('basler_infos_size'), '', 'pixels', parent=self.controller)
         layout.addWidget(self.label_size)
         self.label_size.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         self.color_choice = self.controller.colormode
-        self.label_color_mode = LabelWidget(translate('basler_infos_color_mode'), '', '')
+        self.label_color_mode = LabelWidget(translate('basler_infos_color_mode'), '', '', parent=self.controller)
         layout.addWidget(self.label_color_mode)
         layout.addWidget(make_hline())
         layout.addStretch()

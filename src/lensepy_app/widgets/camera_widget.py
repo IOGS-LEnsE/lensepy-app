@@ -19,7 +19,7 @@ class CameraParamsWidget(ModuleWidget):
         super().__init__(parent=parent)
         layout = QVBoxLayout()
         # Attributes
-        self.camera = self.controller.get_variables()['camera']
+        self.camera = self.controller.get_variables('camera')
         # Graphical objects
         layout.addWidget(make_hline())
         label = QLabel(translate('basler_params_title'))
@@ -30,15 +30,15 @@ class CameraParamsWidget(ModuleWidget):
         print(f'Camera = {self.camera}')
         # Test if camera is connected to the computer
         if self.camera is not None:
-            self.label_fps = LabelWidget(translate('basler_params_fps'), '')
+            self.label_fps = LabelWidget(translate('basler_params_fps'), '', parent=self.controller)
             layout.addWidget(self.label_fps)
             self.slider_expo = SliderBloc(translate('basler_params_slider_expo'), unit='us',
-                                          min_value=20, max_value=1000000, integer=True)
+                                          min_value=20, max_value=1000000, integer=True, parent=self.controller)
             #self.slider_expo.slider.setEnabled(False)
             layout.addWidget(self.slider_expo)
             layout.addWidget(make_hline())
             self.slider_black_level = SliderBloc(translate('basler_params_slider_black'), unit='ADU',
-                                          min_value=0, max_value=255, integer=True)
+                                          min_value=0, max_value=255, integer=True, parent=self.controller)
             #self.slider_black_level.slider.setEnabled(False)
             layout.addWidget(self.slider_black_level)
             layout.addWidget(make_hline())

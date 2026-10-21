@@ -35,8 +35,8 @@ class IDSController(TemplateController):
             # Check if camera is connected
             self.init_camera()
         # Widgets
-        self.top_left = ImageDisplayWidget()
-        self.bot_left = HistogramWidget()
+        self.top_left = ImageDisplayWidget(self)
+        self.bot_left = HistogramWidget(self)
         self.top_right = CameraInfosWidget(self)
         self.bot_right = CameraParamsWidget(self)
 
