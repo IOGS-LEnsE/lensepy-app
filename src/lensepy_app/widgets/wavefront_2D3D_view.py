@@ -191,7 +191,7 @@ class _GLView(gl.GLViewWidget):
 
 class Wavefront3D(_WavefrontBase):
     """Surface 3D OpenGL + barre de couleur + stats. set_z_scale() en plus."""
-    view_changed = QtCore.Signal()
+    view_changed = pyqtSignal()
 
     def __init__(self, title, parent=None, colormap="viridis", subsample=1,
                  subsample_method="moyenne", z_scale=1.0, disp_cmap=True,
@@ -204,7 +204,6 @@ class Wavefront3D(_WavefrontBase):
 
     def _build_ui(self):
         self._surf = None
-        self._z_scale = 1.0
 
         self.view = _GLView()
         self.view.cameraChanged.connect(self.view_changed)
@@ -221,9 +220,9 @@ class Wavefront3D(_WavefrontBase):
         axes.setSize(1.2, 1.2, 1.2)
         self.view.addItem(axes)
 
-        # Barre de couleur
+        # Colorbar
         self._cb_widget = pg.GraphicsLayoutWidget()
-        self._cb_widget.setFixedWidth(110)
+        self._cb_widget.setFixedWidth(100)
         self._cb_plot = self._cb_widget.addPlot()
         self._cb_img = pg.ImageItem()
         self._cb_plot.addItem(self._cb_img)
@@ -328,15 +327,17 @@ class Wavefront3D(_WavefrontBase):
         self._surf.setGLOptions("translucent")
         self.view.addItem(self._surf)
 
-        # Barre de couleur
+        # Colorbar
         self._cb_img.setImage(
-            np.linspace(0, 1, 256)[None, :],
+            np.linspace(0, 1, 256)[:, None],
             levels=(0, 1)
         )
         self._cb_img.setColorMap(cmap)
+
         self._cb_img.setRect(
             QtCore.QRectF(0, vmin, 1, etendue)
         )
+
         self._cb_plot.setXRange(0, 1, padding=0)
         self._cb_plot.setYRange(vmin, vmax, padding=0)
 

@@ -30,12 +30,10 @@ class ZygoMasksController(TemplateController):
 
         '''
         TO DELETE
-        '''
         import cv2
         file_path = '../lensepy-data/optics/fizeau/interference.png'
         image = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
         self.manager.variables['image'] = image
-        '''
         END DELETE
         '''
 
@@ -68,8 +66,8 @@ class ZygoMasksController(TemplateController):
 
     def handle_mask_added(self, event):
         if 'update' in event:
-            self.handle_mask_changed()
             self.set_variables("masks", self.masks)
+            self.handle_mask_changed()
         elif '_masks' in event:
             if 'circular' in event:
                 type = 'circular'
@@ -109,26 +107,36 @@ class ZygoMasksController(TemplateController):
                 self.handle_mask_changed()
 
     def handle_mask_changed(self):
-        mask = self.masks.get_global_mask()
-        mask_disp = False
-        if mask is None:
+        nb_mask = self.masks.get_masks_number()
+        if nb_mask != 0:
+            mask = self.masks.get_global_mask()
+            mask_disp = False
+            if mask is None:
+                self.check_first_mask = True
+                self.bot_left.set_checked_check(False)
+                self.bot_left.set_enabled_check(False)
+            elif self.check_first_mask and mask is not None:
+                self.check_first_mask = False
+                self.bot_left.set_checked_check(True)
+                self.bot_left.set_enabled_check(True)
+                mask_disp = True
+            else:
+                mask_disp = self.bot_left.is_mask_displayed()
+                self.bot_left.set_enabled_check(True)
+            if mask is not None and mask_disp:
+                image_disp = self.first_image * mask
+            else:
+                #self.parent.variables['mask_loaded'] = None
+                self.manager.update_menu()
+                image_disp = self.first_image
+        else:
             self.check_first_mask = True
+            self.set_variables('mask', None)
             self.bot_left.set_checked_check(False)
             self.bot_left.set_enabled_check(False)
-        elif self.check_first_mask and mask is not None:
-            self.check_first_mask = False
-            self.bot_left.set_checked_check(True)
-            self.bot_left.set_enabled_check(True)
-            mask_disp = True
-        else:
-            mask_disp = self.bot_left.is_mask_displayed()
-            self.bot_left.set_enabled_check(True)
-        #
-        if mask is not None and mask_disp:
-            image_disp = self.first_image * mask
-        else:
-            #self.parent.variables['mask_loaded'] = None
             self.manager.update_menu()
             image_disp = self.first_image
+        #
+
         self.top_left.set_image_from_array(image_disp)
         self.top_left.repaint()

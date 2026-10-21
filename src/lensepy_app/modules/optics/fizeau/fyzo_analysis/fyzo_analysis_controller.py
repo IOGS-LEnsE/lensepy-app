@@ -4,7 +4,6 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from PyQt6.QtCore import QThread
 from PyQt6.QtWidgets import QWidget
 
 from lensepy import translate
@@ -19,8 +18,6 @@ from lensepy.optics.zygo import process_statistics_surface
 from lensepy_app.appli._app.template_controller import TemplateController, ImageLive
 from lensepy_app.widgets import ImageDisplayWidget
 from lensepy_app.modules.optics.fizeau.fyzo_analysis.fyzo_analysis_views import FyzoAnalysisOptionsView
-from lensepy_app.widgets.double_3d_view import Surface3DView
-from lensepy_app.widgets.surface_2D_view import Surface2DView
 from skimage.restoration import unwrap_phase
 
 FPS_FFT = 3
@@ -62,9 +59,10 @@ class FyzoAnalysisController(TemplateController):
         # Crop size / mask
         mask = self.get_variables('masks').get_global_mask()
         top_left, bottom_right = find_mask_limits(mask)
-        self.img_height, self.img_width = bottom_right[1] - top_left[1], bottom_right[0] - top_left[0]
+        self.img_height, self.img_width = bottom_right[0] - top_left[0], bottom_right[1] - top_left[1]
         self.img_pos_x, self.img_pos_y = top_left[1], top_left[0]
         self.mask = crop_images([mask], (self.img_height, self.img_width), (self.img_pos_x, self.img_pos_y))[0]
+        self.mask = self._shrink_mask(self.mask, pixels=20)
         # Initial Image
         self.initial_image = self.get_variables('image')
         if self.initial_image is not None:
@@ -74,6 +72,22 @@ class FyzoAnalysisController(TemplateController):
             self.top_left.set_data(self.surface)
             self.top_left.update()
             self.update_view()
+
+    def _shrink_mask(self, mask, pixels):
+        h, w = mask.shape
+        mask[0:1,:] = False
+        mask[:,0:1] = False
+        mask[w-2:w-1,:] = False
+        mask[:,h-2:h-1] = False
+        mask = (np.asarray(mask) > 0).astype(np.uint8) * 255
+        size = 2 * pixels + 1
+        kernel = cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE,
+            (size, size)
+        )
+        # Erode
+        shrink_mask = cv2.erode(mask, kernel, iterations=1)
+        return shrink_mask > 1
 
     def process_data(self):
         image_raw = self.initial_image
@@ -110,7 +124,6 @@ class FyzoAnalysisController(TemplateController):
         self.unwrapped_phase[~self.mask] = np.nan
 
         # Surface
-        Masq = self.mask
         xx = (np.arange(-self.img_width // 2, self.img_width // 2) / self.img_width) * 2
         yy = (np.arange(-self.img_height // 2, self.img_height // 2) / self.img_height) * 2
         Xg, Yg = np.meshgrid(xx, yy)
@@ -120,7 +133,7 @@ class FyzoAnalysisController(TemplateController):
         phase_corr = np.full_like(self.unwrapped_phase, np.nan)
         phase_corr[self.mask] = Z - A @ coeffs
         # Process surface
-        self.surface = phase_corr / (4 * np.pi) * LAMBDA_LASER  # d éfaut en réflexion
+        self.surface = phase_corr / (4 * np.pi) * LAMBDA_LASER
         self.surface[~self.mask] = np.nan
         self.surface = np.ma.masked_where(np.logical_not(self.mask), self.surface)
 
@@ -165,14 +178,10 @@ class FyzoAnalysisController(TemplateController):
             # TO UPDATE
         elif self.disp_mode == 'surface_3D':
             self.view_3D = Wavefront3D(translate('unwrapped_3D_surface'),
-                        parent=self,
-                        disp_cmap=False, colormap='magma',
+                        parent=self, z_scale=0.2,
+                        disp_cmap=True, colormap='magma',
                         initial_distance=3)
             self.replace_top_left_widget(self.view_3D)
-            '''
-            x, y, w_s = self.view_3D.prepare_data_for_mesh(self.surface, undersampling=1) # TO CHANGE
-            self.view_3D.create_mesh_surface(x, y, w_s)
-            '''
             self.view_3D.set_data(self.surface)
         else:
             self.top_left.set_image_from_array(self.image_disp)

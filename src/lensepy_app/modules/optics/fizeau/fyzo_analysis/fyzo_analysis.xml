@@ -2,8 +2,7 @@
 <appli>
     <name>spatial_camera</name>
     <requirements>camera</requirements>
-    <req_var2>bits_depth,camera,mask</req_var2>
-    <req_var>mask</req_var>
+    <req_var>bits_depth,camera,mask</req_var>
     <display>MODE2</display>
     <controller>FyzoAnalysisController</controller>
     <location>fyzo_analysis_controller</location>

@@ -119,7 +119,8 @@ class MasksTableList(QTableWidget):
         self._add_text(0, 0, "ALL")
         self._add_text(0, 1, "GLOBAL")
         self._add_select_checkbox(0)
-        self._add_invert_checkbox(0)
+
+        self._add_invert_checkbox(0, inverted=self.masks.is_mask_inverted())
         self._add_delete_button(0, translate('delete_all'))
 
         self.init_data()
