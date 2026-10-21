@@ -13,6 +13,6 @@ __all__ = [
 ]
 
 
-version = '1.1.1'
+version = '1.1.2'
 print('LEnsE Applications package (v.'+version+') / lensepy-app')
 
