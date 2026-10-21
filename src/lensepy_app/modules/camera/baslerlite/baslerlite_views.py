@@ -5,7 +5,8 @@ from PyQt6.QtWidgets import (
     QLineEdit, QGridLayout, QPushButton, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QCheckBox)
 
 from lensepy import translate
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy.utils import *
 from scipy.ndimage import value_indices
 
@@ -18,7 +19,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from lensepy_app.modules.camera.basler.basler_controller import BaslerController
 
-class CameraInfosWidget(QWidget):
+class CameraInfosWidget(ModuleWidget):
     """
     Widget to display image infos.
     """
@@ -27,28 +28,30 @@ class CameraInfosWidget(QWidget):
     mask_applied = pyqtSignal(bool)
 
     def __init__(self, parent=None):
-        super().__init__(None)
+        super().__init__(parent=parent)
         # Attributes
-        self.parent: BaslerController = parent  # BaslerController or any CameraController
-        self.camera = self.parent.get_variables()['camera']
+        self.camera = self.controller.get_variables('camera')
         # Graphical objects
         layout = QVBoxLayout()
 
         label = QLabel(translate('basler_infos_title'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
         layout.addWidget(make_hline())
 
         self.label_name = LabelWidget(translate('basler_infos_name'), '')
+        self.label_name.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         layout.addWidget(self.label_name)
         self.label_serial = LabelWidget(translate('basler_infos_serial'), '')
+        self.label_serial.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         layout.addWidget(self.label_serial)
         layout.addWidget(make_hline())
 
         self.label_size = LabelWidget(translate('basler_infos_size'), '', 'pixels')
         layout.addWidget(self.label_size)
-        self.color_choice = self.parent.colormode
+        self.label_size.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
+        self.color_choice = self.controller.colormode
         self.label_color_mode = LabelWidget(translate('basler_infos_color_mode'), '', '')
         layout.addWidget(self.label_color_mode)
         layout.addWidget(make_hline())
@@ -68,8 +71,8 @@ class CameraInfosWidget(QWidget):
         """
         Update information from camera.
         """
-        self.camera: BaslerCamera = self.parent.get_variables()['camera']
-        if self.parent.camera_connected:
+        self.camera: BaslerCamera = self.controller.get_variables('camera')
+        if self.controller.camera_connected:
             self.camera.open()
             self.label_name.set_value(self.camera.get_parameter('DeviceModelName'))
             self.label_serial.set_value(self.camera.get_parameter('DeviceSerialNumber'))

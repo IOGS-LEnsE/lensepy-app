@@ -2,6 +2,7 @@ import time
 from PyQt6.QtCore import QObject, QThread
 from PyQt6.QtWidgets import QDialog
 from pathlib import Path
+import lensepy_app
 from lensepy_app import *
 from lensepy_app.appli import *
 
@@ -60,19 +61,19 @@ class BaslerController(TemplateController):
             self.set_color_mode()
             self.set_max_exposure_time()
             self.update_color_mode()
-            camera = self.parent.variables['camera']
+            #camera = self.get_variables('camera')
             # Setup widgets
             self.bot_left.set_background('white')
             self.top_right.update_infos()
             # Init widgets
-            if self.parent.variables['bits_depth'] is not None:
-                self.top_left.set_bits_depth(int(self.parent.variables['bits_depth']))
-                self.bot_left.set_bits_depth(int(self.parent.variables['bits_depth']))
+            if self.get_variables('bits_depth') is not None:
+                self.top_left.set_bits_depth(int(self.get_variables('bits_depth')))
+                self.bot_left.set_bits_depth(int(self.get_variables('bits_depth')))
             else:
                 self.bot_left.set_bits_depth(8)
-            if self.parent.variables['image'] is not None:
-                self.top_left.set_image_from_array(self.parent.variables['image'])
-                self.bot_left.set_image(self.parent.variables['image'])
+            if self.get_variables('image') is not None:
+                self.top_left.set_image_from_array(self.get_variables('image'))
+                self.bot_left.set_image(self.get_variables('image'))
             self.bot_left.refresh_chart()
             # Signals
             self.bot_right.exposure_time_changed.connect(self.handle_exposure_time_changed)
@@ -107,7 +108,7 @@ class BaslerController(TemplateController):
                 camera = self.get_variables("camera")
                 self.set_variables("first_connexion", 'Yes')
                 # Initial parameters
-                camera_ini_file = self.controller.get_config('camera_ini')
+                camera_ini_file = self.get_config('camera_ini')
                 if camera_ini_file is not None:
                     if camera_ini_file.startswith('.'):
                         base_path = Path(lensepy_app.__file__).parent
@@ -125,13 +126,12 @@ class BaslerController(TemplateController):
         else:
             self.camera_connected = True
             self.set_variables("first_connexion", 'No')
-            default_fps = self.get_variables["disp_fps"]
+            default_fps = self.get_variables("disp_fps")
             camera.set_parameter("AcquisitionFrameRate", default_fps)
-
 
     def set_color_mode(self):
         # Get color mode list
-        colormode_get = self.parent.xml_app.get_sub_parameter('camera','colormode')
+        colormode_get = self.manager.xml_app.get_sub_parameter('camera','colormode')
         colormode_get = colormode_get.split(',')
         for colormode in colormode_get:
             colormode_v = colormode.split(':')
@@ -143,7 +143,7 @@ class BaslerController(TemplateController):
         self.bot_right.set_max_exposure_time(exposuretime_get)
 
     def update_color_mode(self):
-        camera = self.get_variables["camera"]
+        camera = self.get_variables("camera")
         # Update to first mode if first connection
         first_mode_color = self.colormode[0]
         camera.open()
@@ -258,12 +258,12 @@ class BaslerController(TemplateController):
     def handle_mask(self):
         type = 'circular'
         help = 'Select 3 different points and then Click Enter'
-        bits_depth = self.parent.variables["bits_depth"]
+        bits_depth = self.get_variables("bits_depth")
         pow = bits_depth - 8
         if pow > 0:
-            first_image = self.parent.variables["image"] // (2**pow)
+            first_image = self.get_variables("image") // (2**pow)
         else:
-            first_image = self.parent.variables["image"]
+            first_image = self.get_variables("image")
         dialog = MasksView(first_image, type, help, parent=self)
         result = dialog.exec()
         if result == QDialog.DialogCode.Rejected:
@@ -274,7 +274,7 @@ class BaslerController(TemplateController):
             self.set_variables("mask", mask)
             self.top_right.activate_mask_button(False)
             self.top_right.activate_mask_check()
-            self.parent.update_menu()
+            self.manager.update_menu()
 
     def handle_mask_applied(self, value):
         self.masked = value
