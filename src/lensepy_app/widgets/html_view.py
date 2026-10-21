@@ -8,20 +8,14 @@
 .. moduleauthor:: Julien VILLEMEJANE (PRAG LEnsE) <julien.villemejane@institutoptique.fr>
 Creation : march/2025
 """
-import sys, os
+import sys
 
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
-    QHBoxLayout
+    QHBoxLayout, QWidget, QTextBrowser
 )
-from PyQt6.QtCore import Qt, QUrl
-from PyQt6.QtWebEngineWidgets import QWebEngineView
 from lensepy_app import *
 from lensepy_app.appli import *
-
-os.environ["QTWEBENGINE_CHROMIUM_FLAGS"] = "--disable-direct-composition"
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
 
 
 class HTMLView(ModuleWidget):
@@ -35,9 +29,10 @@ class HTMLView(ModuleWidget):
         """
         super().__init__(parent=parent)
         self.url = url
-        self.view = QWebEngineView()
+
+        self.view = QTextBrowser()
         self.view.setStyleSheet(f"background-color: {IMAGE_BG[self.global_theme]};")
-        self.view.page().setBackgroundColor(QColor(IMAGE_BG[self.global_theme]))
+        # self.view.page().setBackgroundColor(QColor(IMAGE_BG[self.global_theme]))
 
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.view)
@@ -45,7 +40,7 @@ class HTMLView(ModuleWidget):
         if url != '':
             self.set_url(self.url)
 
-        self.view.loadFinished.connect(self.on_load_finished)
+        #self.view.loadFinished.connect(self.on_load_finished)
 
     def set_url(self, url: str):
         """
@@ -54,37 +49,7 @@ class HTMLView(ModuleWidget):
         :param css: filepath to a css file. Default ''.
         """
         self.url = url
-        print(url)
-        if url.startswith('http'):
-            self.view.setUrl(QUrl(url))
-        else:
-            self.view.setUrl(QUrl.fromLocalFile(self.url))
-
-        '''
-        if self.url != '':
-            css_content = ''
-            if os.path.exists(self.url):
-                with open(url, "r", encoding="utf-8") as file:
-                    html_content = file.read()
-                if self.css != '':
-                    with open(css, "r", encoding="utf-8") as file:
-                        css_content = file.read()
-
-                full_html_content = f"""
-                <html>
-                <head>
-                    <style>
-                    {css_content}
-                    </style>
-                </head>
-                <body>
-                    {html_content}
-                </body>
-                </html>
-                """
-
-                self.html_page.setHtml(full_html_content)
-        '''
+        self.view.setHtml(url)
 
     def on_load_finished(self, ok):
         if not ok:

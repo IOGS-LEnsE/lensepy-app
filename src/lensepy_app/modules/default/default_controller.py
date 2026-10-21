@@ -41,7 +41,7 @@ class DefaultController(TemplateController):
             if config['html'] is not None:
                 self.top_left.show()
                 url = config['html']
-                self.top_left.set_url(url)
+                #self.top_left.set_url(url)
         if 'img_desc' in config:
             if config['img_desc'] is not None:
                 self.top_right.show()
@@ -56,28 +56,3 @@ class DefaultController(TemplateController):
     def get_contributors_by_type(self):
         """Return a list of contributors based on type : dev, sciexp"""
         return self.parent.get_xml_contributors()
-
-'''
-import xml.etree.ElementTree as ET
-
-# Charger le fichier XML
-tree = ET.parse("mon_fichier.xml")  # remplace par le chemin réel
-root = tree.getroot()
-
-# Dictionnaire pour stocker les contributeurs par type
-contributors_by_type = {}
-
-# Parcourir tous les contributeurs
-for contributor in root.findall("./contributors/contributor"):
-    ctype = contributor.get("type")
-    name = contributor.findtext("name")
-
-    # Ajouter au dictionnaire
-    if ctype not in contributors_by_type:
-        contributors_by_type[ctype] = []
-    contributors_by_type[ctype].append(name)
-
-# Afficher le résultat
-for ctype, names in contributors_by_type.items():
-    print(f"{ctype}: {names}")
-'''

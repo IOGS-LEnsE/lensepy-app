@@ -15,6 +15,7 @@ import importlib.util
 DEFAULT_LANG = 'FR'
 
 os.environ["QSG_RHI_BACKEND"] = "opengl"   # avant QApplication
+#os.environ["QSG_RHI_BACKEND"] = "software"
 
 # Palette sombre
 palette = QPalette()
@@ -119,7 +120,6 @@ class My_Application(QApplication):
     def check_options(self):
         if not self.standalone:
             path = f'applis_dir.{self.app_name}'
-            print(f'Path = {path}')
             module = importlib.import_module(path)
             module.init_app(self)
 
@@ -183,6 +183,11 @@ class My_Application(QApplication):
 
 
 def start_app(app_path, standalone=False, argv=None):
+    QApplication.setAttribute(
+        Qt.ApplicationAttribute.AA_ShareOpenGLContexts,
+        True
+    )
+
     if standalone:
         print('Standalone')
         app = My_Application(app_path, standalone)
@@ -194,7 +199,10 @@ def start_app(app_path, standalone=False, argv=None):
             app.init_params()
             app.init_app()
             app.show()
-            sys.exit(app.exec())
+            exit_code = app.exec()
+            app.window.close()
+            sys.exit(exit_code)
+
         else:
             print('Module dependencies failed.')
             if len(app.error_modules) != 0:

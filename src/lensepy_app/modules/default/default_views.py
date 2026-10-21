@@ -1,12 +1,11 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QGuiApplication
-from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QHBoxLayout
+from PyQt6.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout
 from lensepy import translate
 from lensepy_app import *
 from lensepy_app.appli import *
-from lensepy_app.appli._app.main_view import get_disp_mode
 
-import lensepy_app
+import pyqtgraph.opengl as gl
+import numpy as np
 
 contributors_type = ['main_dev','dev','sciexp']
 
@@ -71,11 +70,12 @@ class DefaultBotRightWidget(ModuleWidget):
         self.layout_left = QVBoxLayout()
         self.layout_right = QVBoxLayout()
         layout.addLayout(self.layout_left, 3)
+        # Include OpenGL test if open_gl configuration is required
         if self.controller.get_config('open_gl') is not None:
+            print(f'Surface 3D')
             layout.addWidget(Surface3DWidget(self.controller), 1)
 
     def init_ui(self):
-        print(f'init_ui / DefaultBotRight')
         # Get list of contributors
         contributors_by_type = self.controller.get_contributors_by_type()
         for c_type in contributors_type:
@@ -91,9 +91,6 @@ class DefaultBotRightWidget(ModuleWidget):
 
         self.layout_left.addStretch()
 
-
-import pyqtgraph.opengl as gl
-import numpy as np
 
 class Surface3DWidget(ModuleWidget):
     def __init__(self, parent=None):
@@ -120,4 +117,4 @@ class Surface3DWidget(ModuleWidget):
         self.surface = gl.GLSurfacePlotItem( x=x, y=y, z=Z,
                                              shader="shaded", smooth=True, )
         self.surface.scale(1, 1, 3)
-        self.view.addItem(self.surface)
+        # self.view.addItem(self.surface)

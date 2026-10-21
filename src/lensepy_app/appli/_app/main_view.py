@@ -208,12 +208,13 @@ class MainWindow(QMainWindow):
 
 
     def closeEvent(self, event):
-        if self.manager.controller is not None:
-            print('Controller closed')
-            if hasattr(self.manager.controller, "cleanup"):
-                self.manager.controller.cleanup()
-        print('End of application')
-        event.accept()  # ou event.ignore()
+
+        controller = self.manager.controller
+        if controller is not None:
+            cleanup = getattr(controller, "cleanup", None)
+            if callable(cleanup):
+                cleanup()
+        event.accept()
 
     def resizeEvent(self, event):
         w_width = self.width()

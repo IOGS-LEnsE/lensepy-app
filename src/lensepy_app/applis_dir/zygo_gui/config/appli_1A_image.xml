@@ -9,7 +9,7 @@
     <img_dir>D:\_git\julien\lensepy-data\optics\zygo</img_dir>
     <mode>CLASSIC</mode>
     <theme>BLACK</theme>
-    <opengl></opengl>
+    <open_gl>1</open_gl>
     <contributors>
         <contributor type="dev">
             <name>Julien VILLEMEJANE</name>
