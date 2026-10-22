@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>fizeau_masks</name>
+    <requirements>baslerlite</requirements>
+    <req_var>dataset,dataset_loaded</req_var>
+    <display>MODE2</display>
+    <controller>ZygoMasksController</controller>
+    <location>masks_controller</location>
+</appli>

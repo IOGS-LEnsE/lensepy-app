@@ -21,9 +21,10 @@ class ZygoMasksController(TemplateController):
         super().__init__(parent)
         self.data_set : DataSet = self.get_variables('dataset')
         self.first_image = self.data_set.get_image_from_set(1, 1)
+        theme = self.manager.controller.get_config('global_theme')
 
         # Graphical layout
-        self.top_left = ImageDisplayWidget(self)
+        self.top_left = ImageDisplayWidget(self, bg_color=IMAGE_BG[theme])
         self.bot_left = AddMaskView(self)
         self.bot_right = QWidget()
         self.top_right = MasksOptionsView(self)
