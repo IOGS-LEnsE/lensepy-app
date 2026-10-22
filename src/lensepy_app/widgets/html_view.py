@@ -9,8 +9,10 @@
 Creation : march/2025
 """
 import sys
+from pathlib import Path
 
-from PyQt6.QtGui import QColor
+from PyQt6.QtCore import QUrl
+from PyQt6.QtGui import QColor, QTextDocument
 from PyQt6.QtWidgets import (
     QHBoxLayout, QWidget, QTextBrowser
 )
@@ -38,18 +40,26 @@ class HTMLView(ModuleWidget):
         self.layout.addWidget(self.view)
         self.setLayout(self.layout)
         if url != '':
+            print(f'HTML URL = {url}')
             self.set_url(self.url)
 
         #self.view.loadFinished.connect(self.on_load_finished)
 
-    def set_url(self, url: str):
+    def set_url(self, url: str, css_path=''):
         """
         Set the URL of the mini browser.
         :param url: filepath or url to the HTML page.
-        :param css: filepath to a css file. Default ''.
         """
         self.url = url
-        self.view.setHtml(url)
+
+        path = Path(url).resolve()
+        base_url = QUrl.fromLocalFile(str(path.parent) + "/")
+
+        with path.open("r", encoding="utf-8") as f:
+            html = f.read()
+
+        self.view.document().setBaseUrl(base_url)
+        self.view.setHtml(html)
 
     def on_load_finished(self, ok):
         if not ok:

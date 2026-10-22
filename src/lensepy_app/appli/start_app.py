@@ -89,11 +89,20 @@ class My_Application(QApplication):
             self.config['img_desc'] = xml_data.get_img_desc() or None
             if self.config['img_desc'] is not None:
                 self.config['img_desc'] = app_path + self.config['img_desc']
-            self.config['html'] = xml_data.get_html_page() or None
+            self.config['html']  = xml_data.get_html_page() or None
             if self.config['html'] is not None:
                 if self.config['html'].startswith('http'):
-                    app_path = ''
-                self.config['html'] = app_path + self.config['html']
+                    app_html_path = ''
+                else:
+                    app_html_path = app_path
+                self.config['html'] = app_html_path + self.config['html']
+            self.config['css'] = xml_data.get_css_style() or None
+            if self.config['css'] is not None:
+                if self.config['css'].startswith('http'):
+                    app_html_path = ''
+                else:
+                    app_html_path = app_path
+                self.config['css'] = app_html_path + self.config['css']
             self.config['organization'] = xml_data.get_parameter_xml('organization') or None
             self.config['year'] = xml_data.get_parameter_xml('year') or None
             self.config['img_dir'] = xml_data.get_parameter_xml('img_dir') or None

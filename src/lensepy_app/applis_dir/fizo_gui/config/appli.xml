@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <appli name="My_App">
     <name>Fyzo GUI</name>
+    <description>Fizeau Controller GUI - Basler</description>
     <appname>Fizeau Controller GUI - Basler</appname>
+    <img_desc>./fizo_gui/html/fizeau_lense.png</img_desc>
+    <html_page>./fizo_gui/html/fizeau_lab.html</html_page>
     <organization>LEnsE</organization>
     <year>2026</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>

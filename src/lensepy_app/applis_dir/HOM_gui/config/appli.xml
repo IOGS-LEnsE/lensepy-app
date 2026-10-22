@@ -4,6 +4,7 @@
     <description>Two photons interference labwork</description>
     <img_desc>./HOM_gui/html/HOM_labwork.png</img_desc>
     <html_page>./HOM_gui/html/hom_lab.html</html_page>
+    <css_style>./HOM_gui/html/styles.css</css_style>
     <appname>HOM/Bell Lab</appname>
     <organization>LEnsE</organization>
     <year>2026</year>

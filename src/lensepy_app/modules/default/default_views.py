@@ -117,4 +117,4 @@ class Surface3DWidget(ModuleWidget):
         self.surface = gl.GLSurfacePlotItem( x=x, y=y, z=Z,
                                              shader="shaded", smooth=True, )
         self.surface.scale(1, 1, 3)
-        # self.view.addItem(self.surface)
+        self.view.addItem(self.surface)

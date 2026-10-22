@@ -66,6 +66,13 @@ class XMLFileConfig:
         """
         return self.get_parameter_xml('html_page')
 
+    def get_css_style(self):
+        """
+
+        :return:    Description of the application from the XML file.
+        """
+        return self.get_parameter_xml('css_style')
+
     def get_img_desc(self):
         """
 

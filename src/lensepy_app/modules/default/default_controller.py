@@ -41,7 +41,8 @@ class DefaultController(TemplateController):
             if config['html'] is not None:
                 self.top_left.show()
                 url = config['html']
-                #self.top_left.set_url(url)
+                css = config['css']
+                self.top_left.set_url(url, css)
         if 'img_desc' in config:
             if config['img_desc'] is not None:
                 self.top_right.show()
