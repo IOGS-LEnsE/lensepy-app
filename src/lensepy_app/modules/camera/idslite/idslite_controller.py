@@ -45,6 +45,7 @@ class IDSController(TemplateController):
         camera = self.get_variables('camera')
         theme = self.manager.get_config('global_theme')
         mode = self.manager.get_config('global_mode')
+        self.set_max_exposure_time()
         if camera is not None:
             exposure = camera.get_exposure()
             self.bot_right.set_exposure_time(exposure)
@@ -103,7 +104,7 @@ class IDSController(TemplateController):
 
     def set_color_mode(self):
         # Get color mode list
-        colormode_get = self.parent.xml_app.get_sub_parameter('camera','colormode')
+        colormode_get = self.manager.xml_app.get_sub_parameter('camera','colormode')
         colormode_get = colormode_get.split(',')
         for colormode in colormode_get:
             colormode_v = colormode.split(':')

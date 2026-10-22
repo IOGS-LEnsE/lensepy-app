@@ -5,6 +5,7 @@
     <appname>Fizeau Controller GUI - Basler</appname>
     <img_desc>./fizo_gui/html/fizeau_lense.png</img_desc>
     <html_page>./fizo_gui/html/fizeau_lab.html</html_page>
+    <css_style>./fizo_gui/html/styles.css</css_style>
     <organization>LEnsE</organization>
     <year>2026</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
