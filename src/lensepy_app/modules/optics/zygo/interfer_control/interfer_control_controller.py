@@ -1,7 +1,7 @@
 __all__ = ["ZygoInterferControlController"]
 
 import numpy as np
-from PyQt6.QtWidgets import QWidget, QDialog
+import cv2
 from lensepy import translate, is_float
 from lensepy.optics.zygo.phase import process_statistics_surface
 from lensepy_app.appli._app.template_controller import TemplateController
@@ -10,8 +10,7 @@ from lensepy_app.modules.optics.zygo.interfer_control.interfer_control_view impo
     InterferControlView, SurfaceChoiceView)
 from lensepy.optics.zygo import *
 from lensepy_app import *
-from lensepy_app.widgets.surface_2D_view import Surface2DView
-from lensepy_app.widgets.double_3d_view import Surface3DView
+from lensepy_app.widgets import Wavefront2D, Wavefront3D, ViewLink
 
 
 class ZygoInterferControlController(TemplateController):
@@ -37,6 +36,8 @@ class ZygoInterferControlController(TemplateController):
 
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         image = self.phase.cropped_images_sets.get_image_from_set(1, 1)
+        mask = self._shrink_mask(mask, pixels=10)
+
         self.masked_image = image * mask
         # TO DO  - default colormap in default_parameters
         self.colormap_2D = 'cividis'
@@ -44,10 +45,12 @@ class ZygoInterferControlController(TemplateController):
         self.corrected_phase = None
         self.unwrapped_phase = None
 
+        theme = self.manager.controller.get_config('global_theme')
         # Graphical layout
-        self.top_left = Surface2DView('', self.colormap_2D)
+        self.top_left = Wavefront2D('', parent=self,
+                                    colormap=self.colormap_2D)
         self.bot_left = InterferControlView(self)
-        self.bot_right = ImageDisplayWidget(self)
+        self.bot_right = ImageDisplayWidget(self, bg_color=IMAGE_BG[theme])
         self.top_right = SurfaceChoiceView(self)
         
         # Setup widgets
@@ -95,6 +98,22 @@ class ZygoInterferControlController(TemplateController):
         self.bot_left.set_pv_corrected(pv, '\u03BB')
         self.bot_left.set_rms_corrected(rms, '\u03BB')
 
+    def _shrink_mask(self, mask, pixels):
+        h, w = mask.shape
+        mask[0:1,:] = False
+        mask[:,0:1] = False
+        mask[w-2:w-1,:] = False
+        mask[:,h-2:h-1] = False
+        mask = (np.asarray(mask) > 0).astype(np.uint8) * 255
+        size = 2 * pixels + 1
+        kernel = cv2.getStructuringElement(
+            cv2.MORPH_ELLIPSE,
+            (size, size)
+        )
+        # Erode
+        shrink_mask = cv2.erode(mask, kernel, iterations=1)
+        return shrink_mask > 1
+
     def handle_saved(self, filepath):
         """Saved the current view."""
         self.top_left.save_image(filepath)
@@ -138,19 +157,21 @@ class ZygoInterferControlController(TemplateController):
         """
         Display Wrapped phase in 2D at the top right corner.
         """
-        widget = Surface2DView('Wrapped Phase', self.colormap_2D)
+        widget = Wavefront2D(translate('wrapped_phase'), parent=self,
+                             colormap=self.colormap_2D)
         self.replace_top_left_widget(widget)
         wrapped = self.phase.get_wrapped_phase()
         wrapped_array = wrapped.filled(np.nan)
         # Display unwrapped and corrected in 2D
         self.top_left.set_title(translate('wrapped_phase'))
-        self.top_left.set_array(wrapped_array)
+        self.top_left.set_data(self.unwrapped_phase)
 
     def display_2D_unwrapped(self, gain=1):
         """
         Display unwrapped phase in 2D at the bottom right corner.
         """
-        widget = Surface2DView('Unwrapped Phase', self.colormap_2D)
+        widget = Wavefront2D(translate('unwrapped_phase'), parent=self,
+                             colormap=self.colormap_2D)
         self.replace_top_left_widget(widget)
         if self.tilt:
             unwrapped_array = self.corrected_phase.filled(np.nan)
@@ -160,10 +181,13 @@ class ZygoInterferControlController(TemplateController):
             title = translate('unwrapped_surface')
         # Display unwrapped and corrected in 2D
         self.top_left.set_title(title)
-        self.top_left.set_array(unwrapped_array * gain)
+        self.top_left.set_data(unwrapped_array * gain)
 
     def display_3D_wrapped(self, gain=1):
-        widget = Surface3DView('Wrapped Phase', parent=self)
+        widget = Wavefront3D(translate('wrapped_3D_surface'),
+                        parent=self, z_scale=0.2,
+                        disp_cmap=True, colormap='magma',
+                        initial_distance=3)
         self.replace_top_left_widget(widget)
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         wrapped = self.phase.get_wrapped_phase()
@@ -171,13 +195,13 @@ class ZygoInterferControlController(TemplateController):
         Z2 = np.ma.masked_where(np.logical_not(mask), wrapped_array)
         # Gain ?
         Z1 = Z2 * gain
-        x, y, w_s = self.top_left.prepare_data_for_mesh(Z1, undersampling=4)
-        self.top_left.create_mesh_surface(x, y, w_s)
-        self.top_left.showMaximized()
-        self.top_left.raise_()
+        self.top_left.set_data(Z1)
 
     def display_3D_unwrapped(self, gain=1):
-        widget = Surface3DView('Unwrapped Phase', parent=self)
+        widget = Wavefront3D(translate('unwrapped_3D_surface'),
+                        parent=self, z_scale=0.2,
+                        disp_cmap=True, colormap='magma',
+                        initial_distance=3)
         self.replace_top_left_widget(widget)
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         if self.tilt:
@@ -190,11 +214,7 @@ class ZygoInterferControlController(TemplateController):
         Z2 = np.ma.masked_where(np.logical_not(mask), unwrapped_array)
         # Gain ?
         Z1 = Z2 * gain
-        # Tilt ?
-        x, y, w_s = self.top_left.prepare_data_for_mesh(Z1, undersampling=4)
-        self.top_left.create_mesh_surface(x, y, w_s)
-        self.top_left.showMaximized()
-        self.top_left.raise_()
+        self.top_left.set_data(Z1)
 
     def process_wrapped_phase_calculation(self, set_number: int = 1):
         """

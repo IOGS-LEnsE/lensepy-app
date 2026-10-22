@@ -45,7 +45,11 @@ class _WavefrontBase(ModuleWidget):
         self._methode = subsample_method
         self._disp_cmap = disp_cmap
         self.disp_pvrms = disp_pvrms
+        # Title
         self.title = title
+        self._title_label = QtWidgets.QLabel(self.title)
+        self._title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self._title_label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
 
         # Données en pleine résolution
         self._W = self._mask = self._X = self._Y = None
@@ -63,6 +67,10 @@ class _WavefrontBase(ModuleWidget):
 
     def _refresh(self):
         raise NotImplementedError
+
+    def set_title(self, value):
+        self.title = value
+        self._title_label.setText(value)
 
     # --- API publique -------------------------------------------------
     def set_data(self, W, masque=None, X=None, Y=None):
@@ -82,8 +90,6 @@ class _WavefrontBase(ModuleWidget):
         self._rms = float(vals.std())
         self.label_PV_RMS.setText("PV = %.3f λ     RMS = %.3f λ" % (self._pv, self._rms))
         self.stats_changed.emit(self._pv, self._rms)
-        print(f'Title = {self.title}')
-
         self._refresh()
 
     def set_colormap(self, name):
@@ -232,11 +238,6 @@ class Wavefront3D(_WavefrontBase):
         self._cb_plot.getAxis("right").setLabel("Front d'onde (λ)")
         self._cb_plot.setMouseEnabled(False, False)
         self._cb_plot.setMenuEnabled(False)
-
-        # Title
-        self._title_label = QtWidgets.QLabel(self.title)
-        self._title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._title_label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
 
         haut = QtWidgets.QHBoxLayout()
         haut.addWidget(self.view, stretch=1)
@@ -401,11 +402,6 @@ class Wavefront2D(_WavefrontBase):
         self.cbar = pg.ColorBarItem(values=(0, 1), interactive=False,
                                     label="Front d'onde (λ)")
         self.cbar.setImageItem(self.img, insert_in=self.plot)
-
-        # Title
-        self._title_label = QtWidgets.QLabel(self.title)
-        self._title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._title_label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
 
         lay = QtWidgets.QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)

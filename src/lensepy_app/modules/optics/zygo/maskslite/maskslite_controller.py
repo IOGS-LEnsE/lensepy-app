@@ -39,9 +39,9 @@ class ZygoMasksController(TemplateController):
 
         self.first_image = self.get_variables('dataset').get_image_from_set(1,1)
         print(f'First Image = {self.first_image.shape}')
-
+        theme = self.manager.controller.get_config('global_theme')
         # Graphical layout
-        self.top_left = ImageDisplayWidget(self)
+        self.top_left = ImageDisplayWidget(self, bg_color=IMAGE_BG[theme])
         self.bot_left = AddMaskView(self)
         self.bot_right = QWidget()
         self.top_right = MasksOptionsView(self)
