@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>my_module</name>
+    <requirements></requirements>
+    <req_var>bits_depth,camera,image</req_var>
+    <display>MODE2</display>
+    <controller>MyModuleController</controller>
+    <location>my_module_controller</location>
+</appli>
