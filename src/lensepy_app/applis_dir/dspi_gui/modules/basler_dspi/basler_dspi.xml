@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<appli>
+    <name>basler_dspi</name>
+    <requirements></requirements>
+    <req_var>image,bits_depth,camera,roi_activated,roi_coords</req_var>
+    <display>MODE2</display>
+    <controller>BaslerDSPIController</controller>
+    <location>basler_dspi_controller</location>
+</appli>

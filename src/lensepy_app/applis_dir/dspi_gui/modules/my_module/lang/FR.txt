@@ -1,0 +1,3 @@
+# value;translation
+# DSPI my_module - module - FRANCAIS
+dspi;DSPI
