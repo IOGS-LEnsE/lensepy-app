@@ -23,6 +23,10 @@ class ZygoMasksController(TemplateController):
         self.check_first_mask = True
         if self.get_variables('dataset') is not None:
             self.masks = self.get_variables('dataset').get_masks_set()
+            if self.masks.get_masks_number() == 0:
+                self.set_variables('mask_loaded', None)
+            else:
+                self.set_variables('mask_loaded', True)
         else:
             self.masks = MasksSet()
             self.masks.reset_masks()
@@ -38,7 +42,6 @@ class ZygoMasksController(TemplateController):
         '''
 
         self.first_image = self.get_variables('dataset').get_image_from_set(1,1)
-        print(f'First Image = {self.first_image.shape}')
         theme = self.manager.controller.get_config('global_theme')
         # Graphical layout
         self.top_left = ImageDisplayWidget(self, bg_color=IMAGE_BG[theme])
@@ -109,6 +112,7 @@ class ZygoMasksController(TemplateController):
     def handle_mask_changed(self):
         nb_mask = self.masks.get_masks_number()
         if nb_mask != 0:
+            self.set_variables('mask_loaded', True)
             mask = self.masks.get_global_mask()
             mask_disp = False
             if mask is None:
@@ -132,11 +136,11 @@ class ZygoMasksController(TemplateController):
         else:
             self.check_first_mask = True
             self.set_variables('mask', None)
+            self.set_variables('mask_loaded', None)
             self.bot_left.set_checked_check(False)
             self.bot_left.set_enabled_check(False)
-            self.manager.update_menu()
             image_disp = self.first_image
-        #
 
+        self.manager.update_menu()
         self.top_left.set_image_from_array(image_disp)
         self.top_left.repaint()

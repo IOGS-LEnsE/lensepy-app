@@ -7,6 +7,8 @@
     <year>2026</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>D:\_git\julien\lensepy-data\optics\zygo</img_dir>
+    <img_desc>./zygo_gui/html/zygo_1A.png</img_desc>
+    <html_page>./zygo_gui/html/zygo_1A.html</html_page>
     <mode>CLASSIC</mode>
     <theme>BLACK</theme>
     <open_gl>1</open_gl>

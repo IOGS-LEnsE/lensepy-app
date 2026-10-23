@@ -89,7 +89,6 @@ class ZygoInterferControlController(TemplateController):
 
     def correct_surface(self):
         self.unwrapped_phase = self.phase.get_unwrapped_phase()
-        print(f'Unwrap DTYPE = {self.unwrapped_phase.dtype} Type = {type(self.unwrapped_phase)}')
         _, self.corrected_phase = self.zernike_coeffs.process_surface_correction(['piston', 'tilt'])
         pv, rms = process_statistics_surface(self.unwrapped_phase)
         self.bot_left.set_pv_uncorrected(pv, '\u03BB')
@@ -185,7 +184,7 @@ class ZygoInterferControlController(TemplateController):
 
     def display_3D_wrapped(self, gain=1):
         widget = Wavefront3D(translate('wrapped_3D_surface'),
-                        parent=self, z_scale=0.2,
+                        parent=self, z_scale=0.5,
                         disp_cmap=True, colormap='magma',
                         initial_distance=3)
         self.replace_top_left_widget(widget)
@@ -199,22 +198,23 @@ class ZygoInterferControlController(TemplateController):
 
     def display_3D_unwrapped(self, gain=1):
         widget = Wavefront3D(translate('unwrapped_3D_surface'),
-                        parent=self, z_scale=0.2,
+                        parent=self, z_scale=0.5,
                         disp_cmap=True, colormap='magma',
                         initial_distance=3)
         self.replace_top_left_widget(widget)
         mask, _ = self.phase.cropped_masks_sets.get_mask(1)
         if self.tilt:
             unwrapped_array = self.corrected_phase.filled(np.nan)
-            title = translate('unwrapped_notilt_surface')
+            title = translate('unwrapped_3D_notilt_surface')
         else:
             unwrapped_array = self.unwrapped_phase.filled(np.nan)
-            title = translate('unwrapped_surface')
+            title = translate('unwrapped_3D_surface')
 
         Z2 = np.ma.masked_where(np.logical_not(mask), unwrapped_array)
         # Gain ?
         Z1 = Z2 * gain
         self.top_left.set_data(Z1)
+        self.top_left.set_title(title)
 
     def process_wrapped_phase_calculation(self, set_number: int = 1):
         """

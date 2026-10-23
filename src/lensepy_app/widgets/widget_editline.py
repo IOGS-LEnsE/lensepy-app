@@ -10,25 +10,41 @@
 import sys
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QLineEdit
 from PyQt6.QtCore import Qt, pyqtSignal
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 
 
-class LineEditView(QWidget):
+class LineEditView(ModuleWidget):
 
     text_changed = pyqtSignal(str)
 
-    def __init__(self, signal_name: str, title: str = '', default_value: str = ''):
+    def __init__(self, signal_name: str, title: str = '', default_value: str = '',
+                 parent=None):
         """Default Constructor.
 
         """
-        super().__init__()
+        super().__init__(parent=parent)
         self.layout = QHBoxLayout()
         self.setLayout(self.layout)
         self.title = title
         self.signal_name = signal_name
         self.label = QLabel(self.title)
-        self.label.setStyleSheet(styleH3)
+        self.label.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         self.text_edit = QLineEdit(default_value)
+        self.text_edit.setStyleSheet(f"""
+            QLineEdit {{
+                {STYLE_LINEEDIT['FONT'][self.global_mode]}
+                {STYLE_LINEEDIT[self.global_theme]['NORMAL']}
+            }}
+
+            QLineEdit:focus {{
+                {STYLE_LINEEDIT[self.global_theme]['FOCUS']}
+            }}
+
+            QLineEdit:disabled {{
+                {STYLE_LINEEDIT[self.global_theme]['DISABLED']}
+            }}
+        """)
         self.text_edit.editingFinished.connect(self._changed)
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.text_edit)

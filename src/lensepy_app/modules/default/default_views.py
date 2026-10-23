@@ -72,7 +72,6 @@ class DefaultBotRightWidget(ModuleWidget):
         layout.addLayout(self.layout_left, 3)
         # Include OpenGL test if open_gl configuration is required
         if self.controller.get_config('open_gl') is not None:
-            print(f'Surface 3D')
             layout.addWidget(Surface3DWidget(self.controller), 1)
 
     def init_ui(self):

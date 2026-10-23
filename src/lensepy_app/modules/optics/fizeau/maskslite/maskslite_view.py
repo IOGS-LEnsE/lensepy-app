@@ -90,11 +90,11 @@ class MasksTableList(QTableWidget):
         self.verticalHeader().setVisible(False)     # No line number
         self.setShowGrid(False)
         # Column size
-        self.setColumnWidth(0, 40)
+        self.setColumnWidth(0, 50)
         self.setColumnWidth(1, 80)
-        self.setColumnWidth(2, 100)
-        self.setColumnWidth(3, 100)
-        self.setColumnWidth(4, 100)
+        self.setColumnWidth(2, 80)
+        self.setColumnWidth(3, 80)
+        self.setColumnWidth(4, 120)
         # Set the header name of each column
         self.setHorizontalHeaderLabels([translate('masks_list_nb'), translate('masks_list_type'),
                                         translate('masks_list_select'), translate('masks_list_invert')
@@ -107,7 +107,6 @@ class MasksTableList(QTableWidget):
                 font-weight: bold;
                 font-size: 12pt;
                 padding: 3px;
-                border: 2px solid white;
             }            
             QHeaderView::item {
                 padding: 0px;
@@ -127,18 +126,19 @@ class MasksTableList(QTableWidget):
         self.update_data()
 
     def update_data(self):
-        # Changer la couleur de fond des lignes paires
+        # Update display with new masks
+        theme = self.controller.get_config('global_theme')
+        #
         for row in range(self.rowCount()):
             for col in range(self.columnCount()):
                 item = self.item(row, col)
                 if item:
-                    if row == 0:  # Modifier uniquement la 1ère ligne
-                        item.setBackground(QColor(ORANGE_IOGS))  # Orange
-                        item.setForeground(QColor(BLUE_IOGS))  # Texte noir
-                    elif row % 2 == 0:  # Lignes paires en gris clair
-                        item.setBackground(QColor(230, 230, 230))
-                    else:  # Lignes impaires en blanc
-                        item.setBackground(QColor(255, 255, 255))
+                    if row == 0:  # Modify Header Line
+                        item.setBackground(QColor(ORANGE_IOGS))  # Background : Orange
+                        item.setForeground(QColor(BLUE_IOGS))  # Text : blue
+                    else:  # Other lines
+                        item.setBackground(QColor(IMAGE_BG[theme]))
+                        item.setForeground(QColor(IMAGE_TEXT[theme]))
 
     def update_display(self):
         """
@@ -250,11 +250,14 @@ class MasksTableList(QTableWidget):
         :param row: Row where to add the checkbox.
         :param selected: True if the mask is selected.
         """
+        theme = self.controller.get_config('global_theme')
+        mode = self.controller.get_config('global_mode')
         checkbox = QCheckBox()
         item = QWidget()
         layout = QHBoxLayout(item)
         checkbox.stateChanged.connect(self.select_mask)
         checkbox.setChecked(selected)
+        checkbox.setStyleSheet(STYLE_CHECKBOX[theme][mode])
         self.select_list.append(checkbox)
         layout.addWidget(checkbox)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -266,11 +269,14 @@ class MasksTableList(QTableWidget):
         :param row: Row where to add the checkbox.
         :param inverted: True if the mask is inverted.
         """
+        theme = self.controller.get_config('global_theme')
+        mode = self.controller.get_config('global_mode')
         checkbox = QCheckBox()
         item = QWidget()
         layout = QHBoxLayout(item)
         checkbox.stateChanged.connect(self.invert_mask)
         checkbox.setChecked(inverted)
+        checkbox.setStyleSheet(STYLE_CHECKBOX[theme][mode])
         self.invert_list.append(checkbox)
         layout.addWidget(checkbox)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -735,6 +741,7 @@ class AddMaskView(ModuleWidget):
         layout.addWidget(make_hline())
 
         self.check_display_mask = QCheckBox(translate('check_display_mask'))
+        self.check_display_mask.setStyleSheet(STYLE_CHECKBOX[self.global_theme][self.global_mode])
         self.check_display_mask.setChecked(False)
         layout.addWidget(self.check_display_mask)
         self.check_display_mask.setEnabled(False)

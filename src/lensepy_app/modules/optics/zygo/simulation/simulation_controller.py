@@ -1,17 +1,15 @@
 __all__ = ["ZygoSimulationController"]
 
 import numpy as np
-from PyQt6.QtWidgets import QWidget, QDialog
-from lensepy import translate, is_float
 from lensepy.optics.zygo.phase import process_statistics_surface
 from lensepy_app.appli._app.template_controller import TemplateController
 from lensepy_app.modules.optics.zygo.simulation.simulation_view import *
 from lensepy.optics.zygo import *
 from lensepy_app import *
-from lensepy_app.widgets.surface_2D_view import Surface2DView
-from lensepy_app.widgets.double_3d_view import Surface3DView
+from lensepy.optics.zygo import *
+from lensepy_app import *
+from lensepy_app.widgets import Wavefront2D, Wavefront3D, ViewLink
 
-from matplotlib import pyplot as plt
 
 class ZygoSimulationController(TemplateController):
     """
@@ -23,7 +21,6 @@ class ZygoSimulationController(TemplateController):
 
         """
         super().__init__(parent)
-        self.general_display_mode = 'CLASSIC'
 
         # TO DO  - default colormap in default_parameters
         self.colormap_2D = 'cividis'
@@ -37,9 +34,11 @@ class ZygoSimulationController(TemplateController):
         self.wavelength = 632.8 # nm
 
         # Graphical layout
-        self.top_left = Surface2DView('', self.colormap_2D)
-        self.bot_right = Surface2DView('', self.colormap_2D)
-        self.top_right = SimulationChoiceView()
+        self.top_left = Wavefront2D('', parent=self,
+                                    colormap=self.colormap_2D)
+        self.bot_right = Wavefront2D('', parent=self,
+                                    colormap=self.colormap_2D)
+        self.top_right = SimulationChoiceView(self)
         self.bot_zernike = CoefficientsView(self, number=36)
         
         # Setup widgets
@@ -56,8 +55,7 @@ class ZygoSimulationController(TemplateController):
         self.simulated_phase.process_unwrapped_phase()
         self.new_surface = self.simulated_phase.get_unwrapped_phase()
         self.mask = self.simulated_phase.get_mask()
-        self.top_left.set_array(self.new_surface)
-        self.top_left.reset_z_range()
+        self.top_left.set_data(self.new_surface)
         self.top_left.set_title(translate('unwrapped_notilt_surface'))
         self.update_pv_rms()
         c_pupil, N = self.simulated_phase.get_complex_pupil()
@@ -73,11 +71,15 @@ class ZygoSimulationController(TemplateController):
         super().init_view()
 
     def _create_2D_display(self):
-        widget = Surface2DView('', self.colormap_2D)
+        widget = Wavefront2D('', parent=self,
+                             colormap=self.colormap_2D)
         return widget
 
     def _create_3D_display(self):
-        widget = Surface3DView('', parent=self)
+        widget = Wavefront3D('',
+                             parent=self, z_scale=0.5,
+                             disp_cmap=True, colormap='magma',
+                             initial_distance=3)
         return widget
 
     def _create_xy_chart(self):
@@ -99,19 +101,16 @@ class ZygoSimulationController(TemplateController):
         if value == 'surface':
             self.bot_right.hide()
             disp_2D = self._create_2D_display()
-            disp_2D.set_array(surface)
+            disp_2D.set_data(surface)
             disp_2D.set_title(translate('unwrapped_notilt_surface'))
-            disp_2D.reset_z_range()
             self.replace_top_left_widget(disp_2D)
         elif 'psf' in value:
             self.bot_right.show()
-            self.bot_right.reset_z_range()
-            self.bot_right.set_array(surface)
+            self.bot_right.set_data(surface)
             if '2D' in value:
                 disp_2D = self._create_2D_display()
-                disp_2D.set_array(self.psf_display)
+                disp_2D.set_data(self.psf_display)
                 disp_2D.set_title(translate('psf_display'))
-                disp_2D.reset_z_range()
                 self.replace_top_left_widget(disp_2D)
             elif 'slice' in value:
                 self.process_psf_slice()
@@ -120,13 +119,11 @@ class ZygoSimulationController(TemplateController):
 
         elif 'ftm' in value:
             self.bot_right.show()
-            self.bot_right.reset_z_range()
-            self.bot_right.set_array(surface)
+            self.bot_right.set_data(surface)
             if '2D' in value:
                 disp_2D = self._create_2D_display()
-                disp_2D.set_array(self.ftm)
+                disp_2D.set_data(self.ftm)
                 disp_2D.set_title(translate('ftm_display'))
-                disp_2D.reset_z_range()
                 self.replace_top_left_widget(disp_2D)
             elif 'slice' in value:
                 self.process_ftm_slice()
@@ -140,8 +137,7 @@ class ZygoSimulationController(TemplateController):
     def process_psf_slice(self):
         surface, N = self.simulated_phase.get_surface()
         self.bot_right.show()
-        self.bot_right.reset_z_range()
-        self.bot_right.set_array(surface)
+        self.bot_right.set_data(surface)
         psf_disp = self.psf_display / np.max(self.psf_display)  # Normalization
         psf_disp_perfect = self.psf_display_perfect / np.max(self.psf_display_perfect)  # Normalization
         psf_slice = psf_disp[N // 2, :]
@@ -170,16 +166,12 @@ class ZygoSimulationController(TemplateController):
         max_N = int((1 - k) * N)
         psf_disp = self.psf_display / np.max(self.psf_display)  # Normalization
         disp_small = psf_disp[min_N:max_N, min_N:max_N]
-        x, y, w_s = self.top_left.prepare_data_for_mesh(disp_small, undersampling=1)
-        self.top_left.create_mesh_surface(x, y, w_s)
-        self.top_left.showMaximized()
-        self.top_left.raise_()
+        self.top_left.set_data(disp_small)
 
     def process_ftm_slice(self):
         surface, N = self.simulated_phase.get_surface()
         self.bot_right.show()
-        self.bot_right.reset_z_range()
-        self.bot_right.set_array(surface)
+        self.bot_right.set_data(surface)
         ftm_disp = self.ftm # / np.max(self.psf_display)  # Normalization
         ftm_disp_perfect = self.ftm_perfect # / np.max(self.psf_display_perfect)  # Normalization
         psf_slice = ftm_disp[N // 2, N // 2:3 * N // 4]
@@ -208,16 +200,12 @@ class ZygoSimulationController(TemplateController):
         max_N = int((1 - k) * N)
         psf_disp = self.ftm / np.max(self.ftm)  # Normalization
         disp_small = psf_disp[min_N:max_N, min_N:max_N]
-        x, y, w_s = self.top_left.prepare_data_for_mesh(disp_small, undersampling=1)
-        self.top_left.create_mesh_surface(x, y, w_s)
-        self.top_left.showMaximized()
-        self.top_left.raise_()
+        self.top_left.set_data(disp_small)
 
     def process_circled_slice(self):
         surface, N = self.simulated_phase.get_surface()
         self.bot_right.show()
-        self.bot_right.reset_z_range()
-        self.bot_right.set_array(surface)
+        self.bot_right.set_data(surface)
         circ_disp = self.circled # / np.max(self.psf_display)  # Normalization
         circ_disp_perfect = self.circled_perfect # / np.max(self.psf_display_perfect)  # Normalization
         circ_x = np.arange(1, N // 2 + 1, 1)
@@ -250,9 +238,9 @@ class ZygoSimulationController(TemplateController):
         self.handle_display_changed(self.mode_display)
 
     def replace_top_left_widget(self, new_widget):
-        self.parent.main_window.top_left_container.deleteLater()
+        self.manager.main_window.top_left_container.deleteLater()
         self.top_left = new_widget
-        self.parent.main_window.top_left_container = self.top_left
+        self.manager.main_window.top_left_container = self.top_left
         self.update_view()
 
     def update_pv_rms(self):

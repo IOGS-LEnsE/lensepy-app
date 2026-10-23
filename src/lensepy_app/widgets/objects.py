@@ -689,7 +689,7 @@ class VerticalCenteredGauge(QWidget):
             painter.fillRect(rect, self.fg_color)
 
 
-class VerticalCenteredGaugeTitle(QWidget):
+class VerticalCenteredGaugeTitle(ModuleWidget):
     """
     Slider block combining a numeric input and a vertical slider.
     Displays title above, slider in the center, and value below.
@@ -699,8 +699,9 @@ class VerticalCenteredGaugeTitle(QWidget):
     slider_changed = pyqtSignal(float)
 
     def __init__(self, name: str, unit: str, min_value: float, max_value: float,
-                 integer: bool = False, min_width = 10, min_height = 100) -> None:
-        super().__init__()
+                 integer: bool = False, min_width = 10, min_height = 100,
+                 parent=None) -> None:
+        super().__init__(parent=parent)
 
         self.integer = integer
         self.unit = unit
@@ -718,7 +719,8 @@ class VerticalCenteredGaugeTitle(QWidget):
 
         # Slider title
         self.label_name = QLabel(name)
-        self.label_name.setStyleSheet(f'{styleH2};background-color: {self.background_color}')
+        self.label_name.setStyleSheet(f'{STYLE_H2[self.global_theme][self.global_mode]}'
+                                      f';background-color: {self.background_color}')
         self.label_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_name)
 
@@ -727,9 +729,7 @@ class VerticalCenteredGaugeTitle(QWidget):
 
         self.update_block()
 
-    # ----------------------------
-    # Sous-fonctions d’initialisation
-    # ----------------------------
+    # Init SubFuntions
 
     def _styled_label(self, text: str, style: str) -> QLabel:
         label = QLabel(text)
@@ -740,18 +740,17 @@ class VerticalCenteredGaugeTitle(QWidget):
     def _init_slider_section(self):
         slider_layout = QVBoxLayout()
         slider_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        # Valeur max en haut
-        self.label_max_value = self._styled_label(f"{self.max_value} {self.unit}", styleH3)
+        # Maximal Value
+        self.label_max_value = self._styled_label(f"{self.max_value} {self.unit}",
+                                                  STYLE_H3[self.global_theme][self.global_mode])
         slider_layout.addWidget(self.label_max_value)
-
-        # Slider vertical
+        # Vertical Gauge
         self.gauge = VerticalCenteredGauge(min_width=self.min_width, min_height=self.min_height)
         self.gauge.set_range(int(self.min_value * self.ratio), int(self.max_value * self.ratio))
         slider_layout.addWidget(self.gauge)
-
-        # Valeur min en bas
-        self.label_min_value = self._styled_label(f"{self.min_value} {self.unit}", styleH3)
+        # Minimal value
+        self.label_min_value = self._styled_label(f"{self.min_value} {self.unit}",
+                                                  STYLE_H3[self.global_theme][self.global_mode])
         slider_layout.addWidget(self.label_min_value)
 
         self.layout.addLayout(slider_layout)
@@ -768,16 +767,15 @@ class VerticalCenteredGaugeTitle(QWidget):
         value_layout.addWidget(self.lineedit_value)
 
         if self.unit != '':
-            self.label_unit = self._styled_label(self.unit, styleH3)
+            self.label_unit = self._styled_label(self.unit,
+                                                 STYLE_H3[self.global_theme][self.global_mode])
             value_layout.addWidget(self.label_unit)
 
         container = QWidget()
         container.setLayout(value_layout)
         self.layout.addWidget(container)
 
-    # ----------------------------
-    # Gestion des événements
-    # ----------------------------
+    # Events management
 
     def input_changed(self):
         try:
@@ -789,9 +787,7 @@ class VerticalCenteredGaugeTitle(QWidget):
         self.update_block()
         self.slider_changed.emit(self.value)
 
-    # ----------------------------
-    # Méthodes utilitaires
-    # ----------------------------
+    # Misc Functions
 
     def update_block(self):
         val = int(self.value) if self.integer else self.value
@@ -820,7 +816,8 @@ class VerticalCenteredGaugeTitle(QWidget):
     def set_background_color(self, bg_color):
         self.background_color = bg_color
         self.gauge.set_colors('white', bg_color)
-        self.label_name.setStyleSheet(f"{styleH2};background-color: {self.background_color}")
+        self.label_name.setStyleSheet(f"{STYLE_H2[self.global_theme][self.global_mode]};"
+                                      f"background-color: {self.background_color}")
 
     @staticmethod
     def _clamp(val, vmin, vmax):

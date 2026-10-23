@@ -86,11 +86,11 @@ def main():
     ## Test class
     phase_test.prepare_data()
 
-    if phase_test.process_wrapped_phase():
-        print('Wrapped Phase OK')
+    if phase_test.process_wrapped_phase() is False:
+        return
     wrapped = phase_test.get_wrapped_phase()
-    if phase_test.process_unwrapped_phase():
-        print('Unwrapped Phase OK')
+    if phase_test.process_unwrapped_phase() is False:
+        return
     unwrapped = phase_test.get_unwrapped_phase()
     mask = phase_test.get_mask()
 

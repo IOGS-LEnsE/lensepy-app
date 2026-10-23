@@ -57,7 +57,6 @@ class ImageCrossSections(ModuleWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
 
-
         # X slice
         self.plot_x = pg.PlotWidget()
         self.plot_x.setBackground(IMAGE_BG[self.global_theme])

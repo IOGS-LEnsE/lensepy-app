@@ -3,7 +3,6 @@ import argparse
 def init_app(application):
     application = application
     xml_data = application.manager.xml_app
-    print(f'XML = {xml_data}')
 
     # Check options
     parse_version_choices = ["1A", "2A", "3A"]

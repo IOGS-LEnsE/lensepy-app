@@ -13,3 +13,9 @@ label_pv_rms_uncorrected;Statistiques surface non corrigée
 label_pv_rms_corrected;Statistiques surface corrigée
 label_PV;Pic-Vallée
 label_RMS;RMS
+wrapped_3D_surface;Phase enroulée 3D
+unwrapped_3D_surface;Surface 3D
+unwrapped_3D_notilt_surface;Surface 3D (sans tilt)
+wrapped_phase;Phase enroulée 2D
+unwrapped_surface;Surface 2D
+unwrapped_notilt_surface;Surface 2D (sans tilt)

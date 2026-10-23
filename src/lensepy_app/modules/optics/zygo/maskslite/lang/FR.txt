@@ -10,7 +10,7 @@ masks_list_all; ALL
 delete_all; Tout supprimer
 show_all; Montrer tous
 show_mask; Montrer masque
-delete_mask; Supprimer masque
+delete_mask; Supprimer
 masks_list_nb; Num.
 masks_list_type; Type
 masks_list_select; Select.

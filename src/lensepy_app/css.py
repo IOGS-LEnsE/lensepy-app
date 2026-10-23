@@ -1,7 +1,7 @@
 __all__ = [
     'LAMBDA', 'BLUE_IOGS', 'ORANGE_IOGS',
     'STYLE_H1', 'STYLE_H2', 'STYLE_H3', 'NO_STYLE',
-    'STYLE_L', 'STYLE_T',
+    'STYLE_L', 'STYLE_T', 'STYLE_LINEEDIT',
     'STYLE_CHECKBOX', 'GAUGE_BG', 'LABEL_BG', 'IMAGE_BG', 'IMAGE_INTRO_BG',
     'IMAGE_TEXT',
     'styleL', 'styleT', 'styleL_s', 'styleT_s',
@@ -89,6 +89,10 @@ STYLE_T = {
     },
 }
 
+'''
+<a href="https://www.flaticon.com/free-icons/tick" title="tick icons">
+Tick icons created by Octopocto - Flaticon</a>
+'''
 style_checkbox_white = ("""
     QCheckBox {
         spacing: 5px;
@@ -104,6 +108,7 @@ style_checkbox_white = ("""
     QCheckBox::indicator:checked {
         background-color: #FF960A;
         border: 1px solid #FF960A;
+        image: url("./_assets/check-mark.png");
     }
     QCheckBox::indicator:hover {
         border: 1px solid #0A3250;
@@ -128,6 +133,7 @@ style_checkbox_black = ("""
     QCheckBox::indicator:checked {
         background-color: #FF960A;
         border: 1px solid #FF960A;
+        image: url("./_assets/check-mark.png");
     }
     QCheckBox::indicator:hover {
         border: 1px solid #0A3250;
@@ -156,6 +162,25 @@ IMAGE_TEXT = {
 IMAGE_INTRO_BG = {
     'WHITE': 'white',
     'BLACK': 'black',
+}
+
+STYLE_LINEEDIT = {
+    'FONT': {
+        'CLASSIC': "font-size:14px; padding:0px;",
+        'LITE':    "font-size:10px; padding:0px;",
+    },
+
+    'WHITE': {
+        'NORMAL': f"color:{BLUE_IOGS}; background-color:white; border:1px solid #ccc;",
+        'FOCUS':  "background-color:#f0f6ff; border:1px solid #0078d7;",
+        'DISABLED': "color:#999; background-color:#eee; border:1px solid #ddd;",
+    },
+
+    'BLACK': {
+        'NORMAL': "color:white; background-color:#222; border:1px solid #555;",
+        'FOCUS':  "background-color:#333; border:1px solid #4da3ff;",
+        'DISABLED': "color:#777; background-color:#181818; border:1px solid #333;",
+    }
 }
 
 STYLE_CHECKBOX = {

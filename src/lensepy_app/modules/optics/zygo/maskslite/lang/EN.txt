@@ -10,7 +10,7 @@ masks_list_all;ALL
 delete_all;Delete ALL
 show_all;Show ALL
 show_mask;Show Mask
-delete_mask;Delete Mask
+delete_mask;Delete
 masks_list_nb;Nb
 masks_list_type;Type
 masks_list_select;Select.

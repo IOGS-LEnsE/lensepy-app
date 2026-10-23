@@ -80,17 +80,17 @@ class SimulationChoiceView(ModuleWidget):
         self.setLayout(self.layout)
         ## Title of the widget
         self.label_aberrations_options = QLabel(translate("label_aberrations_options"))
-        self.label_aberrations_options.setStyleSheet(styleH1)
+        self.label_aberrations_options.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
         self.label_aberrations_options.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_aberrations_options)
 
         # PV/RMS displayed (for uncorrected phase)
         self.label_pv_rms_uncorrected = QLabel(translate('label_pv_rms_uncorrected'))
-        self.label_pv_rms_uncorrected.setStyleSheet(styleH3)
+        self.label_pv_rms_uncorrected.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         self.pv_rms_uncorrected = PVRMSView(parent=self.controller)
         # PV/RMS displayed (for corrected phase)
         self.label_pv_rms_corrected = QLabel(translate('label_pv_rms_uncorrected'))
-        self.label_pv_rms_corrected.setStyleSheet(styleH3)
+        self.label_pv_rms_corrected.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         self.pv_rms_corrected = PVRMSView(parent=self.controller)
 
         # Add graphical elements to the layout.
@@ -102,21 +102,22 @@ class SimulationChoiceView(ModuleWidget):
         widget_nm = QWidget()
         layout_nm = QHBoxLayout()
         widget_nm.setLayout(layout_nm)
-        self.switch_scale = SwitchWidget('\u03BB','nm')
-        self.wavelength_label = LineEditWidget(translate("wavelength_label"), units='nm')
+        self.switch_scale = SwitchWidget('\u03BB','nm', parent=self.controller)
+        self.wavelength_label = LineEditWidget(translate("wavelength_label"), units='nm',
+                                               parent=self.controller)
         layout_nm.addWidget(self.switch_scale)
         layout_nm.addWidget(self.wavelength_label)
         self.layout.addWidget(widget_nm)
         ##
         self.layout.addWidget(make_hline())
-        self.strehl_label = LabelWidget(translate("strehl_label"))
+        self.strehl_label = LabelWidget(translate("strehl_label"), parent=self.controller)
         self.layout.addWidget(self.strehl_label)
         self.layout.addWidget(make_hline())
         self.layout.addStretch()
 
         self.angle_button = QPushButton(translate('surface_display'))
-        self.angle_button.setStyleSheet(unactived_button)
-        self.angle_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.angle_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.angle_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
 
         select_widget = QWidget()
         select_layout = QGridLayout()
@@ -127,14 +128,15 @@ class SimulationChoiceView(ModuleWidget):
         self.list_display = ['psf', 'ftm']
         self.type_display = ['2D', 'slice', '3D']
         for k, disp in enumerate(self.list_display):
-            choice = ChoiceItem(select_layout, k, translate(disp), self.update_action)
+            choice = ChoiceItem(select_layout, k, translate(disp),
+                                self.update_action, parent=self)
             buttons = choice.get_list()
             self.dict_buttons[disp] = buttons
 
         # Circled
         self.circled_button = QPushButton(translate('circled_energy_display'))
-        self.circled_button.setStyleSheet(unactived_button)
-        self.circled_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.circled_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.circled_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
 
         self.layout.addWidget(self.angle_button)
         self.layout.addWidget(select_widget)
@@ -159,11 +161,11 @@ class SimulationChoiceView(ModuleWidget):
         # Setup Plugin
 
     def inactivate_buttons(self):
-        self.angle_button.setStyleSheet(unactived_button)
-        self.circled_button.setStyleSheet(unactived_button)
+        self.angle_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.circled_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         for k, disp in enumerate(self.list_display):
             for j in range(3):
-                self.dict_buttons[disp][j].setStyleSheet(unactived_button)
+                self.dict_buttons[disp][j].setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def set_wavelength(self, value):
         self.wavelength_label.set_value(str(value))
@@ -175,7 +177,7 @@ class SimulationChoiceView(ModuleWidget):
     def update_action(self):
         sender = self.sender()
         self.inactivate_buttons()
-        sender.setStyleSheet(actived_button)
+        sender.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         if sender == self.angle_button:
             self.display_changed.emit('surface')
         elif sender == self.circled_button:
@@ -229,29 +231,33 @@ class SimulationChoiceView(ModuleWidget):
 
 class ChoiceItem:
 
-    def __init__(self, layout, position, base_name, handle_function):
+    def __init__(self, layout, position, base_name, handle_function, parent=None):
+        self.widget = parent
+        theme = self.widget.global_theme if parent is not None else 'BLACK'
+        mode = self.widget.global_mode if parent is not None else 'CLASSIC'
+        print(f'Choice : {mode} /  {theme}')
         self.list_button = []
         label = QLabel(translate(f"{base_name}"))
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label.setStyleSheet(styleH3)
+        label.setStyleSheet(STYLE_H2[theme][mode])
         layout.addWidget(label, position, 0)
         button = QPushButton(translate('2D'))
-        button.setStyleSheet(unactived_button)
-        button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        button.setStyleSheet(INACTIVATED_BUTTON[theme][mode])
+        button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[theme][mode])
         button.setFixedWidth(BUTTON_WIDTH)
         button.clicked.connect(handle_function)
         self.list_button.append(button)
         layout.addWidget(button, position, 1)
         button = QPushButton(translate('slice'))
-        button.setStyleSheet(unactived_button)
-        button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        button.setStyleSheet(INACTIVATED_BUTTON[theme][mode])
+        button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[theme][mode])
         button.setFixedWidth(BUTTON_WIDTH)
         button.clicked.connect(handle_function)
         self.list_button.append(button)
         layout.addWidget(button, position, 2)
         button = QPushButton(translate('3D'))
-        button.setStyleSheet(unactived_button)
-        button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        button.setStyleSheet(INACTIVATED_BUTTON[theme][mode])
+        button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[theme][mode])
         button.setFixedWidth(BUTTON_WIDTH)
         button.clicked.connect(handle_function)
         self.list_button.append(button)
@@ -267,13 +273,12 @@ coeff_order = [1, 1, 1, 3, 3, 3, 3, 3, 5, 5,
                9, 9, 9, 9, 9, 11]
 coeff_colors = ['orange', 'lightblue', 'red', 'green', 'cyan', 'magenta']
 
-class CoefficientsView(QWidget):
+class CoefficientsView(ModuleWidget):
 
     sliders_changed = pyqtSignal(int, float)
 
     def __init__(self, parent = None, number=36):
-        super().__init__()
-        self.parent = parent
+        super().__init__(parent=parent)
         self.number = number
         self.range = (-2, 2)
 
@@ -286,7 +291,7 @@ class CoefficientsView(QWidget):
         ## Title of the widget
         layout.addWidget(make_hline())
         self.label_zernike_coefficients = QLabel(translate("label_zernike_coefficients"))
-        self.label_zernike_coefficients.setStyleSheet(styleH2)
+        self.label_zernike_coefficients.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.label_zernike_coefficients.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.label_zernike_coefficients)
         layout.addWidget(make_hline())
@@ -300,8 +305,10 @@ class CoefficientsView(QWidget):
 
     def init_view(self):
         for k in range(self.number):
-            gauge = VerticalCenteredGaugeTitle(f'C{k+1}', '',self.range[0],self.range[1],
-                                                min_width=3, min_height=50)
+            gauge = VerticalCenteredGaugeTitle(f'C{k+1}', '',
+                                               self.range[0],self.range[1],
+                                               min_width=3, min_height=50,
+                                               parent=self.controller)
             color = coeff_colors[coeff_order[k]//2]
             gauge.set_background_color(color)
             gauge.slider_changed.connect(self.handle_slider_changed)

@@ -38,7 +38,6 @@ class ZygoMasksController(TemplateController):
         '''
 
         self.first_image = self.get_variables('image')
-        print(f'First Image = {self.first_image.shape}')
 
         # Graphical layout
         self.top_left = ImageDisplayWidget(self)

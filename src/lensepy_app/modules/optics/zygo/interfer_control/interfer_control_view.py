@@ -40,7 +40,9 @@ class InterferControlView(ModuleWidget):
         self.layout.addWidget(self.label_analyses_options)
 
         # Wedge Factor
-        self.wedge_edit = LineEditView('wedge', translate('label_wedge_value'), '1')
+        self.wedge_edit = LineEditView('wedge',
+                                       translate('label_wedge_value'), '1',
+                                       parent=self.controller)
         self.wedge_edit.text_changed.connect(lambda text: self.wedge_changed.emit(text))
 
         # PV/RMS displayed (for uncorrected phase)
@@ -247,7 +249,7 @@ class SurfaceChoiceView(ModuleWidget):
         layout.addWidget(self.unwrap_3D_button)
         layout.addStretch()
         self.tilt_check = QCheckBox(translate('tilt_check_box'))
-        self.tilt_check.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
+        self.tilt_check.setStyleSheet(STYLE_CHECKBOX[self.global_theme][self.global_mode])
         layout.addWidget(self.tilt_check)
         layout.addStretch()
 

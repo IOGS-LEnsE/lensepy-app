@@ -72,7 +72,6 @@ class My_Application(QApplication):
             self.config['global_theme'] = xml_data.get_parameter_xml('theme')
             self.config['global_mode'] = xml_data.get_parameter_xml('mode')
             self.config['open_gl'] = xml_data.get_parameter_xml('open_gl')
-            print(f'CONFIG _global_theme : {self.config["global_theme"]}')
             if self.config['global_theme'] == 'BLACK':
                 self.setPalette(palette)
             self.config['open_gl'] = xml_data.get_parameter_xml('open_gl')
@@ -86,6 +85,7 @@ class My_Application(QApplication):
             self.manager.update_menu()
             self.config['name'] = xml_data.get_app_name() or None
             self.config['description'] = xml_data.get_app_desc() or None
+            print(f'Description: {self.config['description']}')
             self.config['img_desc'] = xml_data.get_img_desc() or None
             if self.config['img_desc'] is not None:
                 self.config['img_desc'] = app_path + self.config['img_desc']
@@ -96,6 +96,7 @@ class My_Application(QApplication):
                 else:
                     app_html_path = app_path
                 self.config['html'] = app_html_path + self.config['html']
+            print(f'Config HTML path: {self.config['html']}')
             self.config['css'] = xml_data.get_css_style() or None
             if self.config['css'] is not None:
                 if self.config['css'].startswith('http'):

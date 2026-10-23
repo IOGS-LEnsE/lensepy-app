@@ -30,11 +30,13 @@ class ZygoAberrationsController(TemplateController):
         self.psf_update_pending = False
         '''
         TO DELETE
+        '''
         file_path = '../lensepy-data/optics/zygo/test3.mat'
         data_set = DataSet()
         data_set.load_images_set_from_file(file_path)
         data_set.load_masks_from_file(file_path)
         self.manager.variables['dataset'] = data_set
+        '''
         END DELETE
         '''
 
@@ -86,7 +88,6 @@ class ZygoAberrationsController(TemplateController):
             return
         if not self.psf_update_pending:
             return
-        print(f'STARTING PSF Process')
         self.psf_update_pending = False
         self.process_PSF()
 
@@ -217,7 +218,6 @@ class ZygoAberrationsController(TemplateController):
         self.bot_zernike.set_coeffs(coeffs)
 
     def display_results_psf(self, results):
-        print("DISPLAY RESULTS PSF")
         self.psf_processing = False
         self.manager.variables['psf_results'] = results
         ## Display
@@ -227,7 +227,6 @@ class ZygoAberrationsController(TemplateController):
         self.handle_right_selection_changed('bot', self.bot_right_disp)
         self.bot_zernike.set_enabled(True)
         strehl_ratio = results['strehl']
-        print(f'Strehl ratio: {strehl_ratio}')
         self.bot_zernike.set_strehl(strehl_ratio)
 
     def init_view(self):
@@ -282,7 +281,6 @@ class ZygoAberrationsController(TemplateController):
             self._replace_bot_right_widget(widget)
 
     def handle_tilt_changed(self, value):
-        print(f'TITL CHANGED Controller')
         self.tilt = value
         self._process_correction_coeff()
 
@@ -301,7 +299,6 @@ class ZygoAberrationsController(TemplateController):
         if value:
             self.processing()
             # Process new PSF
-            print(f'PARAMS WINDOW')
             self.psf_update_pending = True
             self._start_psf_if_needed()
 
@@ -332,7 +329,6 @@ class ZygoAberrationsController(TemplateController):
             self.wavefront_disp = unwrapped_phase
 
     def handle_correction_changed(self, coeffs):
-        print("HANDLE CORRECTION", id(self), id(self.bot_zernike))
         self.processing()
         # Process correction - new wavefront
         self._process_correction_coeff(coeffs)
@@ -397,6 +393,7 @@ class ZygoAberrationsController(TemplateController):
         theme = self.get_config('global_theme')
         widget.set_background(IMAGE_BG[theme])
         x_label = translate('x_axis_in_um')
+        widget.set_colors(['white', 'orange'])
         widget.set_data(x_axis, data, x_label=x_label, y_label=translate('y_axis_norm'))
         legends = [translate('real_psf_slice_label'),
                    translate('perfect_psf_slice_label')]
@@ -404,6 +401,7 @@ class ZygoAberrationsController(TemplateController):
         return widget
 
     def _display_psf_only(self, axis=None):
+        # TO UPDATE
         psf = self.manager.variables['psf_results']['psf']
         # Zoom In ?
         psf_c, size_z = zoom_image_square(psf, threshold=0.001)
@@ -417,12 +415,15 @@ class ZygoAberrationsController(TemplateController):
         else:
             x_axis = np.linspace(0, N_size-1, N_size)
         # Display
-        widget = ImageCrossSections(parent=self, cmap='gray',
-                                    title=translate('psf_and_slice_title'))
+        widget = Wavefront2D(translate('unwrapped_2D_surface'),
+                             parent=self, colormap=self.colormap_2D)
+
         widget.set_data(psf_c)
+        '''
         widget.set_x_axis(x_axis, label=translate('x_axis_in_um'))
         widget.set_y_axis(x_axis)
         widget.set_color_map('gray')
+        '''
         return widget
 
     def _display_psf_log(self, axis=None):
@@ -434,7 +435,6 @@ class ZygoAberrationsController(TemplateController):
         N_zoom = psf_c.shape[0]
         borne_x1 = (N_size - N_zoom) // 2
         borne_x2 = borne_x1 + N_zoom
-        print(f'Borne_X1 = {borne_x1} / Borne_X2 = {borne_x2}')
         if axis is not None:
             x_axis = axis[borne_x1:borne_x2]
         else:

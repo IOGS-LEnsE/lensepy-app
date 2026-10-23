@@ -21,6 +21,7 @@ import pyqtgraph as pg
 
 LINES = [Qt.PenStyle.SolidLine, Qt.PenStyle.DashLine,
          Qt.PenStyle.DashDotLine, Qt.PenStyle.DashDotDotLine]
+LINES_WIDTH = [2.5, 0.5, 2.5, 1.5]
 
 class XYChartWidget(ModuleWidget):
     """
@@ -84,7 +85,7 @@ class XYChartWidget(ModuleWidget):
 
         # No data at initialization
         self.pen = [mkPen(color=BLUE_IOGS, style=Qt.PenStyle.SolidLine, width=2.5),
-                    mkPen(color=ORANGE_IOGS, style=Qt.PenStyle.DashLine, width=2.5)]
+                    mkPen(color=ORANGE_IOGS, style=Qt.PenStyle.DashLine, width=1.5)]
         self.brush = mkBrush(ORANGE_IOGS)
         self.plot_chart = self.plot_chart_widget.plot([0], pen=self.pen[0])
 
@@ -123,6 +124,13 @@ class XYChartWidget(ModuleWidget):
         """Set Y axis range."""
         self.plot_chart_widget.setYRange(min_val, max_val)
         self.refresh_chart()
+
+    def set_colors(self, colors):
+        self.pen = []
+        for k, color in enumerate(colors):
+            self.pen.append(mkPen(color=color,
+                                  style=LINES[k % len(LINES)],
+                                  width=LINES_WIDTH[k % len(LINES_WIDTH)]))
 
     def refresh_chart(self, last: int = 0):
         """
