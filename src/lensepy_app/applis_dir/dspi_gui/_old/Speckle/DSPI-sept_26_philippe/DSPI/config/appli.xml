@@ -17,6 +17,11 @@
             <organization>IOGS</organization>
             <mail>ludovic.maniols@institutoptique.fr</mail>
         </contributor>
+        <contributor>
+            <name>Ludovic MANIOLS</name>
+            <organization>IOGS</organization>
+            <mail>ludovic.maniols@institutoptique.fr</mail>
+        </contributor>
     </contributors>
 	<module>
 		<name>my_module</name>
