@@ -34,7 +34,7 @@ class Surface2D3DView(ModuleWidget):
         self.right_view = Wavefront3D(translate('unwrapped_3D_surface'),
                                       parent=self.controller,
                                       disp_cmap=False, colormap=colormap,
-                                      initial_distance=3)
+                                      initial_distance=3, z_scale=0.5)
 
         layout.addWidget(self.left_view, 1)
         layout.addWidget(self.right_view, 1)

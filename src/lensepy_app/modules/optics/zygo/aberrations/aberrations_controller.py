@@ -46,6 +46,7 @@ class ZygoAberrationsController(TemplateController):
         self.phase = None
         self.zernike_coeffs = None
         self.colormap_2D = 'plasma'
+        self.colormap_2D_psf = 'magma'
         self.tilt = False
         self.focus = False
         self.params_window = ParamsView(parent=self)
@@ -259,6 +260,9 @@ class ZygoAberrationsController(TemplateController):
         image_radius = wavelength * f_number * pupil_ratio
         x_ax_surface = np.linspace(-N_size // 2, N_size // 2 - 1, N_size) * image_radius * 1e6  # um
 
+        # FOR FTM / CHANGE X AXIS !!
+        # FOR FTM / CHANGE X AXIS !!
+
         # Process depending on top/bot and data to display
         if value == translate('psf_and_slice'):
             widget = self._display_psf_and_slice(x_ax_surface)
@@ -269,7 +273,17 @@ class ZygoAberrationsController(TemplateController):
         elif value == translate('psf_slice'):
             widget = self._display_psf_slice(x_ax_surface)
         elif value == translate('ftm_and_slice'):
+            # FOR FTM / CHANGE X AXIS !!
             widget = self._display_ftm_and_slice(x_ax_surface)
+        elif value == translate('ftm_slice'):
+            # FOR FTM / CHANGE X AXIS !!
+            widget = self._display_ftm_slice(x_ax_surface)
+        elif value == translate('ftm_only'):
+            # FOR FTM / CHANGE X AXIS !!
+            widget = self._display_ftm_only(x_ax_surface)
+        elif value == translate('circled_energy'):
+            # FOR CIRCLED / CHANGE X AXIS !!
+            widget = self._display_circled_energy(x_ax_surface)
         else:
             widget = QWidget()
 
@@ -361,12 +375,26 @@ class ZygoAberrationsController(TemplateController):
         else:
             x_axis = np.linspace(0, N_size-1, N_size)
         # Display
-        widget = ImageCrossSections(parent=self, cmap='gray',
+        widget = ImageCrossSections(parent=self, cmap=self.colormap_2D_psf,
                                     title=translate('psf_and_slice_title'))
         widget.set_data(psf_c)
         widget.set_x_axis(x_axis, label=translate('x_axis_in_um'))
         widget.set_y_axis(x_axis)
-        widget.set_color_map('gray')
+        return widget
+
+    def _display_circled_energy(self, axis=None):
+        circ_energy = self.manager.variables['psf_results']['circled_energy']
+        ### TO DO
+        # Display
+        widget = XYChartWidget(parent=self, title=translate('psf_slice_title'))
+        theme = self.get_config('global_theme')
+        widget.set_background(IMAGE_BG[theme])
+        x_label = translate('x_axis_in_um')
+        widget.set_colors(['white', 'orange'])
+        widget.set_data(x_axis, data, x_label=x_label, y_label=translate('y_axis_norm'))
+        legends = [translate('real_psf_slice_label'),
+                   translate('perfect_psf_slice_label')]
+        widget.set_legend(legends)
         return widget
 
     def _display_psf_slice(self, axis=None):
@@ -415,21 +443,17 @@ class ZygoAberrationsController(TemplateController):
         else:
             x_axis = np.linspace(0, N_size-1, N_size)
         # Display
-        widget = Wavefront2D(translate('unwrapped_2D_surface'),
-                             parent=self, colormap=self.colormap_2D)
-
-        widget.set_data(psf_c)
-        '''
-        widget.set_x_axis(x_axis, label=translate('x_axis_in_um'))
-        widget.set_y_axis(x_axis)
-        widget.set_color_map('gray')
-        '''
+        widget = Wavefront2D(translate('psf_only_title'),
+                             parent=self, colormap=self.colormap_2D_psf)
+        widget.set_x_label(translate('x_axis_in_um'))
+        widget.set_y_label(translate('x_axis_in_um'))
+        widget.set_data(psf_c, x_axis=x_axis, y_axis=x_axis)
         return widget
 
     def _display_psf_log(self, axis=None):
         psf = self.manager.variables['psf_results']['psf']
         # Zoom In ?
-        psf_c, size_z = zoom_image_square(psf, threshold=-5)
+        psf_c, size_z = zoom_image_square(psf, threshold=0.001)
         # Axis construction (with zoom)
         N_size = psf.shape[0]
         N_zoom = psf_c.shape[0]
@@ -440,12 +464,11 @@ class ZygoAberrationsController(TemplateController):
         else:
             x_axis = np.linspace(0, N_size-1, N_size)
 
-        widget = ImageCrossSections(parent=self, cmap='gray',
-                                    title=translate('psf_log_title'))
-        widget.set_data(np.log(psf_c + 0.001))
-        widget.set_x_axis(x_axis, label=translate('x_axis_in_um'))
-        widget.set_y_axis(x_axis)
-        widget.set_color_map('gray')
+        widget = Wavefront2D(translate('psf_only_title'),
+                             parent=self, colormap=self.colormap_2D_psf)
+        widget.set_x_label(translate('x_axis_in_um'))
+        widget.set_y_label(translate('x_axis_in_um'))
+        widget.set_data(np.log(psf_c+0.01), x_axis=x_axis, y_axis=x_axis)
         return widget
 
     def _display_ftm_and_slice(self, axis=None):
@@ -454,6 +477,45 @@ class ZygoAberrationsController(TemplateController):
                                     title=translate('ftm_and_slice_title'))
         widget.set_data(ftm)
         widget.set_color_map('gray')
+        return widget
+
+    def _display_ftm_only(self, axis=None):
+        ftm = self.manager.variables['psf_results']['ftm']
+        widget = Wavefront2D(translate('ftm_only_title'),
+                             parent=self, colormap='gray')
+        N_size = ftm.shape[0]
+        if axis is not None:
+            x_axis = axis
+        else:
+            x_axis = np.linspace(0, N_size-1, N_size)
+        widget.set_x_label(translate('x_axis_in_freq'))
+        widget.set_y_label(translate('x_axis_in_freq'))
+        widget.set_data(ftm, x_axis=x_axis, y_axis=x_axis)
+        return widget
+
+    def _display_ftm_slice(self, axis=None):
+        ftm = self.manager.variables['psf_results']['ftm']
+        ftm_p = self.manager.variables['psf_results']['ftm_perfect']
+        # Axis construction (no zoom)
+        N_size = ftm.shape[0]
+        coeff = 1.5
+        if axis is not None:
+            x_axis = axis[N_size//2:int(coeff*N_size//2)]
+        else:
+            x_axis = np.linspace(0, int(coeff*N_size//2) - 1, int(coeff*N_size//2))
+        ftm_c_line = ftm[N_size//2, N_size//2:int(coeff*N_size//2)]
+        ftm_p_line = ftm_p[N_size//2, N_size//2:int(coeff*N_size//2)]
+        data = [ftm_c_line, ftm_p_line]
+        # Display
+        widget = XYChartWidget(parent=self, title=translate('ftm_slice_title'))
+        theme = self.get_config('global_theme')
+        widget.set_background(IMAGE_BG[theme])
+        x_label = translate('x_axis_in_freq')
+        widget.set_colors(['white', 'orange'])
+        widget.set_data(x_axis, data, x_label=x_label, y_label=translate('y_axis_norm'))
+        legends = [translate('real_ftm_slice_label'),
+                   translate('perfect_ftm_slice_label')]
+        widget.set_legend(legends)
         return widget
 
 
@@ -549,6 +611,7 @@ class ProcessPSFWorker(Worker):
                 'ftm': self.ftm,
                 'ftm_perfect': self.ftm_perfect,
                 'strehl': np.round(self.strehl_ratio, 3)
+                'circled_energy': None
             }
             self.finished.emit(results)
 
@@ -579,3 +642,6 @@ class ProcessPSFWorker(Worker):
 
                 self.strehl_ratio = self.psf_model.get_strehl_ratio()
                 # line_slice = self.center_x // self.pad_factor
+            case 3:
+                ## PROCESS CIRCLED ENERGY - TO DO
+                pass

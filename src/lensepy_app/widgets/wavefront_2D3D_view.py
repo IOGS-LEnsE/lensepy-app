@@ -49,14 +49,14 @@ class _WavefrontBase(ModuleWidget):
         self.title = title
         self._title_label = QtWidgets.QLabel(self.title)
         self._title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self._title_label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
+        self._title_label.setStyleSheet(STYLE_H1[self.global_theme][self.global_mode])
 
         # Données en pleine résolution
         self._W = self._mask = self._X = self._Y = None
         self._pv = self._rms = np.nan
 
         self.label_PV_RMS = QLabel("PV = –   RMS = –")
-        self.label_PV_RMS.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
+        self.label_PV_RMS.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.label_PV_RMS.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self._build_ui()
@@ -72,18 +72,26 @@ class _WavefrontBase(ModuleWidget):
         self.title = value
         self._title_label.setText(value)
 
-    # --- API publique -------------------------------------------------
-    def set_data(self, W, masque=None, X=None, Y=None):
-        """W : front d'onde 2D (en λ). masque : booléen (pupille). X, Y : grilles 2D."""
+    # --- public API -------------------------------------------------
+    def set_data(self, W, mask=None, x_axis=None, y_axis=None):
+        """
+        :param W: wavefront 2D (λ)
+        :param masque : booléen (pupille).
+        :param X:   grilles 2D
+        :param Y:   grilles 2D.
+        """
         W = np.asarray(W, dtype=float)
-        if masque is None:
-            masque = np.isfinite(W)
-        if X is None or Y is None:
+        if mask is None:
+            mask = np.isfinite(W)
+        if x_axis is None or y_axis is None:
             x = np.linspace(-1, 1, W.shape[1])
             y = np.linspace(-1, 1, W.shape[0])
-            X, Y = np.meshgrid(x, y)
+        else:
+            x = x_axis
+            y = y_axis
+        X, Y = np.meshgrid(x, y)
 
-        self._W, self._mask, self._X, self._Y = W, np.asarray(masque, bool), X, Y
+        self._W, self._mask, self._X, self._Y = W, np.asarray(mask, bool), X, Y
 
         vals = W[self._mask]
         self._pv = float(vals.max() - vals.min())
@@ -144,7 +152,7 @@ class _WavefrontBase(ModuleWidget):
             return pg.colormap.get(self._cmap_name, source="matplotlib")
 
     @staticmethod
-    def _sous_echantillonner(W, masque, X, Y, k, methode):
+    def _sub_sampling(W, masque, X, Y, k, methode):
         if k <= 1:
             return W, masque, X, Y
         if methode == "decimation":
@@ -165,7 +173,7 @@ class _WavefrontBase(ModuleWidget):
 
     def _donnees_affichage(self):
         """Renvoie W, masque, X, Y sous-échantillonnés + cmap, vmin, vmax (pleine résolution)."""
-        W, masque, X, Y = self._sous_echantillonner(
+        W, masque, X, Y = self._sub_sampling(
             self._W, self._mask, self._X, self._Y, self._k, self._methode)
         vals = self._W[self._mask]
         return W, masque, X, Y, self._get_cmap(), vals.min(), vals.max()
@@ -409,6 +417,12 @@ class Wavefront2D(_WavefrontBase):
         lay.addWidget(self.glw, stretch=1)
         if self.disp_pvrms:
             lay.addWidget(self.label_PV_RMS)
+
+    def set_x_label(self, label):
+        self.plot.setLabel("bottom", label)
+
+    def set_y_label(self, label):
+        self.plot.setLabel("left", label)
 
     # --- état de la vue (pour la synchronisation avec la vue 3D) -----
     def view_state(self):
