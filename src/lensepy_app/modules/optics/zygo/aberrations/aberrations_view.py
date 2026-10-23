@@ -73,6 +73,8 @@ class PSFInProgressView(ModuleWidget):
             self.text += '\n'+translate('psf_phase_ok')
         if step >= 2:
             self.text += '\n'+translate('ftm_strehl_ok')
+        if step >= 3:
+            self.text += '\n'+translate('circled_energy_ok')
 
         self.label.setText(self.text)
         self.label.repaint()

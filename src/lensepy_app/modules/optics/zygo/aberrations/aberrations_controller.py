@@ -30,13 +30,11 @@ class ZygoAberrationsController(TemplateController):
         self.psf_update_pending = False
         '''
         TO DELETE
-        '''
         file_path = '../lensepy-data/optics/zygo/test3.mat'
         data_set = DataSet()
         data_set.load_images_set_from_file(file_path)
         data_set.load_masks_from_file(file_path)
         self.manager.variables['dataset'] = data_set
-        '''
         END DELETE
         '''
 
@@ -383,15 +381,16 @@ class ZygoAberrationsController(TemplateController):
         return widget
 
     def _display_circled_energy(self, axis=None):
-        circ_energy = self.manager.variables['psf_results']['circled_energy']
-        ### TO DO
+        circ_c, circ_p = self.manager.variables['psf_results']['circled_energy']
+
+        x_axis = np.linspace(0, len(circ_c)-1, len(circ_c))
         # Display
         widget = XYChartWidget(parent=self, title=translate('psf_slice_title'))
         theme = self.get_config('global_theme')
         widget.set_background(IMAGE_BG[theme])
         x_label = translate('x_axis_in_um')
         widget.set_colors(['white', 'orange'])
-        widget.set_data(x_axis, data, x_label=x_label, y_label=translate('y_axis_norm'))
+        widget.set_data(x_axis, [circ_c, circ_p], x_label=x_label, y_label=translate('y_axis_norm'))
         legends = [translate('real_psf_slice_label'),
                    translate('perfect_psf_slice_label')]
         widget.set_legend(legends)
@@ -595,11 +594,12 @@ class ProcessPSFWorker(Worker):
         self.pad_factor = self.manager.controller.get_variables('pad_factor')
         self.ftm = None
         self.ftm_perfect = None
+        self.circled_energy = None
         self.strehl_ratio = 1
 
     def run(self):
         try:
-            for i in range(2):
+            for i in range(3):
                 self.process_step(i+1)
                 self.emit_progress(i+1)
 
@@ -610,8 +610,8 @@ class ProcessPSFWorker(Worker):
                 'psf_perfect': self.psf_perfect,
                 'ftm': self.ftm,
                 'ftm_perfect': self.ftm_perfect,
-                'strehl': np.round(self.strehl_ratio, 3)
-                'circled_energy': None
+                'strehl': np.round(self.strehl_ratio, 3),
+                'circled_energy': self.circled_energy
             }
             self.finished.emit(results)
 
@@ -644,4 +644,4 @@ class ProcessPSFWorker(Worker):
                 # line_slice = self.center_x // self.pad_factor
             case 3:
                 ## PROCESS CIRCLED ENERGY - TO DO
-                pass
+                self.circled_energy = self.psf_model.get_circled_energy()

@@ -220,7 +220,6 @@ class CoefficientsView(ModuleWidget):
         self.update()
 
     def handle_tilt_changed(self):
-        print(f'TILT CHANGED _ CoeffView')
         # Specific correction for tilt and focus
         if self.tilt_button.isChecked():
             self.sliders[1].set_checked(False)
