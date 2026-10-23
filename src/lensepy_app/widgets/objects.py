@@ -275,7 +275,7 @@ class SliderBloc(ModuleWidget):
         return max(vmin, min(vmax, val))
 
 
-class SliderBlocVertical(QWidget):
+class SliderBlocVertical(ModuleWidget):
     """
     Slider block combining a numeric input and a vertical slider.
     Displays title above, slider in the center, and value below.
@@ -285,8 +285,8 @@ class SliderBlocVertical(QWidget):
     slider_changed = pyqtSignal(float)
 
     def __init__(self, name: str, unit: str, min_value: float, max_value: float,
-                 integer: bool = False) -> None:
-        super().__init__()
+                 integer: bool = False, parent=None) -> None:
+        super().__init__(parent=parent)
 
         self.integer = integer
         self.unit = unit
@@ -302,7 +302,8 @@ class SliderBlocVertical(QWidget):
 
         # Slider title
         self.label_name = QLabel(name)
-        self.label_name.setStyleSheet(f'{styleH2};background-color: {self.background_color}')
+        self.label_name.setStyleSheet(f'{STYLE_H2[self.global_theme][self.global_mode]};'
+                                      f'background-color: {self.background_color}')
         self.label_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_name)
 
@@ -326,7 +327,8 @@ class SliderBlocVertical(QWidget):
         slider_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Valeur max en haut
-        self.label_max_value = self._styled_label(f"{self.max_value} {self.unit}", styleH3)
+        self.label_max_value = self._styled_label(f"{self.max_value} {self.unit}",
+                                                  STYLE_H3[self.global_theme][self.global_mode])
         slider_layout.addWidget(self.label_max_value)
 
         # Slider vertical
@@ -337,7 +339,8 @@ class SliderBlocVertical(QWidget):
         slider_layout.addWidget(self.slider)
 
         # Valeur min en bas
-        self.label_min_value = self._styled_label(f"{self.min_value} {self.unit}", styleH3)
+        self.label_min_value = self._styled_label(f"{self.min_value} {self.unit}",
+                                                  STYLE_H3[self.global_theme][self.global_mode])
         slider_layout.addWidget(self.label_min_value)
 
         self.layout.addLayout(slider_layout)

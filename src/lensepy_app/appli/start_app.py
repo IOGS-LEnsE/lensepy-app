@@ -87,11 +87,19 @@ class LEnsEApplication(QApplication):
             self.config['description'] = xml_data.get_app_desc() or None
             self.config['img_desc'] = xml_data.get_img_desc() or None
             if self.config['img_desc'] is not None:
-                self.config['img_desc'] = app_path + self.config['img_desc']
+                if self.config['img_desc'].startswith('./'):
+                    app_html_path = self.app_name
+                    self.config['img_desc'] = self.config['img_desc'][1:]
+                else:
+                    app_html_path = app_path
+                self.config['img_desc'] = app_html_path + self.config['img_desc']
             self.config['html']  = xml_data.get_html_page() or None
             if self.config['html'] is not None:
                 if self.config['html'].startswith('http'):
                     app_html_path = ''
+                elif self.config['html'].startswith('./'):
+                    app_html_path = self.app_name
+                    self.config['html'] = self.config['html'][1:]
                 else:
                     app_html_path = app_path
                 self.config['html'] = app_html_path + self.config['html']

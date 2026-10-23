@@ -6,11 +6,14 @@ from PyQt6.QtWidgets import (
     QFileDialog, QMessageBox, QPushButton, QWidget, QLabel, QVBoxLayout
 )
 from lensepy.utils import *
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.widgets.objects import *
 
+import numpy as np
 
-class ImagesOpeningWidget(QWidget):
+
+class ImagesOpeningWidget(ModuleWidget):
     """
     Widget to display image opening options.
     """
@@ -18,20 +21,19 @@ class ImagesOpeningWidget(QWidget):
     image_opened = pyqtSignal(str)
 
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent    # Controller
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
 
         layout.addWidget(make_hline())
 
         label = QLabel(translate('image_opening_dialog'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
 
         self.open_button = QPushButton(translate('image_opening_button'))
-        self.open_button.setStyleSheet(unactived_button)
-        self.open_button.setFixedHeight(BUTTON_HEIGHT)
+        self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.open_button.setFixedHeight(BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.open_button.clicked.connect(self.handle_opening)
         layout.addWidget(self.open_button)
 
@@ -41,7 +43,7 @@ class ImagesOpeningWidget(QWidget):
     def handle_opening(self):
         sender = self.sender()
         if sender == self.open_button:
-            self.open_button.setStyleSheet(actived_button)
+            self.open_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
             '''
             # Check if for a default directory for images.
             module_path = self.parent.parent.xml_app.get_module_parameter('images', 'imgdir')
@@ -52,7 +54,7 @@ class ImagesOpeningWidget(QWidget):
             '''
             im_ok = self.open_image()
             if im_ok:
-                self.open_button.setStyleSheet(unactived_button)
+                self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
 
     def open_image(self, default_dir: str = '') -> bool:
         """
@@ -63,8 +65,8 @@ class ImagesOpeningWidget(QWidget):
                                                    default_dir, "Images (*.png *.jpg *.jpeg)")
         if file_path != '':
             image_array, bits_depth = imread_rgb(file_path)
-            self.parent.get_variables()['image'] = image_array
-            self.parent.get_variables()['bits_depth'] = bits_depth
+            self.controller.set_variables('image', image_array)
+            self.controller.set_variables('bits_depth', bits_depth)
             self.image_opened.emit('image_opened')
             return True
         else:
@@ -79,32 +81,34 @@ class ImagesOpeningWidget(QWidget):
             return False
 
 
-class ImagesInfosWidget(QWidget):
+class ImagesInfosWidget(ModuleWidget):
     """
     Widget to display image infos.
     """
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
 
         self.image = None
 
         label = QLabel(translate('image_infos_title'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
 
         layout.addWidget(make_hline())
 
-        self.label_w = LabelWidget(translate("image_infos_label_w"), '', 'pixels')
+        self.label_w = LabelWidget(translate("image_infos_label_w"), '',
+                                   'pixels', parent=self.controller)
         layout.addWidget(self.label_w)
-        self.label_h = LabelWidget(translate("image_infos_label_h"), '', 'pixels')
+        self.label_h = LabelWidget(translate("image_infos_label_h"), '',
+                                   'pixels', parent=self.controller)
         layout.addWidget(self.label_h)
 
         layout.addWidget(make_hline())
 
-        self.label_type = LabelWidget(translate("image_infos_label_type"), '', '')
+        self.label_type = LabelWidget(translate("image_infos_label_type"), '',
+                                      '', parent=self.controller)
         layout.addWidget(self.label_type)
 
         layout.addStretch()

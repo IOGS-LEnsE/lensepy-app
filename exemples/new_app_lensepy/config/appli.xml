@@ -6,6 +6,10 @@
     <year>2026</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>%USERPROFILE%\Documents</img_dir>
+    <img_desc>./html/my_app.png</img_desc>
+    <html_page>./html/my_app.html</html_page>
+    <mode>CLASSIC</mode>
+    <theme>BLACK</theme>
     <contributors>
         <contributor>
             <name>Julien VILLEMEJANE</name>

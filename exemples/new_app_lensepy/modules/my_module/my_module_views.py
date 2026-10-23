@@ -1,28 +1,29 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton
 from lensepy import translate
-from lensepy.css import *
+from lensepy_app import *
+from lensepy_app.appli import *
 
 
-class MyModuleTopLeftWidget(QWidget):
+class MyModuleTopLeftWidget(ModuleWidget):
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
         label = QLabel('Top Left')
         layout.addWidget(label)
         self.setLayout(layout)
 
-class MyModuleBotLeftWidget(QWidget):
+class MyModuleBotLeftWidget(ModuleWidget):
 
     def __init__(self, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
         label = QLabel('Bot Left')
         layout.addWidget(label)
 
         self.open_button = QPushButton(translate('image_opening_button'))
-        self.open_button.setStyleSheet(unactived_button)
-        self.open_button.setFixedHeight(BUTTON_HEIGHT)
+        self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.open_button.setFixedHeight(BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.open_button.clicked.connect(self.handle_opening)
         layout.addWidget(self.open_button)
 

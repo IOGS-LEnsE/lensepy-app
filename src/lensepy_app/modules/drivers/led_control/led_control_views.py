@@ -8,13 +8,12 @@ from PyQt6.QtWidgets import (
 )
 
 from lensepy import translate
-from lensepy.utils import *
-
+from lensepy_app import *
+from lensepy_app.appli import *
 from lensepy_app.widgets.objects import *
-from lensepy.css import *
 
 
-class RGBLedControlWidget(QWidget):
+class RGBLedControlWidget(ModuleWidget):
     """
     Widget to display image opening options.
     """
@@ -23,35 +22,34 @@ class RGBLedControlWidget(QWidget):
     arduino_connected = pyqtSignal(str)
 
     def __init__(self, parent=None):
-        super().__init__(None)
-        self.parent = parent    # Controller
+        super().__init__(parent=parent)
         layout = QVBoxLayout()
         # Graphical Elements
         layout.addWidget(make_hline())
 
         label = QLabel(translate('led_control_dialog'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
 
         # Connection to Arduino
         layout.addWidget(make_hline())
         label_boards = QLabel(translate('led_control_boards'))
-        label_boards.setStyleSheet(styleH3)
+        label_boards.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         label_boards.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label_boards)
         self.boards_list = QComboBox()
         layout.addWidget(self.boards_list)
         self.board_connect_button = QPushButton(translate('arduino_connect'))
-        self.board_connect_button.setStyleSheet(unactived_button)
-        self.board_connect_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.board_connect_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.board_connect_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         layout.addWidget(self.board_connect_button)
         self.board_connect_button.clicked.connect(self.handle_arduino_connected)
 
         layout.addWidget(make_hline())
 
         label_rgb = QLabel(translate('R_G_B_values'))
-        label_rgb.setStyleSheet(styleH3)
+        label_rgb.setStyleSheet(STYLE_H3[self.global_theme][self.global_mode])
         label_rgb.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label_rgb)
 
@@ -65,7 +63,9 @@ class RGBLedControlWidget(QWidget):
         r_widget.setLayout(r_layout)
         r_circle = CircleWidget(color=QColor(255, 0, 0), diameter=30)
         r_layout.addWidget(r_circle)
-        self.r_color = SliderBlocVertical('R', '', 0, 255, integer=True)
+        self.r_color = SliderBlocVertical('R', '',
+                                          0, 255, integer=True,
+                                          parent=self.controller)
         r_layout.addWidget(self.r_color)
         ## Green
         g_widget = QWidget()
@@ -73,7 +73,9 @@ class RGBLedControlWidget(QWidget):
         g_widget.setLayout(g_layout)
         g_circle = CircleWidget(color=QColor(0, 150, 0), diameter=30)
         g_layout.addWidget(g_circle)
-        self.g_color = SliderBlocVertical('G', '', 0, 255, integer=True)
+        self.g_color = SliderBlocVertical('G', '',
+                                          0, 255, integer=True,
+                                          parent=self.controller)
         g_layout.addWidget(self.g_color)
         ## Blue
         b_widget = QWidget()
@@ -81,7 +83,9 @@ class RGBLedControlWidget(QWidget):
         b_widget.setLayout(b_layout)
         b_circle = CircleWidget(color=QColor(0, 0, 255), diameter=30)
         b_layout.addWidget(b_circle)
-        self.b_color = SliderBlocVertical('B', '', 0, 255, integer=True)
+        self.b_color = SliderBlocVertical('B', '',
+                                          0, 255, integer=True,
+                                          parent=self.controller)
         b_layout.addWidget(self.b_color)
 
         ## White 1
@@ -90,7 +94,9 @@ class RGBLedControlWidget(QWidget):
         w1_widget.setLayout(w1_layout)
         w1_circle = CircleWidget(color=QColor(120, 200, 150), diameter=30)
         w1_layout.addWidget(w1_circle)
-        self.w1_color = SliderBlocVertical('W1', '', 0, 255, integer=True)
+        self.w1_color = SliderBlocVertical('W1', '',
+                                           0, 255,
+                                           integer=True, parent=self.controller)
         w1_layout.addWidget(self.w1_color)
         ## White 2
         w2_widget = QWidget()
@@ -98,7 +104,9 @@ class RGBLedControlWidget(QWidget):
         w2_widget.setLayout(w2_layout)
         w2_circle = CircleWidget(color=QColor(120, 200, 20), diameter=30)
         w2_layout.addWidget(w2_circle)
-        self.w2_color = SliderBlocVertical('W2', '', 0, 255, integer=True)
+        self.w2_color = SliderBlocVertical('W2', '',
+                                           0, 255,
+                                           integer=True, parent=self.controller)
         w2_layout.addWidget(self.w2_color)
 
         self.r_color.set_enabled(False)
@@ -115,8 +123,8 @@ class RGBLedControlWidget(QWidget):
         layout.addLayout(rgb_layout)
         # Erase all
         self.erase_button = QPushButton(translate('erase_button'))
-        self.erase_button.setStyleSheet(disabled_button)
-        self.erase_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT)
+        self.erase_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
+        self.erase_button.setFixedHeight(OPTIONS_BUTTON_HEIGHT[self.global_theme][self.global_mode])
         self.erase_button.clicked.connect(self.handle_erase_all)
         layout.addWidget(self.erase_button)
         self.erase_button.setEnabled(False)
@@ -124,13 +132,13 @@ class RGBLedControlWidget(QWidget):
         layout.addStretch()
         self.setLayout(layout)
         # Init boards and lists
-        self.boards = self.parent.wrapper.find_arduino_ports()
+        self.boards = self.controller.wrapper.find_arduino_ports()
         if self.boards:
             self.boards_list.addItems(self.boards)
         else:
             self.board_connect_button.setEnabled(False)
             self.board_connect_button.setText(translate('no_boards'))
-            self.board_connect_button.setStyleSheet(disabled_button)
+            self.board_connect_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
 
         # Signals
         self.r_color.slider_changed.connect(lambda: self.rgb_changed.emit())
@@ -154,8 +162,8 @@ class RGBLedControlWidget(QWidget):
 
     def handle_arduino_connected(self):
         self.board_connect_button.setEnabled(False)
-        self.board_connect_button.setStyleSheet(disabled_button)
-        self.erase_button.setStyleSheet(unactived_button)
+        self.board_connect_button.setStyleSheet(DISABLED_BUTTON[self.global_theme][self.global_mode])
+        self.erase_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.r_color.set_enabled(True)
         self.g_color.set_enabled(True)
         self.b_color.set_enabled(True)
@@ -166,7 +174,7 @@ class RGBLedControlWidget(QWidget):
         self.arduino_connected.emit(com)
 
     def handle_erase_all(self):
-        self.erase_button.setStyleSheet(actived_button)
+        self.erase_button.setStyleSheet(ACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.repaint()
         self.r_color.set_value(0)
         self.g_color.set_value(0)
@@ -175,20 +183,20 @@ class RGBLedControlWidget(QWidget):
         self.w2_color.set_value(0)
         self.rgb_changed.emit()
         time.sleep(0.3)
-        self.erase_button.setStyleSheet(unactived_button)
+        self.erase_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
         self.repaint()
 
 
-class MatrixWidget(QWidget):
+class MatrixWidget(ModuleWidget):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
         layout = QVBoxLayout(self)
 
         # Title
         layout.addWidget(make_hline())
         label = QLabel(translate('rgb_matrix_title'))
-        label.setStyleSheet(styleH2)
+        label.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
         layout.addWidget(make_hline())

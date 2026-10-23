@@ -53,7 +53,10 @@ class HTMLView(ModuleWidget):
         self.url = url
 
         path = Path(url).resolve()
+        print(f'Path = {path} / url = {url}')
         base_url = QUrl.fromLocalFile(str(path.parent) + "/")
+
+        print(f'Base URL = {base_url}')
 
         with path.open("r", encoding="utf-8") as f:
             html = f.read()

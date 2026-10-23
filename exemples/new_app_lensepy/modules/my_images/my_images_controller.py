@@ -25,13 +25,13 @@ class ImagesController(TemplateController):
         # Setup widgets
         self.bot_left.set_labels(translate('histo_xlabel'), translate('histo_ylabel'))
         self.bot_left.set_background('white')
-        if self.parent.variables['bits_depth'] is not None:
-            self.bot_left.set_bits_depth(int(self.parent.variables['bits_depth']))
+        if self.get_variables('bits_depth') is not None:
+            self.bot_left.set_bits_depth(int(self.get_variables('bits_depth')))
         else:
             self.bot_left.set_bits_depth(8)
-        if self.parent.variables['image'] is not None:
-            self.top_left.set_image_from_array(self.parent.variables['image'])
-            self.bot_left.set_image(self.parent.variables['image'])
+        if self.get_variables('image') is not None:
+            self.top_left.set_image_from_array(self.get_variables('image'))
+            self.bot_left.set_image(self.get_variables('image'))
         self.bot_left.refresh_chart()
         # Signals
         self.bot_right.image_opened.connect(self.action_image_opened)
@@ -41,7 +41,7 @@ class ImagesController(TemplateController):
         Action performed when an image is opened via the bot_right widget.
         :return:
         """
-        image = self.get_variables()['image']
+        image = self.get_variables('image')
         # Display image
         self.display_image(image)
         # Update histogram
@@ -49,7 +49,7 @@ class ImagesController(TemplateController):
         self.bot_left.refresh_chart()
         # Update image information
         self.top_right.update_infos(image)
-        self.parent.main_window.update_menu()
+        self.manager.main_window.update_menu()
 
     def display_image(self, image: np.ndarray):
         """
