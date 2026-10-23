@@ -68,7 +68,29 @@ class MyModuleController(TemplateController):
             self.bot_right.slider_expo.set_value(expo_init)
 
         # Connexion Nucléo (commande piezo)
-        self.piezo = None
+        ''' Update NUCLEO with a wrapper
+        # Nucleo wrapper
+        if self.parent.variables["nucleo_connected"] is not None:
+            self.nucleo_wrapper = self.parent.variables['nucleo_wrapper']
+            self.connected = self.parent.variables["nucleo_connected"]
+        else:
+            self.nucleo_wrapper = NucleoWrapper()
+            self.connected = False
+            self.parent.variables['nucleo_wrapper'] = self.nucleo_wrapper
+        ## List of Nucleo boards
+        self.boards_list = self.nucleo_wrapper.list_serial_hardware()
+        ## If Nucleo board
+        if len(self.boards_list) != 0:
+            boards_list_display = self._boards_list_display(self.boards_list)
+            self.bot_right.set_boards_list(boards_list_display)
+        # Nucleo connected
+        if self.connected:
+            hw_version = self.nucleo_wrapper.get_hw_version()
+            self.bot_right.set_connected(hw_version)
+            self.nucleo_wrapper.set_sampling_period(self.exposure_time * 1000)
+        '''
+
+        self.piezo = self.get_variables('piezo')
         try:
             self.piezo = serial.Serial('COM4', 115200, timeout=1)
             print("Serial Port COM4 / Successfully initialized.")
@@ -721,8 +743,9 @@ class MyModuleController(TemplateController):
         self.new_window = None
         self.worker = None
         self.thread = None
-        self.piezo.close()
-        self.piezo = None
+        if self.piezo is not None:
+            self.piezo.close()
+            self.piezo = None
 
 
     def _get_image_dir(self, filepath):

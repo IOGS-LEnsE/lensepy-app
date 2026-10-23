@@ -25,6 +25,7 @@ class CameraInfosWidget(ModuleWidget):
     roi_reset = pyqtSignal()
     roi_activated = pyqtSignal(bool)
     open_fft = pyqtSignal()
+    open_autocorr = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -74,10 +75,15 @@ class CameraInfosWidget(ModuleWidget):
         self.activate_roi_button.clicked.connect(self.handle_roi_activated)
         layout.addWidget(self.activate_roi_button)
 
-        self.open_button = QPushButton(translate("FFT"))  # Button to display the Fourier Transform of the image
-        self.open_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
-        self.open_button.clicked.connect(self.handle_open_fft)
-        layout.addWidget(self.open_button)
+        self.fft_button = QPushButton(translate('process_FFT'))  # Button to display the Fourier Transform of the image
+        self.fft_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.fft_button.clicked.connect(self.handle_open_fft)
+        layout.addWidget(self.fft_button)
+
+        self.autocorr_button = QPushButton(translate('process_autocorr'))  # Button to display the Fourier Transform of the image
+        self.autocorr_button.setStyleSheet(INACTIVATED_BUTTON[self.global_theme][self.global_mode])
+        self.autocorr_button.clicked.connect(self.handle_open_autocorr)
+        layout.addWidget(self.autocorr_button)
 
         layout.addStretch()
         self.setLayout(layout)
@@ -125,6 +131,12 @@ class CameraInfosWidget(ModuleWidget):
         Action performed when the FFT button is triggered
         """
         self.open_fft.emit()
+
+    def handle_open_autocorr(self):
+        """
+        Action performed when the FFT button is triggered
+        """
+        self.open_autocorr.emit()
 
     def update_infos(self):
         """
@@ -396,9 +408,9 @@ class FFTWindow(QMainWindow):
     close_fft = pyqtSignal()
     def __init__(self, parent=None):
         super().__init__()
-        self.parent: BaslerDSPIController = parent
+        self.controller: BaslerDSPIController = parent
         # Main widget to display image
-        self.fft_widget = ImageDisplayWidget()
+        self.fft_widget = ImageDisplayWidget(self.parent)
         self.setCentralWidget(self.fft_widget)
         # Closing Button
         """The button doesn't work yet (isn't displayed on the window)"""
@@ -410,10 +422,10 @@ class FFTWindow(QMainWindow):
         self.open_button.clicked.connect(self.handle_close_fft)
         layout.addWidget(self.open_button)
         #Bit depth
-        bits_depth = int(self.parent.parent.variables.get('bits_depth', 8))
+        bits_depth = 8 # int(self.controller.get_variables('bits_depth'))
         self.fft_widget.set_bits_depth(bits_depth)
         #Initial Image
-        self.initial_image = self.parent.parent.variables.get('image')
+        self.initial_image = self.controller.get_variables('image')
         if self.initial_image is not None:
             self.fft_widget.set_image_from_array(self.initial_image)
 
@@ -422,3 +434,38 @@ class FFTWindow(QMainWindow):
         Action performed when the closing button is triggered
         """
         self.close_fft.emit()
+
+
+class AutoCorrWindow(QMainWindow):
+    """
+    Window to display the Fourier Transform of an image
+    """
+    close_autocorr = pyqtSignal()
+    def __init__(self, parent=None):
+        super().__init__()
+        self.controller: BaslerDSPIController = parent
+        # Main widget to display image
+        self.fft_widget = ImageDisplayWidget(self.parent)
+        self.setCentralWidget(self.fft_widget)
+        # Closing Button
+        """The button doesn't work yet (isn't displayed on the window)"""
+        layout = QVBoxLayout()
+        label = QLabel(translate('autocorrelation_title'))
+        layout.addWidget(label)
+        self.open_button = QPushButton(translate("autocorrelation_stop_button"))
+        self.open_button.setStyleSheet(unactived_button)
+        self.open_button.clicked.connect(self.handle_close_fft)
+        layout.addWidget(self.open_button)
+        #Bit depth
+        bits_depth = 8 # int(self.parent.parent.variables.get('bits_depth', 8))
+        self.fft_widget.set_bits_depth(bits_depth)
+        #Initial Image
+        self.initial_image = self.controller.get_variables('image')
+        if self.initial_image is not None:
+            self.fft_widget.set_image_from_array(self.initial_image)
+
+    def handle_close_autocorr(self):
+        """
+        Action performed when the closing button is triggered
+        """
+        self.close_autocorr.emit()

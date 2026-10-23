@@ -378,9 +378,7 @@ class AcquisitionLive(QObject):
             self._finish()
             return
 
-        # -------------------------
-        # 1️⃣ Appliquer tension
-        # -------------------------
+        # Apply Voltage
         if not self.waiting_settle:
             dac_val = self.volt_list[self.index]
             print(f"DAC = {dac_val}")
@@ -419,9 +417,7 @@ class AcquisitionLive(QObject):
         if self.timer is not None:
             self.timer.stop()
 
-    # =========================
-    # 🏁 FIN propre
-    # =========================
+    # End of acquisition
     def _finish(self):
         if self.timer is not None:
             self.timer.stop()

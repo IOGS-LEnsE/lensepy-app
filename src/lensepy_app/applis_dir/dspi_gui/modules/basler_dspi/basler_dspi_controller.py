@@ -28,8 +28,11 @@ class BaslerDSPIController(TemplateController):
         self.bot_left = HistogramWidget(parent=self)           # Widget where the histogram of the image is displayed
         self.top_right = CameraInfosWidget(parent=self)    # Widget with camera infos and ROI selection buttons
         self.bot_right = CameraParamsWidget(parent=self)   # Widget used to change parameters of the camera
-        self.fft_window = None                      # Window where the Fourier Transform of an image is displayed
-        self.do_fft = False                         # Boolean used to initiate fft processing
+        self.fft_window = None  # Window where the Fourier Transform of an image is displayed
+        self.do_fft = False  # Boolean used to initiate fft processing
+        self.autocorr_window = None  # Window where the Fourier Transform of an image is displayed
+        self.do_autocorr = False  # Boolean used to initiate fft processing
+
         # Check if camera is connected
         self.init_camera()
         x0, y0, x1, y1 = self.camera_range
@@ -50,7 +53,7 @@ class BaslerDSPIController(TemplateController):
         Update graphical objects of the interface.
         """
         # Update view
-        if self.get_variables("camera") is not None:
+        if self.get_variables("camera") is None:
             super().init_view()
             self.set_color_mode()
             self.set_max_exposure_time()
@@ -62,14 +65,14 @@ class BaslerDSPIController(TemplateController):
             self.top_left.set_enabled(True)
             self.top_right.update_infos()
             # Init widgets
-            if self.parent.variables['bits_depth'] is not None:
+            if self.get_variables('bits_depth') is not None:
                 self.top_left.set_bits_depth(int(self.parent.variables['bits_depth']))
                 self.bot_left.set_bits_depth(int(self.parent.variables['bits_depth']))
             else:
                 self.bot_left.set_bits_depth(8)
-            if self.parent.variables['image'] is not None:
-                self.top_left.set_image_from_array(self.parent.variables['image'])
-                self.bot_left.set_image(self.parent.variables['image'])
+            if self.get_variables('image') is not None:
+                self.top_left.set_image_from_array(self.get_variables('image'))
+                self.bot_left.set_image(self.get_variables('image'))
             self.bot_left.refresh_chart()
             # Signals
             self.top_left.rectangle_changed.connect(self.handle_rect_changed)
@@ -78,6 +81,7 @@ class BaslerDSPIController(TemplateController):
             self.top_right.roi_reset.connect(self.handle_roi_reset)
             self.top_right.roi_activated.connect(self.handle_roi_activated)
             self.top_right.open_fft.connect(self.handle_open_fft)
+            self.top_right.open_autocorr.connect(self.handle_open_autocorr)
             self.bot_right.exposure_time_changed.connect(self.handle_exposure_time_changed)
             self.bot_right.black_level_changed.connect(self.handle_black_level_changed)
             self.start_live()
@@ -128,7 +132,7 @@ class BaslerDSPIController(TemplateController):
         """
         Get possible color mode list
         """
-        colormode_get = self.parent.xml_app.get_sub_parameter('camera','colormode')
+        colormode_get = self.manager.xml_app.get_sub_parameter('camera','colormode')
         colormode_get = colormode_get.split(',')
         for colormode in colormode_get:
             colormode_v = colormode.split(':')
@@ -136,27 +140,29 @@ class BaslerDSPIController(TemplateController):
             self.colormode_bits_depth.append(int(colormode_v[1]))
 
     def set_max_exposure_time(self):
-        exposuretime_get = self.parent.xml_app.get_sub_parameter('camera', 'exposuretime')
+        exposuretime_get = self.manager.xml_app.get_sub_parameter('camera', 'exposuretime')
         self.bot_right.set_max_exposure_time(exposuretime_get)
 
     def update_color_mode(self):
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
+        if camera is None:
+            return
         # Update to first mode if first connection
         pix_format = camera.get_parameter('PixelFormat')
         if 'first_connexion' in self.parent.variables:
-            if self.parent.variables['first_connexion'] == 'Yes':
+            if self.get_variables('first_connexion') == 'Yes':
                 first_mode_color = self.colormode[0]
                 camera.open()
                 camera.set_parameter("PixelFormat", first_mode_color)
                 camera.initial_params["PixelFormat"] = first_mode_color
                 camera.close()
                 first_bits_depth = self.colormode_bits_depth[0]
-                self.parent.variables["bits_depth"] = first_bits_depth
+                self.set_variables("bits_depth", first_bits_depth)
             else:
                 idx = self.colormode.index(pix_format)
                 self.top_right.label_color_mode.set_choice(idx)
                 new_bits_depth = self.colormode_bits_depth[idx]
-                self.parent.variables["bits_depth"] = new_bits_depth
+                self.set_variables("bits_depth", new_bits_depth)
             black_level = camera.get_parameter('BlackLevel')
             self.bot_right.set_black_level(black_level)
 
@@ -219,6 +225,20 @@ class BaslerDSPIController(TemplateController):
             # Display the result
             self.fft_window.fft_widget.set_image_from_array(fft_display)
             self.do_fft = False
+        # Update Autocorrelation - TF-1(TF(Intensité)*Conj(TF(Intensité))
+        if self.do_autocorr:
+            image = image.astype(np.uint8)
+            # Autocorrelation :
+            auto_corr = np.correlate(image.astype(np.uint8), image.astype(np.uint8),
+                                     mode='same')
+            # OR ?
+            tf_image = np.fft.fft2(image)
+            tf_image_conj = np.conjugate(tf_image)
+            tf_mult = tf_image * tf_image_conj
+            # Display the result
+            self.autocorr_window.fft_widget.set_image_from_array(auto_corr)
+            self.do_autocorr = False
+
         # Update Histo
         self.bot_left.set_image(image)
         # Store new image.
@@ -228,7 +248,7 @@ class BaslerDSPIController(TemplateController):
         """
         Action performed when the FFT button is triggered
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             # Stop live safely
             self.stop_live()
@@ -247,7 +267,7 @@ class BaslerDSPIController(TemplateController):
         """
         Action performed when the button to close the FFT window is triggered
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             # Stop live safely
             self.stop_live()
@@ -262,6 +282,48 @@ class BaslerDSPIController(TemplateController):
             camera.open()
             self.start_live()
 
+    def handle_open_autocorr(self):
+        """
+        Action performed when the Autocorrelation button is triggered
+        """
+        print(f'Autocorrelation')
+        camera = self.get_variables("camera")
+        if camera is not None:
+            '''
+            # Stop live safely
+            self.stop_live()
+            # Close camera
+            camera.close()
+            '''
+            # Open Autocorrelation Window
+            self.autocorr_window = AutoCorrWindow(self)   # Class defined in basler_dspi_views
+            self.autocorr_window.close_autocorr.connect(self.handle_close_autocorr)
+            self.autocorr_window.show()
+            self.do_autocorr = True
+            '''
+            # Restart live
+            camera.open()
+            self.start_live()
+        '''
+
+    def handle_close_autocorr(self):
+        """
+        Action performed when the button to close the FFT window is triggered
+        """
+        camera = self.get_variables("camera")
+        if camera is not None:
+            # Stop live safely
+            self.stop_live()
+            # Close camera
+            camera.close()
+            # Close FFT Window
+            self.autocorr_window.fft_widget = None
+            self.autocorr_window.close()
+            self.autocorr_window = None
+            self.do_autocorr = False
+            # Restart live
+            camera.open()
+            self.start_live()
 
     def handle_exposure_time_changed(self, value):
         """
@@ -421,6 +483,8 @@ class BaslerDSPIController(TemplateController):
         self.stop_live()
         if self.fft_window is not None:
              self.handle_close_fft()
+        if self.autocorr_window is not None:
+             self.handle_close_autocorr()
         camera = self.get_variables("camera")
         if camera is not None:
             if getattr(camera, "is_open", False):

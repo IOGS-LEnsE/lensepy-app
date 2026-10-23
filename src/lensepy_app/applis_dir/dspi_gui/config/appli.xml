@@ -41,6 +41,7 @@
     <variable name="roi_activated"/>
     <variable name="camera"/>
     <variable name="roi_coords"/>
+    <variable name="piezo"/>
     <camera>
         <name>Basler</name>
         <colormode>Mono8:8</colormode>

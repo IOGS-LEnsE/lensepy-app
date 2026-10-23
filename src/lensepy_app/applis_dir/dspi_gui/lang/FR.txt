@@ -1,3 +1,5 @@
 # value;translation
 # MAIN MENU
 basler_menu;Camera Basler
+my_module_menu;Traitements
+basler_dspi_menu;Camera Basler
