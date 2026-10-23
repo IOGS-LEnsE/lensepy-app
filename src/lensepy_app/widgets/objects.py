@@ -51,23 +51,24 @@ def make_vline():
     return line
 
 
-class SelectWidget(QWidget):
+class SelectWidget(ModuleWidget):
     """
     Widget including a select list.
     """
     choice_selected = pyqtSignal(str)
 
-    def __init__(self, title: str, values: list, units: str = None):
+    def __init__(self, title: str, values: list, units: str = None,
+                 parent=None):
         """
 
         :param title:   Title of the widget.
         :param values:  Values of the selection list.
         :param units:   Units of the data.
         """
-        super().__init__()
+        super().__init__(parent=parent)
         # Graphical objects
         self.label_title = QLabel(title)
-        self.label_title.setStyleSheet(styleH2)
+        self.label_title.setStyleSheet(STYLE_H2[self.global_theme][self.global_mode])
         self.combo_box = QComboBox()
         self.combo_box.addItems(values)
         self.combo_box.currentIndexChanged.connect(self.handle_choice_selected)

@@ -44,7 +44,6 @@ class MainWindow(QMainWindow):
         self.menu_button_name_list = []
         self.menu_button_list = []
         self.actual_button = None
-        self.general_display_mode = 'CLASSIC'
 
         self.right_container = QWidget()
         self.right_layout = QGridLayout()
@@ -71,13 +70,13 @@ class MainWindow(QMainWindow):
         Create graphical elements of the main menu.
         :param elements: List of graphical elements to add.
         """
+        theme = self.manager.get_config('global_theme')
+        mode = self.manager.get_config('global_mode')
         self.menu_button_list = []
         for element in elements:
             b_title = translate(f'{element}_menu')
             button = QPushButton(b_title)
             button.clicked.connect(self.handle_main_menu)
-            theme = self.manager.get_config('global_theme')
-            mode = self.manager.get_config('global_mode')
             button.setFixedHeight(BUTTON_HEIGHT[theme][mode])
             self.menu_button_name_list.append(f'{element}')
             self.menu_button_list.append(button)

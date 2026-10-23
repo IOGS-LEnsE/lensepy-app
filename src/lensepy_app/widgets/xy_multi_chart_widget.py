@@ -1,13 +1,12 @@
 import numpy as np
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QScrollArea
-from pyqtgraph import mkPen, PlotWidget
 import pyqtgraph as pg
+from lensepy_app import *
+from lensepy_app.appli import *
 
-from lensepy.css import *
 
-
-class XYMultiChartWidget(QWidget):
+class XYMultiChartWidget(ModuleWidget):
     """
     Widget to display XY curves:
     – either all curves on a single plot (multi_chart=False)
@@ -21,7 +20,7 @@ class XYMultiChartWidget(QWidget):
     def __init__(self, parent=None, multi_chart=True,
                  base_color=None, max_points=2000,
                  allow_point_selection=True):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         self.multi_chart = multi_chart
         self.allow_point_selection = allow_point_selection
         self.max_points = max_points

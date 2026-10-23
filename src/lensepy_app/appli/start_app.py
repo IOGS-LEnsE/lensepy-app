@@ -30,7 +30,7 @@ palette.setColor(QPalette.ColorRole.Highlight, QColor(42, 130, 218))
 palette.setColor(QPalette.ColorRole.HighlightedText, Qt.GlobalColor.white)
 
 
-class My_Application(QApplication):
+class LEnsEApplication(QApplication):
 
     def __init__(self, app_name=None, standalone=False, argv=None):
         if argv is None:
@@ -85,7 +85,6 @@ class My_Application(QApplication):
             self.manager.update_menu()
             self.config['name'] = xml_data.get_app_name() or None
             self.config['description'] = xml_data.get_app_desc() or None
-            print(f'Description: {self.config['description']}')
             self.config['img_desc'] = xml_data.get_img_desc() or None
             if self.config['img_desc'] is not None:
                 self.config['img_desc'] = app_path + self.config['img_desc']
@@ -96,7 +95,6 @@ class My_Application(QApplication):
                 else:
                     app_html_path = app_path
                 self.config['html'] = app_html_path + self.config['html']
-            print(f'Config HTML path: {self.config['html']}')
             self.config['css'] = xml_data.get_css_style() or None
             if self.config['css'] is not None:
                 if self.config['css'].startswith('http'):
@@ -144,6 +142,17 @@ class My_Application(QApplication):
             for module in modules_list:
                 module_path = self.manager.xml_app.get_module_path(module)
                 if './' in module_path:
+                    '''
+                    app_path = Path(self.app_name)
+                    relative_path = module_path.lstrip("./").replace("/", ".")
+                    package_path = app_path / module_path.lstrip("./") / module
+
+                    # Cas d'un package : modules/my_module/__init__.py
+                    init_file = package_path / "__init__.py"
+
+                    if init_file.is_file():
+                        continue
+                    '''
                     module_path_n = module_path.lstrip("./").replace("/", ".")
                     path_module = f'{module_path_n}.{module}'
                 else:
@@ -200,9 +209,9 @@ def start_app(app_path, standalone=False, argv=None):
 
     if standalone:
         print('Standalone')
-        app = My_Application(app_path, standalone)
+        app = LEnsEApplication(app_path, standalone, argv=argv)
     else:
-        app = My_Application(app_path, argv=argv)
+        app = LEnsEApplication(app_path, argv=argv)
 
     if app.init_config():
         if app.check_dependencies():
