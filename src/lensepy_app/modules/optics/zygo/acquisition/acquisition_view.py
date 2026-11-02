@@ -139,7 +139,8 @@ class CameraParamsView(ModuleWidget):
         self.label_camera_params.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.label_camera_params)
         self.layout.addWidget(make_hline())
-        self.slider_expo = SliderBloc(translate('slider_exposure'), 'ms', 100, 3000, integer=True, parent=self.controller)
+        self.slider_expo = SliderBloc(translate('slider_exposure'), 'ms', 100,
+                                      3000, integer=True, parent=self.controller)
         self.slider_expo.set_value(3000)
         self.layout.addWidget(self.slider_expo)
         self.layout.addStretch()
@@ -180,7 +181,8 @@ class PiezoControlView(ModuleWidget):
         mini_layout.addWidget(self.circle_ok)
         self.layout.addWidget(mini_widget)
         self.layout.addWidget(make_hline())
-        self.slider = SliderBloc(translate('slider_piezo'), 'V', 0, 5)
+        self.slider = SliderBloc(translate('slider_piezo'), 'V', 0, 5,
+                                 parent=self.controller)
         self.slider.set_enabled(False)
         self.slider.set_value(1)
         self.layout.addWidget(self.slider)
