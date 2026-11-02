@@ -42,10 +42,12 @@ class ZygoImagesController(TemplateController):
             print('Data_set OK')
             if not self.data_set.is_empty():
                 self.update_images()
+                self.set_variables('dataset_loaded', True)
                 self.data_set.reset_processes()
                 self.bot_right.set_enabled()
         else:
             self.data_set = DataSet()
+            self.set_variables('dataset_loaded', False)
             self.set_variables('dataset', self.data_set)
         # Signals
         self.bot_right.image_opened.connect(self.handle_image_opened)
@@ -82,7 +84,8 @@ class ZygoImagesController(TemplateController):
         if im_ok:
             mask_ok = self.data_set.load_masks_from_file(filepath)
             if mask_ok:
-                self.manager.variables['mask_loaded'] = True
+                self.set_variables('mask_loaded', True)
+                self.set_variables('phase_results', None)
                 self.manager.update_menu()
             self.update_images()
 

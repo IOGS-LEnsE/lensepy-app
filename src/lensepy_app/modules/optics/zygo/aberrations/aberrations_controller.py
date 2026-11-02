@@ -39,7 +39,7 @@ class ZygoAberrationsController(TemplateController):
         '''
 
         self.nb_coeff = nb_coeff
-        self.data_set : DataSet = self.manager.variables['dataset']
+        self.data_set : DataSet = self.get_variables('dataset')
         self.number_of_repetition = 1
         self.phase = None
         self.zernike_coeffs = None
@@ -72,10 +72,10 @@ class ZygoAberrationsController(TemplateController):
         self.coeffs_window.window_closed.connect(self.handle_coeffs_window_closed)
 
         # Start surface processing
-        if self.manager.variables['phase_results'] is None:
+        if self.get_variables('phase_results') is None:
             self.process_surface()
         else:
-            results = self.manager.variables['phase_results']
+            results = self.get_variables('phase_results')
             self.display_results(results, first=False)
             self.process_PSF()
 
