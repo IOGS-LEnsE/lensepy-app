@@ -210,7 +210,10 @@ class ZygoAcquisitionController(TemplateController):
         # Store new data in data_set
         self.data_set.add_set_images(images)
         self.set_variables('dataset', self.data_set)
-        self.set_variables('phase_results', None)
+        self.set_variables('dataset_loaded', True)
+        self.set_variables('mask_loaded', None)
+        self.set_variables('phase', None)
+        self.manager.update_menu()
 
         # Display grid of images in an external view
         if images:

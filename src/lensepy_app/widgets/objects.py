@@ -164,16 +164,20 @@ class SliderBloc(ModuleWidget):
 
     def _init_value_line(self, name: str):
         line = QHBoxLayout()
+        self.value_line = LineEditWidget(name, str(self.value),self.unit, parent=self.controller)
+        self.value_line.edit_changed.connect(self.handle_input_changed_finish)
+        '''
         self.label_name = self._styled_label(f"{name}:", STYLE_H2[self.global_theme][self.global_mode])
         self.lineedit_value = QLineEdit(str(self.value))
         #self.lineedit_value.textEdited.connect(self.handle_input_changed)
         self.lineedit_value.editingFinished.connect(self.handle_input_changed_finish)
         self.label_unit = self._styled_label(self.unit, STYLE_H3[self.global_theme][self.global_mode])
-
+        
         for widget in (self.label_name, self.lineedit_value, self.label_unit):
             line.addWidget(widget)
         line.setContentsMargins(0, 0, 0, 0)
-
+        '''
+        line.addWidget(self.value_line)
         container = QWidget()
         container.setLayout(line)
         self.layout.addWidget(container)
@@ -203,13 +207,13 @@ class SliderBloc(ModuleWidget):
         self.value = self.slider.value() / self.ratio
         if self.integer:
             self.value = int(self.value)
-        self.lineedit_value.setText(str(self.value))
+        self.value_line.set_value(str(self.value))
         self.slider_changed.emit(self.value)
 
     def handle_input_changed(self):
         """Triggered when user edits the numeric value."""
         try:
-            val = float(self.lineedit_value.text())
+            val = float(self.value_line.get_value())
         except ValueError:
             return
 
@@ -223,7 +227,7 @@ class SliderBloc(ModuleWidget):
     def handle_input_changed_finish(self):
         """Triggered when user finishes to edit the numeric value."""
         try:
-            val = float(self.lineedit_value.text())
+            val = float(self.value_line.get_value())
         except ValueError:
             val = self.value
             return
@@ -241,7 +245,7 @@ class SliderBloc(ModuleWidget):
     def update_block(self):
         """Sync text and slider position."""
         val = int(self.value) if self.integer else self.value
-        self.lineedit_value.setText(str(val))
+        self.value_line.set_value(str(val))
         self.slider.blockSignals(True)
         self.slider.setValue(int(val * self.ratio))
         self.slider.blockSignals(False)
@@ -268,7 +272,7 @@ class SliderBloc(ModuleWidget):
     def set_enabled(self, enabled: bool):
         """Enable or disable the whole block."""
         self.slider.setEnabled(enabled)
-        self.lineedit_value.setEnabled(enabled)
+        self.value_line.setEnabled(enabled)
 
     @staticmethod
     def _clamp(val, vmin, vmax):
@@ -443,6 +447,20 @@ class LineEditWidget(ModuleWidget):
         layout.addWidget(self.label, 1)
         # Line Edit
         self.line_edit = QLineEdit()
+        self.line_edit.setStyleSheet(f"""
+            QLineEdit {{
+                {STYLE_LINEEDIT['FONT'][self.global_mode]}
+                {STYLE_LINEEDIT[self.global_theme]['NORMAL']}
+            }}
+
+            QLineEdit:focus {{
+                {STYLE_LINEEDIT[self.global_theme]['FOCUS']}
+            }}
+
+            QLineEdit:disabled {{
+                {STYLE_LINEEDIT[self.global_theme]['DISABLED']}
+            }}
+        """)
         self.line_edit.setText(value)
         self.line_edit.textEdited.connect(self.handle_input_changed)
         self.line_edit.editingFinished.connect(self.handle_input_changed_finish)

@@ -39,10 +39,13 @@ class ZygoImagesController(TemplateController):
 
         if self.get_variables('dataset') is not None:
             self.data_set = self.get_variables('dataset')
+            self.set_variables('mask_loaded', None)
             print('Data_set OK')
             if not self.data_set.is_empty():
                 self.update_images()
                 self.set_variables('dataset_loaded', True)
+                if self.get_variables('dataset').has_mask():
+                    self.set_variables('mask_loaded', True)
                 self.data_set.reset_processes()
                 self.bot_right.set_enabled()
         else:
@@ -62,7 +65,7 @@ class ZygoImagesController(TemplateController):
         image1 = self.data_set.images_sets.get_image_from_set(1,1)
         self.top_left.set_image_from_array(image1)
         self.bot_left.update_dataset(self.data_set)
-        self.manager.variables['dataset_loaded'] = True
+        self.set_variables('dataset_loaded', True)
         self.manager.update_menu()
 
     def handle_saving_png(self, filepath):
@@ -86,6 +89,7 @@ class ZygoImagesController(TemplateController):
             if mask_ok:
                 self.set_variables('mask_loaded', True)
                 self.set_variables('phase_results', None)
+                self.set_variables('phase', None)
                 self.manager.update_menu()
             self.update_images()
 
