@@ -54,7 +54,6 @@ from lensepy import translate
 from lensepy_app import *
 from lensepy_app.appli import *
 
-from lensepy.utils.images import resize_image_ratio
 
 class HistogramSimpleWidget(ModuleWidget):
     """Simple Histogram display from data. Auto zoom."""
