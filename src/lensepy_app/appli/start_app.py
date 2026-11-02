@@ -95,7 +95,6 @@ class LEnsEApplication(QApplication):
                 self.config['img_desc'] = app_html_path + self.config['img_desc']
             self.config['html']  = xml_data.get_html_page() or None
             if self.config['html'] is not None:
-                print(f'CONFIG HTML = {self.config["html"]}')
                 if self.config['html'].startswith('http'):
                     app_html_path = ''
                 elif self.config['html'].startswith('./'):
