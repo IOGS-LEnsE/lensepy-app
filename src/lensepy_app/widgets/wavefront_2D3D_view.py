@@ -424,6 +424,10 @@ class Wavefront2D(_WavefrontBase):
     def set_y_label(self, label):
         self.plot.setLabel("left", label)
 
+    def set_scale(self, label, range=(0, 1)):
+        self.cbar = pg.ColorBarItem(values=range, interactive=False,
+                                    label=label)
+
     # --- état de la vue (pour la synchronisation avec la vue 3D) -----
     def view_state(self):
         """(cx, cy, largeur) : centre et étendue en x de la zone visible."""

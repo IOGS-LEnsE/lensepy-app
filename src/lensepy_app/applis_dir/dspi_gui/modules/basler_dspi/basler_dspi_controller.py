@@ -53,7 +53,8 @@ class BaslerDSPIController(TemplateController):
         Update graphical objects of the interface.
         """
         # Update view
-        if self.get_variables("camera") is None:
+        print(f'Camera = {self.get_variables("camera")}')
+        if self.get_variables("camera") is not None:
             super().init_view()
             self.set_color_mode()
             self.set_max_exposure_time()
@@ -66,8 +67,8 @@ class BaslerDSPIController(TemplateController):
             self.top_right.update_infos()
             # Init widgets
             if self.get_variables('bits_depth') is not None:
-                self.top_left.set_bits_depth(int(self.parent.variables['bits_depth']))
-                self.bot_left.set_bits_depth(int(self.parent.variables['bits_depth']))
+                self.top_left.set_bits_depth(int(self.get_variables('bits_depth')))
+                self.bot_left.set_bits_depth(int(self.get_variables('bits_depth')))
             else:
                 self.bot_left.set_bits_depth(8)
             if self.get_variables('image') is not None:
@@ -114,6 +115,7 @@ class BaslerDSPIController(TemplateController):
                 self.set_variables("first_connexion", 'Yes')
                 # Initial parameters
                 camera_ini_file = self.manager.get_config('camera_ini')
+                print(f'Cam Init : {camera_ini_file}')
                 if os.path.isfile(camera_ini_file):
                     camera.init_camera_parameters(camera_ini_file)
                     print(f'Camera ini file {camera_ini_file} successfully initialized.')
@@ -121,10 +123,10 @@ class BaslerDSPIController(TemplateController):
                 # ROI management
                 x0, y0, x1, y1 = self._get_max_coords()
                 self.camera_range = [x0, y0, x1, y1]
-                self.parent.variables["roi_coords"] = self.camera_range
+                self.set_variables("roi_coords", self.camera_range)
         else:
             self.camera_connected = True
-            self.parent.variables["first_connexion"] = 'No'
+            self.set_variables("first_connexion", 'No')
             x0, y0, x1, y1 = self._get_max_coords()
             self.camera_range = [x0, y0, x1, y1]
 
@@ -149,7 +151,7 @@ class BaslerDSPIController(TemplateController):
             return
         # Update to first mode if first connection
         pix_format = camera.get_parameter('PixelFormat')
-        if 'first_connexion' in self.parent.variables:
+        if 'first_connexion' in self.manager.variables:
             if self.get_variables('first_connexion') == 'Yes':
                 first_mode_color = self.colormode[0]
                 camera.open()
@@ -212,7 +214,7 @@ class BaslerDSPIController(TemplateController):
         if self.do_fft:
             # Computation of the Fourier Transform
             m = cv2.mean(image.astype(np.uint8))
-            x0, y0, x1, y1 = self.parent.variables["roi_coords"]
+            x0, y0, x1, y1 = self.get_variables("roi_coords")
             processed = image - m[0] * np.ones((abs(y1-y0), abs(x1-x0)), dtype=np.uint8)    # Subtracts the mean value of the image
 
             dft = cv2.dft(processed, flags=cv2.DFT_COMPLEX_OUTPUT)      # Discrete FT (returns real and imaginary parts in an 3D array)
@@ -229,20 +231,34 @@ class BaslerDSPIController(TemplateController):
         if self.do_autocorr:
             image = image.astype(np.uint8)
             # Autocorrelation :
-            auto_corr = np.correlate(image.astype(np.uint8), image.astype(np.uint8),
-                                     mode='same')
-            # OR ?
-            tf_image = np.fft.fft2(image)
-            tf_image_conj = np.conjugate(tf_image)
-            tf_mult = tf_image * tf_image_conj
+            # Computation of the Fourier Transform
+            m = cv2.mean(image.astype(np.uint8))
+            x0, y0, x1, y1 = self.get_variables("roi_coords")
+            processed = image - m[0] * np.ones((abs(y1 - y0), abs(x1 - x0)),
+                                               dtype=np.uint8)  # Subtracts the mean value of the image
+
+            dft = cv2.dft(processed,
+                          flags=cv2.DFT_COMPLEX_OUTPUT)  # Discrete FT (returns real and imaginary parts in an 3D array)
+            dft_shift = np.fft.fftshift(dft)
+            fft_amplitude2 = (dft_shift[:, :, 0] ** 2 + dft_shift[:, :, 1] ** 2)
+
+
+            dft_inv = cv2.dft(fft_amplitude2,
+                          flags=cv2.DFT_COMPLEX_OUTPUT)
+            dft_shift = np.fft.fftshift(dft_inv)
+            fft_amplitude_inv = np.sqrt(dft_shift[:, :, 0] ** 2 + dft_shift[:, :, 1] ** 2)
+
+            fft_display = cv2.normalize(fft_amplitude_inv, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
+
             # Display the result
-            self.autocorr_window.fft_widget.set_image_from_array(auto_corr)
+            #self.autocorr_window.fft_widget.set_image_from_array(fft_display)
+            self.autocorr_window.fft_widget.set_data(fft_display)
             self.do_autocorr = False
 
         # Update Histo
         self.bot_left.set_image(image)
         # Store new image.
-        self.parent.variables['image'] = image.copy()
+        self.set_variables('image', image.copy())
 
     def handle_open_fft(self):
         """
@@ -289,22 +305,18 @@ class BaslerDSPIController(TemplateController):
         print(f'Autocorrelation')
         camera = self.get_variables("camera")
         if camera is not None:
-            '''
             # Stop live safely
             self.stop_live()
             # Close camera
             camera.close()
-            '''
             # Open Autocorrelation Window
             self.autocorr_window = AutoCorrWindow(self)   # Class defined in basler_dspi_views
             self.autocorr_window.close_autocorr.connect(self.handle_close_autocorr)
             self.autocorr_window.show()
             self.do_autocorr = True
-            '''
             # Restart live
             camera.open()
             self.start_live()
-        '''
 
     def handle_close_autocorr(self):
         """
@@ -329,7 +341,7 @@ class BaslerDSPIController(TemplateController):
         """
         Action performed when the exposure time changed.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             # Stop live safely
             self.stop_live()
@@ -348,7 +360,7 @@ class BaslerDSPIController(TemplateController):
         """
         Action performed when the black level changed.
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             # Stop live safely
             self.stop_live()
@@ -369,35 +381,35 @@ class BaslerDSPIController(TemplateController):
         coords = [int(x) for x in coords]
         roi_coords = self.check_order(coords)
         if self.check_roi_range(roi_coords):
-            self.parent.variables['roi_coords'] = roi_coords
-            self.top_right.set_roi(self.parent.variables['roi_coords'])
+            self.set_variables('roi_coords', roi_coords)
+            self.top_right.set_roi(self.get_variables('roi_coords'))
         # Update Top_Right widget
-        self.top_left.draw_rectangle(self.parent.variables['roi_coords'])
+        self.top_left.draw_rectangle(self.get_variables('roi_coords'))
 
     def handle_roi_activated(self, value):
         """
         Action performed when the button to select a ROI has been triggered
         """
-        self.parent.variables["roi_activated"] = value
-        camera = self.parent.variables["camera"]
+        self.set_variables("roi_activated", value)
+        camera = self.get_variables("camera")
         # Stop live safely
         self.stop_live()
         self.top_right.set_enabled_roi_widget(not value)
         self.top_left.set_enabled(not value)
         if value:
             # Creation of the new ROI
-            x0, y0, x1, y1 = self.parent.variables["roi_coords"]
+            x0, y0, x1, y1 = self.get_variables("roi_coords")
             new_w = min((x1-x0) + (32-(x1-x0)%32), camera.get_parameter('WidthMax'))
             new_h = min((y1-y0) + (4-(y1-y0)%4), camera.get_parameter('HeightMax'))
             x0, y0 = x0 - x0%32, y0 - y0%4
             x1 = x0 + new_w
             y1 = y0 + new_h
-            self.parent.variables["roi_coords"] = [x0, y0, x1, y1]
+            self.set_variables("roi_coords", [x0, y0, x1, y1])
         else:
             x0, y0, x1, y1 = self._get_max_coords()
             new_w = x1
             new_h = y1
-            self.top_left.draw_rectangle(self.parent.variables["roi_coords"])
+            self.top_left.draw_rectangle(self.get_variables("roi_coords"))
         # Activation of the new ROI
         self.top_right.set_roi([x0, y0, x1, y1])
         camera.set_parameter('Width', new_w)
@@ -446,11 +458,11 @@ class BaslerDSPIController(TemplateController):
         new_y0 = (self.camera_range[3] - self.camera_range[1]) // 2 - new_h // 2
         new_y1 = (self.camera_range[3] - self.camera_range[1]) // 2 + new_h // 2
         if self.check_roi_range([new_x0, new_y0, new_x1, new_y1]):
-            self.parent.variables["roi_coords"] = [new_x0, new_y0, new_x1, new_y1]
-            self.top_right.set_roi(self.parent.variables["roi_coords"])
-            self.top_left.draw_rectangle(self.parent.variables["roi_coords"])
+            self.set_variables("roi_coords", [new_x0, new_y0, new_x1, new_y1])
+            self.top_right.set_roi(self.get_variables("roi_coords"))
+            self.top_left.draw_rectangle(self.get_variables("roi_coords"))
         else:
-            self.top_right.set_roi(self.parent.variables["roi_coords"])
+            self.top_right.set_roi(self.get_variables("roi_coords"))
 
     def handle_roi_reset(self):
         """
@@ -459,19 +471,19 @@ class BaslerDSPIController(TemplateController):
         print("ROI Reset")
         self.stop_live()
         x0, y0, x1, y1 = self._get_max_coords()
-        self.parent.variables["roi_coords"] = [x0, y0, x1, y1]
-        self.top_right.set_roi(self.parent.variables["roi_coords"])
+        self.set_variables("roi_coords", [x0, y0, x1, y1])
+        self.top_right.set_roi(self.get_variables("roi_coords"))
         self.top_left.clear_rect()
-        self.top_left.draw_rectangle(self.parent.variables["roi_coords"])
+        self.top_left.draw_rectangle(self.get_variables("roi_coords"))
         self.start_live()
 
     def _get_max_coords(self):
         """
         Access to the dimensions of the camera
         """
-        max_width = self.parent.xml_app.get_sub_parameter('camera', 'maxwidth')
-        max_height = self.parent.xml_app.get_sub_parameter('camera', 'maxheight')
-        offset = self.parent.xml_app.get_sub_parameter('camera', 'offset')
+        max_width = self.manager.xml_app.get_sub_parameter('camera', 'maxwidth')
+        max_height = self.manager.xml_app.get_sub_parameter('camera', 'maxheight')
+        offset = self.manager.xml_app.get_sub_parameter('camera', 'offset')
         x0, y0 = int(offset), int(offset)
         x1, y1 = int(max_width)+x0, int(max_height)+y0
         return x0, y0, x1, y1

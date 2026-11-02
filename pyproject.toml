@@ -15,7 +15,9 @@ dependencies = [
     "pyqtgraph>=0.12",
     "colour-science",
     "pyserial",
-    "PyQt6-WebEngine"
+    "PyQt6-WebEngine",
+    "opencv-python",
+    "pyopengl"
 ]
 
 classifiers = [

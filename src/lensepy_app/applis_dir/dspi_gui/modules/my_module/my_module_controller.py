@@ -347,7 +347,7 @@ class MyModuleController(TemplateController):
             #acquisition of the reference image and of the Pi image
 
 
-            camera = self.parent.variables["camera"]
+            camera = self.get_variables("camera")
             self.stop_live()
             if camera is not None:
                 # Acquisition of the 2 images
@@ -481,7 +481,7 @@ class MyModuleController(TemplateController):
         """
         # Set the successive voltages to send to piezo
         voltages = [0, self.tensionpi/2, self.tensionpi, 3*self.tensionpi/2, 2*self.tensionpi]
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         self.stop_live()
         if camera is not None :
             # Acquisition of the 5 images
@@ -525,7 +525,7 @@ class MyModuleController(TemplateController):
         """
         Action performed when the Phase Shift Deformation button is pressed
         """
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         if camera is not None:
             # Stop live safely
             self.stop_live()
@@ -607,7 +607,7 @@ class MyModuleController(TemplateController):
         """
         # Set the successive voltages to send to piezo
         voltages = [0, self.tensionpi / 2, self.tensionpi, 3 * self.tensionpi / 2, 2 * self.tensionpi]
-        camera = self.parent.variables["camera"]
+        camera = self.get_variables("camera")
         self.stop_live()
         if camera is not None:
             # Acquisition of the 5 images

@@ -3,6 +3,7 @@ from PyQt6.QtWidgets import QLineEdit, QGridLayout, QPushButton, QMainWindow, QV
 
 from lensepy_app import *
 from lensepy_app.appli import *
+from lensepy_app.widgets.image_display_widget import *
 from lensepy import translate
 from lensepy.utils import is_integer
 
@@ -120,10 +121,12 @@ class CameraInfosWidget(ModuleWidget):
         Action performed when the ROI is activated
         """
         self.roi_activated_state = not self.roi_activated_state
+        '''
         if self.roi_activated_state:
             self.activate_roi_button.setStyleSheet(actived_button)
         else:
             self.activate_roi_button.setStyleSheet(unactived_button)
+        '''
         self.roi_activated.emit(self.roi_activated_state)
 
     def handle_open_fft(self):
@@ -410,7 +413,7 @@ class FFTWindow(QMainWindow):
         super().__init__()
         self.controller: BaslerDSPIController = parent
         # Main widget to display image
-        self.fft_widget = ImageDisplayWidget(self.parent)
+        self.fft_widget = ImageDisplayWidget(self.controller)
         self.setCentralWidget(self.fft_widget)
         # Closing Button
         """The button doesn't work yet (isn't displayed on the window)"""
@@ -418,7 +421,7 @@ class FFTWindow(QMainWindow):
         label = QLabel(translate('FFT'))
         layout.addWidget(label)
         self.open_button = QPushButton(translate("Stop FFT"))
-        self.open_button.setStyleSheet(unactived_button)
+        #self.open_button.setStyleSheet(INACTIVATED_BUTTON[self])
         self.open_button.clicked.connect(self.handle_close_fft)
         layout.addWidget(self.open_button)
         #Bit depth
@@ -436,6 +439,8 @@ class FFTWindow(QMainWindow):
         self.close_fft.emit()
 
 
+from lensepy_app.widgets.wavefront_2D3D_view import *
+
 class AutoCorrWindow(QMainWindow):
     """
     Window to display the Fourier Transform of an image
@@ -445,24 +450,31 @@ class AutoCorrWindow(QMainWindow):
         super().__init__()
         self.controller: BaslerDSPIController = parent
         # Main widget to display image
-        self.fft_widget = ImageDisplayWidget(self.parent)
+        self.fft_widget = ImageDisplayWidget(self.controller)
+        self.fft_widget = Wavefront2D('', self.controller)
         self.setCentralWidget(self.fft_widget)
+        # Setup Widgets
+        self.fft_widget.set_x_label('pixels')
+        self.fft_widget.set_y_label('pixels')
+        #self.fft_widget.set_scale('Arbitrary Value', range=(0,255))
+
         # Closing Button
         """The button doesn't work yet (isn't displayed on the window)"""
         layout = QVBoxLayout()
         label = QLabel(translate('autocorrelation_title'))
         layout.addWidget(label)
         self.open_button = QPushButton(translate("autocorrelation_stop_button"))
-        self.open_button.setStyleSheet(unactived_button)
-        self.open_button.clicked.connect(self.handle_close_fft)
+        # self.open_button.setStyleSheet(unactived_button)
+        self.open_button.clicked.connect(self.handle_close_autocorr)
         layout.addWidget(self.open_button)
         #Bit depth
         bits_depth = 8 # int(self.parent.parent.variables.get('bits_depth', 8))
-        self.fft_widget.set_bits_depth(bits_depth)
+        #self.fft_widget.set_bits_depth(bits_depth)
         #Initial Image
         self.initial_image = self.controller.get_variables('image')
         if self.initial_image is not None:
-            self.fft_widget.set_image_from_array(self.initial_image)
+            #self.fft_widget.set_image_from_array(self.initial_image)
+            self.fft_widget.set_data(self.initial_image)
 
     def handle_close_autocorr(self):
         """

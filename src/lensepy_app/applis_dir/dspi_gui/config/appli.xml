@@ -7,8 +7,8 @@
     <year>2026</year>
     <logo>appli/_assets/LEnsE_IOGS.jpg</logo>
     <img_dir>%USERPROFILE%\Documents</img_dir>
-    <img_desc2>./zygo_gui/html/zygo_2A.png</img_desc2>
-    <html_page2>./zygo_gui/html/zygo_2A.html</html_page2>
+    <img_desc2>/zygo_gui/html/zygo_2A.png</img_desc2>
+    <html_page2>/zygo_gui/html/zygo_2A.html</html_page2>
     <mode>CLASSIC</mode>
     <theme>BLACK</theme>
     <contributors>
@@ -49,5 +49,6 @@
         <maxwidth>1920</maxwidth>
         <maxheight>1200</maxheight>
         <offset>0</offset>
+        <init_file>./config/camera.ini</init_file>
     </camera>
 </appli>

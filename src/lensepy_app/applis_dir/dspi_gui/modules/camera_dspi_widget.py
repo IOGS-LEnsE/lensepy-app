@@ -73,7 +73,7 @@ class CameraParamsWidget(ModuleWidget):
         """
         Update information from camera.
         """
-        self.camera: BaslerCamera = self.parent.get_variables()['camera']
+        self.camera: BaslerCamera = self.controller.get_variables('camera')
         if self.camera is not None:
             self.camera.open()
             fps_value = self.camera.get_parameter('AcquisitionFrameRate')
